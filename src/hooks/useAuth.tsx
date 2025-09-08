@@ -40,14 +40,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Check authentication status on mount and route changes
   const checkAuth = useCallback(async () => {
     try {
+      console.log('🔍 Checking authentication status...')
+      
+      // Check if we have a stored token (mobile fallback)
+      const hasStoredToken = typeof window !== 'undefined' && localStorage.getItem('access_token')
+      console.log('📱 Has stored token:', !!hasStoredToken)
+      
       const userData = await api.getCurrentUser()
+      console.log('✅ Authentication successful:', userData.email)
       setUser(userData)
-    } catch (error) {
+    } catch (error: any) {
+      console.log('❌ Authentication failed:', error.message)
       setUser(null)
+      
+      // Only redirect to login if we're on a protected route
+      if (typeof window !== 'undefined' && pathname.startsWith('/dashboard')) {
+        console.log('🔄 Redirecting to login from protected route')
+        router.push('/auth/login')
+      }
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [pathname, router])
 
   // Refresh authentication (for token refresh)
   const refreshAuth = useCallback(async () => {
@@ -62,13 +76,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Login function
   const login = useCallback(async (email: string, password: string) => {
     try {
+      console.log('🔐 Attempting login for:', email)
       const response = await api.login(email, password) as AuthResponse
+      console.log('✅ Login successful, got user:', response.user.email)
+      console.log('🔑 Token received:', !!response.access_token)
       setUser(response.user)
       
       // Redirect to dashboard after login
       const redirectTo = new URLSearchParams(window.location.search).get('redirect') || '/dashboard'
+      console.log('🔄 Redirecting to:', redirectTo)
       router.push(redirectTo as any)
     } catch (error) {
+      console.log('❌ Login failed:', error)
       throw error
     }
   }, [router])

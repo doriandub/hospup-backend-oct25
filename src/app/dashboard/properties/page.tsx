@@ -6,8 +6,9 @@ import { Property } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { PropertyForm } from '@/components/dashboard/property-form'
-import { useProperties } from '@/contexts/PropertiesContext'
+import { useProperties } from '@/hooks/useProperties'
 import { useQuota } from '@/hooks/useQuota'
+import { api } from '@/lib/api'
 import { 
   Plus, 
   Building2, 
@@ -84,27 +85,21 @@ export default function PropertiesPage() {
 
   const fetchVideoCount = async (propertyId: number) => {
     try {
-      // Only count uploaded videos, not generated ones
-      const response = await fetch(`https://web-production-b52f.up.railway.app/api/v1/videos/?property_id=${propertyId}&video_type=uploaded`, {
-        credentials: 'include'
-      })
+      // Use centralized API client for consistent authentication
+      const videos = await api.get(`/api/v1/videos/?property_id=${propertyId}&video_type=uploaded`)
+      setVideoCounts(prev => ({ ...prev, [propertyId]: videos.length }))
       
-      if (response.ok) {
-        const videos = await response.json()
-        setVideoCounts(prev => ({ ...prev, [propertyId]: videos.length }))
+      // Get thumbnail from the most recent video if available
+      if (videos.length > 0) {
+        const mostRecentVideo = videos.sort((a: any, b: any) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]
         
-        // Get thumbnail from the most recent video if available
-        if (videos.length > 0) {
-          const mostRecentVideo = videos.sort((a: any, b: any) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          )[0]
-          
-          if (mostRecentVideo.thumbnail_url) {
-            setPropertyThumbnails(prev => ({ 
-              ...prev, 
-              [propertyId]: mostRecentVideo.thumbnail_url 
-            }))
-          }
+        if (mostRecentVideo.thumbnail_url) {
+          setPropertyThumbnails(prev => ({ 
+            ...prev, 
+            [propertyId]: mostRecentVideo.thumbnail_url 
+          }))
         }
       }
     } catch (error) {

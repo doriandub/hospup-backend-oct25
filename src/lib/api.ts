@@ -9,19 +9,30 @@ class ApiClient {
     this.baseUrl = baseUrl
   }
 
+  private getStoredToken(): string | null {
+    if (typeof window === 'undefined') return null
+    return localStorage.getItem('access_token')
+  }
+
   private async request<T>(
     endpoint: string, 
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
     
+    // Get token from localStorage - primary method for cloud deployment
+    const storedToken = this.getStoredToken()
+    console.log(`🌐 API Request to ${endpoint}:`, { hasToken: !!storedToken })
+    
     const config: RequestInit = {
       headers: {
         // Don't set Content-Type for FormData - let browser handle it
         ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+        // Authorization header is primary method for cloud (Vercel ↔ Railway)
+        ...(storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {}),
         ...options.headers,
       },
-      credentials: 'include', // Important: include cookies in requests
+      credentials: 'include', // Keep for compatibility but Authorization is primary
       ...options,
     }
 
@@ -57,23 +68,44 @@ class ApiClient {
 
   // Auth methods
   async register(email: string, password: string) {
-    return this.request('/api/v1/auth/register', {
+    const result = await this.request<any>('/api/v1/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
+    
+    // Store token for mobile compatibility
+    if (result.access_token && typeof window !== 'undefined') {
+      localStorage.setItem('access_token', result.access_token)
+    }
+    
+    return result
   }
 
   async login(email: string, password: string) {
-    return this.request('/api/v1/auth/login', {
+    const result = await this.request<any>('/api/v1/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
+    
+    // Store token for mobile compatibility
+    if (result.access_token && typeof window !== 'undefined') {
+      localStorage.setItem('access_token', result.access_token)
+    }
+    
+    return result
   }
 
   async logout() {
-    return this.request('/api/v1/auth/logout', {
+    const result = await this.request('/api/v1/auth/logout', {
       method: 'POST',
     })
+    
+    // Clear stored token
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token')
+    }
+    
+    return result
   }
 
   async getCurrentUser(): Promise<User> {
@@ -81,9 +113,17 @@ class ApiClient {
   }
 
   async refreshToken() {
-    return this.request('/api/v1/auth/refresh', {
+    const result = await this.request<any>('/api/v1/auth/refresh', {
       method: 'POST',
     })
+    
+    // Store new token for mobile compatibility
+    if (result.access_token && typeof window !== 'undefined') {
+      localStorage.setItem('access_token', result.access_token)
+      console.log('🔄 Token refreshed and stored')
+    }
+    
+    return result
   }
 
   // Property methods

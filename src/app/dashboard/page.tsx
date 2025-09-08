@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useProperties } from '@/contexts/PropertiesContext'
+import { useProperties } from '@/hooks/useProperties'
 import Link from 'next/link'
 import {
   Building2,

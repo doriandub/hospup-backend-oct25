@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useProperties } from '@/contexts/PropertiesContext'
+import { useProperties } from '@/hooks/useProperties'
 import { useQuota } from '@/hooks/useQuota'
+import { api } from '@/lib/api'
 import { PROPERTY_TYPES, SUPPORTED_LANGUAGES } from '@/types'
 import { 
   ArrowLeft, 
@@ -148,28 +149,12 @@ export function PropertyOnboardingDashboard() {
       try {
         console.log(`Uploading file: ${file.name}, type: ${file.type}, size: ${file.size}`)
         
-        const urlResponse = await fetch('https://web-production-b52f.up.railway.app/api/v1/upload/presigned-url', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            file_name: file.name,
-            content_type: file.type,
-            property_id: propertyId,
-            file_size: file.size
-          })
+        const urlData = await api.post('/api/v1/upload/presigned-url', {
+          file_name: file.name,
+          content_type: file.type,
+          property_id: propertyId,
+          file_size: file.size
         })
-
-        if (!urlResponse.ok) {
-          console.error(`Failed to get presigned URL: ${urlResponse.status} ${urlResponse.statusText}`)
-          const errorText = await urlResponse.text()
-          console.error('Error response:', errorText)
-          continue
-        }
-        
-        const urlData = await urlResponse.json()
         console.log('Received upload URL data:', urlData)
 
         const formData = new FormData()
@@ -190,19 +175,12 @@ export function PropertyOnboardingDashboard() {
         console.log('Upload response status:', uploadResponse.status, uploadResponse.statusText)
 
         if (uploadResponse.ok) {
-          await fetch('https://web-production-b52f.up.railway.app/api/v1/upload/complete', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              property_id: propertyId,
-              s3_key: urlData.s3_key,
-              file_name: file.name,
-              file_size: file.size,
-              content_type: file.type
-            })
+          await api.post('/api/v1/upload/complete', {
+            property_id: propertyId,
+            s3_key: urlData.s3_key,
+            file_name: file.name,
+            file_size: file.size,
+            content_type: file.type
           })
         }
       } catch (error) {
