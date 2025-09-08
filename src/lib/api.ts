@@ -155,6 +155,69 @@ class ApiClient {
     return this.request<any>('/api/v1/users/quota', { method: 'GET' })
   }
 
+  // Video upload methods - Presigned URL flow
+  async getPresignedUrl(fileName: string, contentType: string, propertyId: number, fileSize: number) {
+    return this.request<{
+      upload_url: string
+      fields: Record<string, string>
+      s3_key: string
+      file_url: string
+      expires_in: number
+    }>('/api/v1/upload/presigned-url', {
+      method: 'POST',
+      body: JSON.stringify({
+        file_name: fileName,
+        content_type: contentType,
+        property_id: propertyId,
+        file_size: fileSize
+      }),
+    })
+  }
+
+  async completeUpload(propertyId: number, s3Key: string, fileName: string, fileSize: number, contentType: string) {
+    return this.request<{
+      message: string
+      video_id: string
+      status: string
+    }>('/api/v1/upload/complete', {
+      method: 'POST',
+      body: JSON.stringify({
+        property_id: propertyId,
+        s3_key: s3Key,
+        file_name: fileName,
+        file_size: fileSize,
+        content_type: contentType
+      }),
+    })
+  }
+
+  // Video methods
+  async getVideos(propertyId?: number, videoType?: string) {
+    let endpoint = '/api/v1/videos/'
+    const params = new URLSearchParams()
+    
+    if (propertyId) params.set('property_id', propertyId.toString())
+    if (videoType) params.set('video_type', videoType)
+    
+    if (params.toString()) {
+      endpoint += `?${params.toString()}`
+    }
+    
+    return this.request<any>(endpoint, { method: 'GET' })
+  }
+
+  async getVideo(videoId: string) {
+    return this.request(`/api/v1/videos/${videoId}`, { method: 'GET' })
+  }
+
+  async deleteVideo(videoId: string) {
+    return this.request(`/api/v1/videos/${videoId}`, { method: 'DELETE' })
+  }
+
+  async restartVideoProcessing(videoId: string) {
+    return this.request(`/api/v1/videos/${videoId}/restart-processing`, { method: 'POST' })
+  }
+
   // Generic methods for future use
   async get<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET' })

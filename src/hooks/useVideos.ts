@@ -26,20 +26,20 @@ export function useVideos(propertyId?: string, videoType?: string) {
       setLoading(true)
       setError(null)
       
-      // Build the query string for filtering
-      const params = new URLSearchParams()
-      if (propertyId) params.set('property_id', propertyId)
-      if (videoType) params.set('video_type', videoType)
-      
-      const queryString = params.toString() ? `?${params.toString()}` : ''
-      const response = await api.get(`/api/v1/videos/${queryString}`) as { data?: Video[] } | Video[]
+      // Use the dedicated API method for getting videos
+      const propertyIdNumber = propertyId ? parseInt(propertyId) : undefined
+      const response = await api.getVideos(propertyIdNumber, videoType) as { videos?: Video[], data?: Video[] } | Video[]
       
       // Handle different response formats from the API
       let videosData: Video[] = []
       if (Array.isArray(response)) {
         videosData = response
-      } else if (response && typeof response === 'object' && Array.isArray(response.data)) {
-        videosData = response.data
+      } else if (response && typeof response === 'object') {
+        if (Array.isArray(response.videos)) {
+          videosData = response.videos
+        } else if (Array.isArray(response.data)) {
+          videosData = response.data
+        }
       }
       
       setVideos(videosData)

@@ -9,6 +9,7 @@ import { FolderOpen, Building2, Video, Grid3X3, List, Upload, ChevronLeft, Chevr
 import { Button } from '@/components/ui/button'
 import { useProperties } from '@/hooks/useProperties'
 import { useVideos } from '@/hooks/useVideos'
+import { api } from '@/lib/api'
 
 export default function AssetsPage() {
   const router = useRouter()
@@ -61,19 +62,11 @@ export default function AssetsPage() {
       // Check status for each processing video
       const statusChecks = processingVideos.map(async (video) => {
         try {
-          const response = await fetch(`/api/v1/videos/${video.id}`, {
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-            }
-          })
-          
-          if (response.ok) {
-            const updatedVideo = await response.json()
-            // If video status changed, we need a full refresh
-            if (updatedVideo.status !== video.status) {
-              statusChanges.push({ id: video.id, from: video.status, to: updatedVideo.status })
-              needsFullRefresh = true
-            }
+          const updatedVideo = await api.getVideo(video.id)
+          // If video status changed, we need a full refresh
+          if (updatedVideo.status !== video.status) {
+            statusChanges.push({ id: video.id, from: video.status, to: updatedVideo.status })
+            needsFullRefresh = true
           }
         } catch (error) {
           console.error(`Network error checking status for video ${video.id}:`, error)
@@ -96,12 +89,7 @@ export default function AssetsPage() {
         // 24 hour cleanup (86400000 ms = 24 hours)
         if (processingTime > 86400000) {
           try {
-            await fetch(`/api/v1/videos/${video.id}`, {
-              method: 'DELETE',
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-              }
-            })
+            await api.deleteVideo(video.id)
             
             // Remove from processing times and refresh list
             const updatedTimes = { ...processingStartTime }
@@ -118,13 +106,7 @@ export default function AssetsPage() {
         if (processingTime > 60000) { // 60 seconds
           try {
             // Restart processing by calling the backend
-            await fetch(`/api/v1/videos/${video.id}/restart-processing`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-                'Content-Type': 'application/json'
-              }
-            })
+            await api.restartVideoProcessing(video.id)
             
             // Reset the start time
             newProcessingTimes[video.id] = Date.now()
@@ -252,37 +234,54 @@ export default function AssetsPage() {
   }, [])
 
   const uploadSingleFile = async (file: File, propertyId: string) => {
-    const token = localStorage.getItem('access_token')
-    
-    if (!token) {
-      throw new Error('No authentication token found')
-    }
-    
     if (!propertyId) {
       throw new Error('No property ID provided')
     }
     
-    // Simple direct upload using the centralized API
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('property_id', propertyId)
-    formData.append('title', file.name.split('.')[0])
-
-    const response = await fetch('/api/v1/upload/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`Upload failed for ${file.name}: ${response.status} ${response.statusText}`)
+    try {
+      // Step 1: Get presigned URL from backend
+      const presignedData = await api.getPresignedUrl(
+        file.name,
+        file.type || 'video/mp4',
+        parseInt(propertyId),
+        file.size
+      )
+      
+      // Step 2: Upload directly to S3 using presigned URL
+      const uploadFormData = new FormData()
+      
+      // Add all the required fields from the presigned response
+      Object.keys(presignedData.fields).forEach(key => {
+        uploadFormData.append(key, presignedData.fields[key])
+      })
+      
+      // Add the file last (S3 requirement)
+      uploadFormData.append('file', file)
+      
+      const uploadResponse = await fetch(presignedData.upload_url, {
+        method: 'POST',
+        body: uploadFormData
+      })
+      
+      if (!uploadResponse.ok) {
+        throw new Error(`S3 upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`)
+      }
+      
+      // Step 3: Complete the upload by notifying the backend
+      const completeResult = await api.completeUpload(
+        parseInt(propertyId),
+        presignedData.s3_key,
+        file.name,
+        file.size,
+        file.type || 'video/mp4'
+      )
+      
+      return completeResult
+      
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw new Error(`Upload failed for ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
-
-    const result = await response.json()
-    return result
   }
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
