@@ -41,8 +41,11 @@ export function PropertiesProvider({ children }: PropertiesProviderProps) {
       // Always try to fetch, but handle gracefully if it fails
       const data = await api.getProperties() as Property[]
       
+      console.log('Raw API response:', data) // Debug log
+      
       // Ensure data is an array
       if (Array.isArray(data)) {
+        console.log('Setting properties:', data) // Debug log
         setProperties(data)
       } else {
         console.warn('API returned non-array data:', data)

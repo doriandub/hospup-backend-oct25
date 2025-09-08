@@ -113,7 +113,7 @@ export default function PropertiesPage() {
   }
 
   useEffect(() => {
-    if (properties && (properties || []).length > 0) {
+    if (properties && properties.length > 0) {
       properties.forEach(property => {
         fetchVideoCount(property.id)
       })
@@ -143,7 +143,7 @@ export default function PropertiesPage() {
         )}
 
         {/* Empty State */}
-        {(!properties || (properties || []).length === 0) && !loading && !error && (
+        {properties.length === 0 && !loading && !error && (
           <div className="text-center py-12">
             <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No properties yet - Ready to create!</h3>
@@ -155,20 +155,31 @@ export default function PropertiesPage() {
           </div>
         )}
 
+        {/* Debug info - Remove in production */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg mb-6">
+            <p className="font-medium mb-1">Debug Info</p>
+            <p className="text-sm">Properties count: {properties?.length || 0}</p>
+            <p className="text-sm">Loading: {loading.toString()}</p>
+            <p className="text-sm">Error: {error || 'none'}</p>
+          </div>
+        )}
+
         {/* Properties Grid */}
+        {properties.length > 0 || loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Add Property Card - Always first */}
           <div 
             className={`bg-[#09725c]/5 border border-[#09725c]/30 rounded-xl shadow-sm p-8 transition-all duration-200 group ${
-              checkCanCreateProperty((properties || []).length) 
+              checkCanCreateProperty(properties.length) 
                 ? 'cursor-pointer hover:bg-[#09725c]/10 hover:shadow-md' 
                 : 'opacity-50 cursor-not-allowed'
             }`}
             onClick={() => {
-              if (checkCanCreateProperty((properties || []).length)) {
+              if (checkCanCreateProperty(properties.length)) {
                 router.push('/dashboard/properties/new')
               } else {
-                alert(`Quota exceeded! You have used ${getUsedProperties((properties || []).length)}/${getPropertiesLimit()} properties. Upgrade your plan to add more.`)
+                alert(`Quota exceeded! You have used ${getUsedProperties(properties.length)}/${getPropertiesLimit()} properties. Upgrade your plan to add more.`)
               }
             }}
           >
@@ -176,9 +187,9 @@ export default function PropertiesPage() {
               <div>
                 <h1 className="text-xl font-semibold mb-2 text-[#09725c]" style={{ fontFamily: 'Inter' }}>Add Property</h1>
                 <p className="text-base font-medium text-[#09725c]/80" style={{ fontFamily: 'Inter' }}>
-                  {checkCanCreateProperty((properties || []).length) 
-                    ? `Create new property (${getRemainingProperties((properties || []).length)} remaining)` 
-                    : `Quota limit reached (${getUsedProperties((properties || []).length)}/${getPropertiesLimit()})`
+                  {checkCanCreateProperty(properties.length) 
+                    ? `Create new property (${getRemainingProperties(properties.length)} remaining)` 
+                    : `Quota limit reached (${getUsedProperties(properties.length)}/${getPropertiesLimit()})`
                   }
                 </p>
               </div>
@@ -189,7 +200,7 @@ export default function PropertiesPage() {
           </div>
 
           {/* Property Cards */}
-          {(properties || []).map((property) => (
+          {properties.map((property) => (
           <div key={property.id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 overflow-hidden">
             {/* Thumbnail */}
             {propertyThumbnails[property.id] ? (
@@ -306,6 +317,7 @@ export default function PropertiesPage() {
           </div>
           ))}
         </div>
+        ) : null}
       </div>
 
       {/* Create Property Modal */}
