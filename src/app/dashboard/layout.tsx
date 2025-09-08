@@ -13,7 +13,7 @@ function getPageTitle(pathname: string): string {
     '/dashboard/properties': 'Properties',
     '/dashboard/videos': 'Videos',
     '/dashboard/generate': 'AI Generator',
-    '/dashboard/content-library': 'Content Library',
+    '/dashboard/assets': 'Assets',
     '/dashboard/viral-inspiration': 'Viral Inspiration',
     '/dashboard/settings': 'Settings',
     '/dashboard/billing': 'Billing & Usage',

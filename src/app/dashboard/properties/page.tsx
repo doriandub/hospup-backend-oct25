@@ -150,15 +150,6 @@ export default function PropertiesPage() {
           </div>
         )}
 
-        {/* Debug info - Remove in production */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg mb-6">
-            <p className="font-medium mb-1">Debug Info</p>
-            <p className="text-sm">Properties count: {properties?.length || 0}</p>
-            <p className="text-sm">Loading: {loading.toString()}</p>
-            <p className="text-sm">Error: {error || 'none'}</p>
-          </div>
-        )}
 
         {/* Properties Grid */}
         {properties.length > 0 || loading ? (

@@ -22,7 +22,6 @@ class ApiClient {
     
     // Get token from localStorage - primary method for cloud deployment
     const storedToken = this.getStoredToken()
-    console.log(`🌐 API Request to ${endpoint}:`, { hasToken: !!storedToken })
     
     const config: RequestInit = {
       headers: {
@@ -41,7 +40,6 @@ class ApiClient {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        console.error('API Error:', response.status, response.statusText, errorData)
         
         // Handle detailed error messages properly
         let errorMessage = `HTTP error! status: ${response.status}`
@@ -120,7 +118,6 @@ class ApiClient {
     // Store new token for mobile compatibility
     if (result.access_token && typeof window !== 'undefined') {
       localStorage.setItem('access_token', result.access_token)
-      console.log('🔄 Token refreshed and stored')
     }
     
     return result

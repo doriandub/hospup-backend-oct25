@@ -45,8 +45,8 @@ const navigation: NavItem[] = [
     icon: Wand2
   },
   { 
-    name: "Content Library", 
-    href: "/dashboard/content-library", 
+    name: "Assets", 
+    href: "/dashboard/assets", 
     icon: FolderOpen
   },
   { 
