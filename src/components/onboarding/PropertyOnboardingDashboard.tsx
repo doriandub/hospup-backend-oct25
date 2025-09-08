@@ -154,7 +154,7 @@ export function PropertyOnboardingDashboard() {
           content_type: file.type,
           property_id: propertyId,
           file_size: file.size
-        })
+        }) as any
         console.log('Received upload URL data:', urlData)
 
         const formData = new FormData()
