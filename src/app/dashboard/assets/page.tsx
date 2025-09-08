@@ -62,9 +62,9 @@ export default function AssetsPage() {
       // Check status for each processing video
       const statusChecks = processingVideos.map(async (video) => {
         try {
-          const updatedVideo = await api.getVideo(video.id)
+          const updatedVideo = await api.getVideo(video.id) as any
           // If video status changed, we need a full refresh
-          if (updatedVideo.status !== video.status) {
+          if (updatedVideo?.status && updatedVideo.status !== video.status) {
             statusChanges.push({ id: video.id, from: video.status, to: updatedVideo.status })
             needsFullRefresh = true
           }

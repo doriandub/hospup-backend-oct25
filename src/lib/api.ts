@@ -206,8 +206,8 @@ class ApiClient {
     return this.request<any>(endpoint, { method: 'GET' })
   }
 
-  async getVideo(videoId: string) {
-    return this.request(`/api/v1/videos/${videoId}`, { method: 'GET' })
+  async getVideo(videoId: string): Promise<any> {
+    return this.request<any>(`/api/v1/videos/${videoId}`, { method: 'GET' })
   }
 
   async deleteVideo(videoId: string) {
