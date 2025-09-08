@@ -12,4 +12,5 @@ export interface User {
 export interface AuthResponse {
   user: User
   message: string
+  access_token?: string
 }
