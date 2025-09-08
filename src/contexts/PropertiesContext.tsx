@@ -38,17 +38,21 @@ export function PropertiesProvider({ children }: PropertiesProviderProps) {
       setLoading(true)
       setError(null)
       
-      // Always try to fetch, but handle gracefully if it fails
-      const data = await api.getProperties() as Property[]
+      const data = await api.getProperties() as any
       
       console.log('Raw API response:', data) // Debug log
       
-      // Ensure data is an array
-      if (Array.isArray(data)) {
-        console.log('Setting properties:', data) // Debug log
+      // Check if it's a PropertyListResponse or direct array
+      if (data && typeof data === 'object' && Array.isArray(data.properties)) {
+        // It's a PropertyListResponse object
+        console.log('Setting properties from PropertyListResponse:', data.properties)
+        setProperties(data.properties)
+      } else if (Array.isArray(data)) {
+        // It's a direct array
+        console.log('Setting properties from direct array:', data)
         setProperties(data)
       } else {
-        console.warn('API returned non-array data:', data)
+        console.warn('API returned unexpected data format:', data)
         setProperties([])
       }
     } catch (error) {
