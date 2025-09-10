@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://web-production-b52f.up.railway.app'
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization')
     
@@ -10,25 +10,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Authorization required' }, { status: 401 })
     }
 
-    // Extract query parameters from the request
-    const { searchParams } = new URL(request.url)
-    const queryString = searchParams.toString()
-    const backendUrl = `${BACKEND_URL}/api/v1/videos${queryString ? `?${queryString}` : ''}`
-    
-    console.log('🔍 Proxying request to:', backendUrl)
-    
+    const body = await request.json()
+
     // Forward request to Railway backend
-    const response = await fetch(backendUrl, {
-      method: 'GET',
+    const response = await fetch(`${BACKEND_URL}/api/v1/viral-inspiration`, {
+      method: 'POST',
       headers: {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify(body)
     })
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: 'Failed to fetch videos' }, 
+        { error: 'Failed to add to viral inspiration' }, 
         { status: response.status }
       )
     }
@@ -44,4 +40,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-

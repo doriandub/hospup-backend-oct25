@@ -192,12 +192,11 @@ class ApiClient {
   }
 
   // Video methods
-  async getVideos(propertyId?: number, videoType?: string) {
+  async getVideos(propertyId?: number) {
     let endpoint = '/api/v1/videos/'
     const params = new URLSearchParams()
     
     if (propertyId) params.set('property_id', propertyId.toString())
-    if (videoType) params.set('video_type', videoType)
     
     if (params.toString()) {
       endpoint += `?${params.toString()}`
@@ -243,3 +242,18 @@ class ApiClient {
 }
 
 export const api = new ApiClient(API_BASE_URL)
+
+// Text API for video timeline editor - adapted for cloud architecture
+export const textApi = {
+  getSuggestions: (propertyId?: string, category?: string, count?: number) => {
+    const params = new URLSearchParams()
+    if (propertyId) params.append('property_id', propertyId)
+    if (category) params.append('category', category)
+    if (count) params.append('count', count.toString())
+    
+    const query = params.toString()
+    return api.get(`/api/v1/text/suggestions${query ? '?' + query : ''}`)
+  },
+  
+  getCategories: () => api.get('/api/v1/text/categories'),
+}

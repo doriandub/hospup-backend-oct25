@@ -86,7 +86,7 @@ export default function PropertiesPage() {
   const fetchVideoCount = async (propertyId: number) => {
     try {
       // Use centralized API client for consistent authentication
-      const videos = await api.get(`/api/v1/videos/?property_id=${propertyId}&video_type=uploaded`) as any[]
+      const videos = await api.get(`/api/v1/videos/?property_id=${propertyId}`) as any[]
       setVideoCounts(prev => ({ ...prev, [propertyId]: videos.length }))
       
       // Get thumbnail from the most recent video if available

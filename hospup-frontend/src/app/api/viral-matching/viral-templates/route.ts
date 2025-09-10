@@ -10,16 +10,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Authorization required' }, { status: 401 })
     }
 
-    // Extract query parameters from the request
-    const { searchParams } = new URL(request.url)
-    const queryString = searchParams.toString()
-    const backendUrl = `${BACKEND_URL}/api/v1/videos${queryString ? `?${queryString}` : ''}`
-    
-    console.log('🔍 Proxying request to:', backendUrl)
-    
     // Forward request to Railway backend
-    const response = await fetch(backendUrl, {
-      method: 'GET',
+    const response = await fetch(`${BACKEND_URL}/api/v1/viral-matching/viral-templates`, {
       headers: {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
@@ -28,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: 'Failed to fetch videos' }, 
+        { error: 'Failed to fetch templates' }, 
         { status: response.status }
       )
     }
@@ -44,4 +36,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-
