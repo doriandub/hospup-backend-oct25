@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { VideoTimelineEditor } from '@/components/video-timeline-editor'
 import { VideoGenerationNavbar } from '@/components/video-generation/VideoGenerationNavbar'
@@ -48,25 +48,43 @@ export default function ComposePage() {
   const [loading, setLoading] = useState(true)
   const [selectedProperty, setSelectedProperty] = useState<string>('')
   
-  // Use EXACT same video loading system as Assets page (load ALL videos, filter client-side)
-  const { videos, loading: videosLoading } = useVideos(undefined, 'uploaded')
+  // 🎯 DIRECT COPY from Assets page - load videos with direct API call like Assets does
+  const [allVideos, setAllVideos] = useState<any[]>([])
+  const [videosLoading, setVideosLoading] = useState(true)
+  
+  // Load videos exactly like Assets page does
+  const loadVideosLikeAssets = useCallback(async () => {
+    try {
+      setVideosLoading(true)
+      // Use EXACT same API call as working Assets page  
+      const response = await api.get(`/api/v1/videos?property_id=${selectedProperty}&status=uploaded,ready,completed`)
+      console.log('📚 Direct Assets-style API response:', response)
+      setAllVideos(Array.isArray(response) ? response : [])
+    } catch (error) {
+      console.error('❌ Assets-style video loading failed:', error)
+      setAllVideos([])
+    } finally {
+      setVideosLoading(false)
+    }
+  }, [selectedProperty])
+  
+  // Load videos when property changes
+  useEffect(() => {
+    if (selectedProperty) {
+      loadVideosLikeAssets()
+    }
+  }, [selectedProperty, loadVideosLikeAssets])
 
   const templateId = params.templateId as string
   const propertyFromUrl = searchParams.get('property')
   const promptFromUrl = searchParams.get('prompt')
   
-  // Filter videos for selected property (same logic as Assets page)
-  const filteredVideos = videos.filter(video => {
-    if (!selectedProperty) return false
-    return video.property_id.toString() === selectedProperty
-  })
-  
-  // Convert to ContentVideo format for VideoTimelineEditor compatibility
-  const contentVideos: ContentVideo[] = filteredVideos.map((video) => ({
+  // Convert to ContentVideo format for VideoTimelineEditor compatibility (direct from allVideos)
+  const contentVideos: ContentVideo[] = allVideos.map((video) => ({
     id: video.id,
     title: video.title,
     thumbnail_url: video.thumbnail_url || '',
-    video_url: video.file_url,
+    video_url: video.file_url || video.video_url,
     duration: video.duration || 10,
     description: video.description || ''
   }))
@@ -89,17 +107,16 @@ export default function ComposePage() {
   // Debug log when videos change
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-    console.log('🎬 Videos updated:', {
+    console.log('🎬 Assets-style Videos updated:', {
       selectedProperty,
-      totalVideos: videos.length,
-      filteredVideos: filteredVideos.length,
+      allVideos: allVideos.length,
       contentVideos: contentVideos.length,
       videosLoading,
       hasToken: !!token,
       tokenPreview: token ? `${token.slice(0, 10)}...` : 'NO TOKEN',
-      sampleVideo: videos[0]
+      sampleVideo: allVideos[0]
     })
-  }, [videos, videosLoading, selectedProperty])
+  }, [allVideos, videosLoading, selectedProperty, contentVideos])
 
   // Auto-match when both templateSlots and contentVideos are loaded
   useEffect(() => {
