@@ -192,11 +192,12 @@ class ApiClient {
   }
 
   // Video methods
-  async getVideos(propertyId?: number) {
+  async getVideos(propertyId?: number, videoType?: string) {
     let endpoint = '/api/v1/videos/'
     const params = new URLSearchParams()
     
     if (propertyId) params.set('property_id', propertyId.toString())
+    if (videoType) params.set('video_type', videoType)
     
     if (params.toString()) {
       endpoint += `?${params.toString()}`

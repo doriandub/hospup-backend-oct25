@@ -28,7 +28,9 @@ export function useVideos(propertyId?: string, videoType?: string) {
       
       // Use the dedicated API method for getting videos
       const propertyIdNumber = propertyId ? parseInt(propertyId) : undefined
+      console.log('🔄 Calling api.getVideos with:', { propertyIdNumber, videoType })
       const response = await api.getVideos(propertyIdNumber, videoType) as { videos?: Video[], data?: Video[] } | Video[]
+      console.log('📥 Raw API response:', response)
       
       // Handle different response formats from the API
       let videosData: Video[] = []
