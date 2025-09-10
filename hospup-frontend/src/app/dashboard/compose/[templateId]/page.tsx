@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { VideoTimelineEditor } from '@/components/video-timeline-editor'
 import { VideoGenerationNavbar } from '@/components/video-generation/VideoGenerationNavbar'
 import { useProperties } from '@/hooks/useProperties'
+import { useVideos } from '@/hooks/useVideos'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
@@ -44,13 +45,31 @@ export default function ComposePage() {
   
   const [template, setTemplate] = useState<ViralTemplate | null>(null)
   const [templateSlots, setTemplateSlots] = useState<TemplateSlot[]>([])
-  const [contentVideos, setContentVideos] = useState<ContentVideo[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedProperty, setSelectedProperty] = useState<string>('')
+  
+  // Use same video loading system as Assets page (which works!)
+  const { videos, loading: videosLoading } = useVideos(selectedProperty, 'uploaded')
 
   const templateId = params.templateId as string
   const propertyFromUrl = searchParams.get('property')
   const promptFromUrl = searchParams.get('prompt')
+  
+  // Filter videos for selected property (same logic as Assets page)
+  const filteredVideos = videos.filter(video => {
+    if (!selectedProperty) return false
+    return video.property_id.toString() === selectedProperty
+  })
+  
+  // Convert to ContentVideo format for VideoTimelineEditor compatibility
+  const contentVideos: ContentVideo[] = filteredVideos.map((video) => ({
+    id: video.id,
+    title: video.title,
+    thumbnail_url: video.thumbnail_url || '',
+    video_url: video.file_url,
+    duration: video.duration || 10,
+    description: video.description || ''
+  }))
 
   // Auto-select property from URL parameter
   useEffect(() => {
@@ -67,11 +86,17 @@ export default function ComposePage() {
     loadTemplateAndSegments()
   }, [templateId])
 
+  // Debug log when videos change
   useEffect(() => {
-    if (selectedProperty) {
-      loadContentLibrary()
-    }
-  }, [selectedProperty])
+    console.log('🎬 Videos updated:', {
+      selectedProperty,
+      totalVideos: videos.length,
+      filteredVideos: filteredVideos.length,
+      contentVideos: contentVideos.length,
+      videosLoading,
+      sampleVideo: videos[0]
+    })
+  }, [videos, videosLoading, selectedProperty])
 
   // Auto-match when both templateSlots and contentVideos are loaded
   useEffect(() => {
@@ -103,48 +128,6 @@ export default function ComposePage() {
     }
   }
 
-  const loadContentLibrary = async () => {
-    try {
-      console.log('🔍 Loading content library for property:', selectedProperty)
-      
-      // Use the same API method as Assets page (which works!)
-      const propertyIdNumber = parseInt(selectedProperty)
-      const response = await api.getVideos(propertyIdNumber, 'uploaded')
-      console.log('📚 Raw content library response:', response)
-      
-      // Handle different response formats from the API (same as useVideos hook)
-      let videosArray: any[] = []
-      if (Array.isArray(response)) {
-        videosArray = response
-      } else if (response && typeof response === 'object') {
-        if (Array.isArray(response.videos)) {
-          videosArray = response.videos
-        } else if (Array.isArray(response.data)) {
-          videosArray = response.data
-        }
-      }
-      
-      if (videosArray.length > 0) {
-        const videos = videosArray.map((video: any) => ({
-          id: video.id,
-          title: video.title,
-          thumbnail_url: video.thumbnail_url,
-          video_url: video.file_url, // Map file_url to video_url for compatibility
-          duration: video.duration || 10,
-          description: video.description || ''
-        }))
-        
-        console.log('✅ Processed content videos:', videos.length, 'videos for property:', selectedProperty)
-        setContentVideos(videos)
-      } else {
-        console.warn('⚠️ No videos found for this property')
-        setContentVideos([])
-      }
-    } catch (error) {
-      console.error('❌ Error loading content library:', error)
-      setContentVideos([])
-    }
-  }
 
   const parseTemplateScript = (script: any): TemplateSlot[] => {
     try {
