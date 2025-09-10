@@ -48,8 +48,8 @@ export default function ComposePage() {
   const [loading, setLoading] = useState(true)
   const [selectedProperty, setSelectedProperty] = useState<string>('')
   
-  // Use same video loading system as Assets page (which works!)
-  const { videos, loading: videosLoading } = useVideos(selectedProperty, 'uploaded')
+  // Use EXACT same video loading system as Assets page (load ALL videos, filter client-side)
+  const { videos, loading: videosLoading } = useVideos(undefined, 'uploaded')
 
   const templateId = params.templateId as string
   const propertyFromUrl = searchParams.get('property')
@@ -88,12 +88,15 @@ export default function ComposePage() {
 
   // Debug log when videos change
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
     console.log('🎬 Videos updated:', {
       selectedProperty,
       totalVideos: videos.length,
       filteredVideos: filteredVideos.length,
       contentVideos: contentVideos.length,
       videosLoading,
+      hasToken: !!token,
+      tokenPreview: token ? `${token.slice(0, 10)}...` : 'NO TOKEN',
       sampleVideo: videos[0]
     })
   }, [videos, videosLoading, selectedProperty])
