@@ -23,6 +23,16 @@ class ApiClient {
     // Get token from localStorage - primary method for cloud deployment
     const storedToken = this.getStoredToken()
     
+    // Debug logging for videos endpoint
+    if (endpoint.includes('/videos')) {
+      console.log('🔐 API Request Debug:', {
+        endpoint,
+        url,
+        hasToken: !!storedToken,
+        tokenPreview: storedToken ? `${storedToken.slice(0, 10)}...` : 'NO TOKEN'
+      })
+    }
+    
     const config: RequestInit = {
       headers: {
         // Don't set Content-Type for FormData - let browser handle it
