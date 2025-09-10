@@ -21,7 +21,7 @@ def test_direct_processing():
     
     # Test with a real video ID
     video_id = "b2e2567a-7e7f-4c32-b4d4-d402489b2386"
-    s3_key = "uploads/b2e2567a-7e7f-4c32-b4d4-d402489b2386/WhatsApp%20Video%202025-09-02%20at%2001.webm"
+    s3_key = "uploads/b2e2567a-7e7f-4c32-b4d4-d402489b2386/test-video.webm"
     
     print(f"🎬 Processing video {video_id}")
     print(f"📁 S3 key: {s3_key}")

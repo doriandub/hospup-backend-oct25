@@ -734,7 +734,7 @@ async def debug_processing_system():
 async def force_process_test():
     """Force run a processing test to see what happens"""
     video_id = "b2e2567a-7e7f-4c32-b4d4-d402489b2386"
-    s3_key = "uploads/b2e2567a-7e7f-4c32-b4d4-d402489b2386/WhatsApp%20Video%202025-09-02%20at%2001.webm"
+    s3_key = "uploads/b2e2567a-7e7f-4c32-b4d4-d402489b2386/test-video.webm"
     
     try:
         logger.info(f"🧪 Force testing processing for {video_id}")

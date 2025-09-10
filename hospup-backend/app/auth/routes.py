@@ -10,7 +10,7 @@ from ..core.config import settings
 from ..models.user import User
 from .security import verify_password, get_password_hash, create_access_token, create_refresh_token, verify_refresh_token
 from .schemas import UserCreate, UserLogin, AuthResponse, UserResponse, TokenResponse
-from .dependencies import get_current_user
+from .dependencies import get_current_user, get_current_user_sync
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 logger = structlog.get_logger(__name__)
@@ -100,63 +100,75 @@ async def register(
     )
 
 @router.post("/login", response_model=AuthResponse)
-async def login(
+def login(
     user_data: UserLogin,
-    response: Response,
-    db: AsyncSession = Depends(get_db)
+    response: Response
 ):
-    """Login user"""
+    """Login user - SYNCHRONOUS VERSION for Supabase compatibility"""
+    logger.info(f"🔐 Login attempt", email=user_data.email)
     
-    # Rate limiting
-    rate_limit_key = f"login:{user_data.email}"
-    if not check_rate_limit(rate_limit_key, max_attempts=5):
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Too many login attempts. Please try again later."
+    # Use direct SessionLocal connection - no dependency injection
+    from app.core.database import SessionLocal
+    
+    db = SessionLocal()
+    try:
+        # Find user - SYNCHRONOUS QUERY
+        user = db.query(User).filter(User.email == user_data.email).first()
+        
+        if not user or not verify_password(user_data.password, user.hashed_password):
+            logger.warning(f"❌ Invalid credentials", email=user_data.email)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password"
+            )
+        
+        logger.info(f"✅ User found and password verified", email=user.email)
+        
+        # Generate tokens
+        access_token = create_access_token(data={"sub": str(user.id)})
+        refresh_token = create_refresh_token(data={"sub": str(user.id)})
+        
+        logger.info(f"🎟️ Tokens generated successfully", user_id=user.id)
+        
+        # Set HttpOnly cookies
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            httponly=True,
+            secure=settings.COOKIE_SECURE,
+            samesite=settings.COOKIE_SAMESITE,
+            domain=settings.COOKIE_DOMAIN
         )
-    
-    # Find user
-    result = await db.execute(select(User).where(User.email == user_data.email))
-    user = result.scalar_one_or_none()
-    
-    if not user or not verify_password(user_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
+        
+        response.set_cookie(
+            key="refresh_token", 
+            value=refresh_token,
+            max_age=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+            httponly=True,
+            secure=settings.COOKIE_SECURE,
+            samesite=settings.COOKIE_SAMESITE,
+            domain=settings.COOKIE_DOMAIN
         )
-    
-    # Create tokens
-    access_token = create_access_token(data={"sub": str(user.id)})
-    refresh_token = create_refresh_token(data={"sub": str(user.id)})
-    
-    # Set HttpOnly cookies
-    response.set_cookie(
-        key="access_token",
-        value=access_token,
-        max_age=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        httponly=True,
-        secure=settings.COOKIE_SECURE,
-        samesite=settings.COOKIE_SAMESITE,
-        domain=settings.COOKIE_DOMAIN
-    )
-    
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        max_age=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-        httponly=True,
-        secure=settings.COOKIE_SECURE,
-        samesite=settings.COOKIE_SAMESITE,
-        domain=settings.COOKIE_DOMAIN
-    )
-    
-    logger.info("User logged in successfully", user_id=user.id, email=user.email)
-    
-    return AuthResponse(
-        user=UserResponse.model_validate(user),
-        message="Login successful",
-        access_token=access_token  # Mobile fallback
-    )
+        
+        logger.info("✅ User logged in successfully", user_id=user.id, email=user.email)
+        
+        return AuthResponse(
+            user=UserResponse.model_validate(user),
+            message="Login successful",
+            access_token=access_token  # Mobile fallback
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Login error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Login failed"
+        )
+    finally:
+        db.close()
 
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(
@@ -232,7 +244,7 @@ async def logout(response: Response):
     
     return TokenResponse(message="Logout successful")
 
-@router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user: User = Depends(get_current_user)):
-    """Get current user information"""
+@router.get("/me", response_model=UserResponse)  
+def get_current_user_info(current_user: User = Depends(get_current_user_sync)):
+    """Get current user information - SYNCHRONOUS VERSION"""
     return UserResponse.model_validate(current_user)

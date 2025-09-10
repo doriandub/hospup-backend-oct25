@@ -39,13 +39,13 @@ def render_video(self, project_id: int, assets_data: dict, template_data: dict):
             
             downloaded_assets = []
             for asset_key, asset_info in assets_data.items():
-                local_path = temp_path / f"asset_{asset_key}"
+                temp_asset_path = temp_path / f"asset_{asset_key}"
                 s3_client.download_file(
                     settings.S3_BUCKET,
                     asset_info['s3_key'],
-                    str(local_path)
+                    str(temp_asset_path)
                 )
-                downloaded_assets.append(local_path)
+                downloaded_assets.append(temp_asset_path)
                 logger.debug("Downloaded asset", s3_key=asset_info['s3_key'])
             
             # Update task state
