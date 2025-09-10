@@ -1,0 +1,13 @@
+CRITICAL: Supabase connection pool configuration fix
+Timestamp: 2025-09-09T21:35:00Z
+
+Issue: Persistent TimeoutError despite redeploy
+Root cause: SQLAlchemy pool_size too high for Supabase limits
+
+Cloud-only fixes (no local intervention):
+1. Reduce SQLAlchemy connection pool size
+2. Implement connection recycling
+3. Add proper connection cleanup
+4. Switch to Supabase connection pooler mode
+
+Status: Implementing connection pool optimization
