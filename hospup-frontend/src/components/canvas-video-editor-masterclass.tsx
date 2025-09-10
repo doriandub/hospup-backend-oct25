@@ -119,6 +119,8 @@ export function CanvasVideoEditorMasterclass({
     }
 
     function drawTexts() {
+      if (!ctx) return
+      
       const visibleTexts = getVisibleTexts(currentTime)
       
       visibleTexts.forEach(text => {
