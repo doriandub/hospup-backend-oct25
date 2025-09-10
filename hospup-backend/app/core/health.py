@@ -22,10 +22,13 @@ async def check_database_health() -> dict:
         
         # Test database connection with timeout
         async with AsyncSessionLocal() as db:
-            await asyncio.wait_for(
-                db.execute(text("SELECT 1")),
+            # Use a simple query with no prepared statement caching
+            result = await asyncio.wait_for(
+                db.execute(text("SELECT 1 as health_check")),
                 timeout=5.0  # 5 second timeout
             )
+            # Consume the result to ensure the query actually executed
+            await result.fetchone()
             
         end_time = asyncio.get_event_loop().time()
         latency_ms = round((end_time - start_time) * 1000, 2)

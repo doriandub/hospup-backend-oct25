@@ -108,3 +108,33 @@ async def health_check():
 @app.get("/")
 async def root():
     return {"message": "Hospup API v0.1.6", "docs": "/docs", "deployed": "2025-09-07-18:50:00"}
+
+@app.get("/version")
+async def version():
+    """Version information endpoint"""
+    return {
+        "version": "0.1.6",
+        "service": "hospup-api", 
+        "build_date": "2025-09-07-18:50:00",
+        "description": "Viral video generation platform for hotels"
+    }
+
+@app.get("/test-direct-db")
+async def test_direct_db():
+    """Direct database test endpoint"""
+    from app.core.health import check_database_health
+    
+    try:
+        db_health = await check_database_health()
+        return {
+            "status": "success",
+            "message": "Direct database test completed",
+            "database": db_health["database"],
+            "timestamp": "2025-09-08-13:00:00"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"Direct database test failed: {str(e)[:100]}",
+            "timestamp": "2025-09-08-13:00:00"
+        }
