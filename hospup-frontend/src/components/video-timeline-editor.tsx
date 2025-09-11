@@ -22,7 +22,8 @@ import {
   AlertTriangle,
   Type
 } from 'lucide-react'
-import { TimelineTextEditor, TextOverlay } from './timeline-text-editor'
+import { TimelineTextEditor } from './timeline-text-editor'
+import { TextOverlay } from '@/types/text-overlay'
 import { UnifiedTextEditor } from './unified-text-editor'
 import { InteractiveTextEditor } from './interactive-text-editor'
 import { TimelineVideoScrubber } from './timeline-video-scrubber'
@@ -80,12 +81,12 @@ export function VideoTimelineEditor({
   const [dragOverSlot, setDragOverSlot] = useState<string | null>(null)
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null)
   const [resizingText, setResizingText] = useState<{ textId: string, side: 'start' | 'end' } | null>(null)
-  const [showTextEditor, setShowTextEditor] = useState<boolean>(false)
   const [showPreview, setShowPreview] = useState<boolean>(false)
-  const [editingTextId, setEditingTextId] = useState<string | null>(null)
-  const [editingContent, setEditingContent] = useState<string>('')
+  const [showTextEditor, setShowTextEditor] = useState<boolean>(false)
   const [currentTime, setCurrentTime] = useState<number>(0)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
+  const [editingTextId, setEditingTextId] = useState<string | null>(null)
+  const [editingContent, setEditingContent] = useState<string>('')
 
   // Functions to save/load assignments
   const saveAssignmentsToStorage = (assignments: SlotAssignment[]) => {
@@ -124,10 +125,10 @@ export function VideoTimelineEditor({
       content: 'New Text',
       start_time: snappedStart,
       end_time: snappedEnd,
-      position: { x: 50, y: 50, anchor: 'center' },
+      position: { x: 540, y: 960, anchor: 'center' }, // Centre de l'écran en pixels vidéo
       style: {
         font_family: 'Arial',
-        font_size: 4.8, // Taille réduite de 10x
+        font_size: 60, // Taille normale pour le système InteractiveTextEditor
         color: '#FFFFFF',
         bold: false,
         italic: false,
@@ -254,7 +255,7 @@ export function VideoTimelineEditor({
         template_id: templateId
       })
       
-      const smartResult = response.data
+      const smartResult = response as any
       console.log('✅ Smart matching result:', smartResult)
       
       if (smartResult.slot_assignments && smartResult.slot_assignments.length > 0) {
@@ -565,7 +566,7 @@ export function VideoTimelineEditor({
                   <TimelineVideoScrubber
                     videoSlots={videoSlots}
                     textOverlays={textOverlays}
-                    setTextOverlays={setTextOverlays}
+                    setTextOverlays={setTextOverlays as (overlays: TextOverlay[]) => void}
                     selectedTextId={selectedTextId}
                     setSelectedTextId={setSelectedTextId}
                     currentTime={currentTime}
@@ -971,6 +972,7 @@ export function VideoTimelineEditor({
             </div>
           </div>
         </div>
+
 
         {/* Content Library */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

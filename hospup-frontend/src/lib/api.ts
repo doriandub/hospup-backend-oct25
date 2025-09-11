@@ -23,16 +23,6 @@ class ApiClient {
     // Get token from localStorage - primary method for cloud deployment
     const storedToken = this.getStoredToken()
     
-    // Debug logging for videos endpoint
-    if (endpoint.includes('/videos')) {
-      console.log('🔐 API Request Debug:', {
-        endpoint,
-        url,
-        hasToken: !!storedToken,
-        tokenPreview: storedToken ? `${storedToken.slice(0, 10)}...` : 'NO TOKEN'
-      })
-    }
-    
     const config: RequestInit = {
       headers: {
         // Don't set Content-Type for FormData - let browser handle it
@@ -160,12 +150,29 @@ class ApiClient {
     return this.request(`/api/v1/properties/${id}`, { method: 'DELETE' })
   }
 
+  // Generated Videos API (for AI-generated video results)
+  async getGeneratedVideos(propertyId?: number) {
+    let endpoint = '/api/v1/generated-videos/'
+    if (propertyId) {
+      endpoint += `?property_id=${propertyId}`
+    }
+    return this.request<any>(endpoint, { method: 'GET' })
+  }
+
+  async getGeneratedVideo(videoId: string): Promise<any> {
+    return this.request<any>(`/api/v1/generated-videos/${videoId}`, { method: 'GET' })
+  }
+
+  async deleteGeneratedVideo(videoId: string) {
+    return this.request(`/api/v1/generated-videos/${videoId}`, { method: 'DELETE' })
+  }
+
   // Quota methods
   async getUserQuota() {
     return this.request<any>('/api/v1/users/quota', { method: 'GET' })
   }
 
-  // Video upload methods - Presigned URL flow
+  // Asset upload methods - Presigned URL flow
   async getPresignedUrl(fileName: string, contentType: string, propertyId: number, fileSize: number) {
     return this.request<{
       upload_url: string
@@ -187,7 +194,7 @@ class ApiClient {
   async completeUpload(propertyId: number, s3Key: string, fileName: string, fileSize: number, contentType: string) {
     return this.request<{
       message: string
-      video_id: string
+      asset_id: string
       status: string
     }>('/api/v1/upload/complete', {
       method: 'POST',
@@ -201,13 +208,13 @@ class ApiClient {
     })
   }
 
-  // Video methods
-  async getVideos(propertyId?: number, videoType?: string) {
-    let endpoint = '/api/v1/videos/'
+  // Asset methods (renamed from video methods)
+  async getAssets(propertyId?: number, assetType?: string) {
+    let endpoint = '/api/v1/assets/'
     const params = new URLSearchParams()
     
     if (propertyId) params.set('property_id', propertyId.toString())
-    if (videoType) params.set('video_type', videoType)
+    if (assetType) params.set('asset_type', assetType)
     
     if (params.toString()) {
       endpoint += `?${params.toString()}`
@@ -216,16 +223,16 @@ class ApiClient {
     return this.request<any>(endpoint, { method: 'GET' })
   }
 
-  async getVideo(videoId: string): Promise<any> {
-    return this.request<any>(`/api/v1/videos/${videoId}`, { method: 'GET' })
+  async getAsset(assetId: string): Promise<any> {
+    return this.request<any>(`/api/v1/assets/${assetId}`, { method: 'GET' })
   }
 
-  async deleteVideo(videoId: string) {
-    return this.request(`/api/v1/videos/${videoId}`, { method: 'DELETE' })
+  async deleteAsset(assetId: string) {
+    return this.request(`/api/v1/assets/${assetId}`, { method: 'DELETE' })
   }
 
-  async restartVideoProcessing(videoId: string) {
-    return this.request(`/api/v1/videos/${videoId}/restart-processing`, { method: 'POST' })
+  async restartAssetProcessing(assetId: string) {
+    return this.request(`/api/v1/assets/${assetId}/restart-processing`, { method: 'POST' })
   }
 
   // Generic methods for future use
@@ -267,4 +274,19 @@ export const textApi = {
   },
   
   getCategories: () => api.get('/api/v1/text/categories'),
+}
+
+// Assets API for uploaded content (videos, images, etc.) - User uploads
+export const assetsApi = {
+  getAsset: (assetId: string) => api.getAsset(assetId),
+  deleteAsset: (assetId: string) => api.deleteAsset(assetId),
+  restartProcessing: (assetId: string) => api.restartAssetProcessing(assetId),
+  getAssets: (propertyId?: number, assetType?: string) => api.getAssets(propertyId, assetType),
+}
+
+// Videos API for AI-generated videos - AI generation results
+export const videosApi = {
+  getAll: (propertyId?: number) => api.getGeneratedVideos(propertyId),
+  getById: (videoId: string) => api.getGeneratedVideo(videoId),
+  delete: (videoId: string) => api.deleteGeneratedVideo(videoId),
 }

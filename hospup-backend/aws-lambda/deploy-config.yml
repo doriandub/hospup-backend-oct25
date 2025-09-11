@@ -1,0 +1,55 @@
+# AWS Lambda Deployment Configuration
+# Configuration pour déployer la fonction Lambda et MediaConvert
+
+service: hospup-video-generator
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: eu-west-1
+  timeout: 900  # 15 minutes maximum pour MediaConvert
+  memorySize: 512
+  
+  environment:
+    MEDIA_CONVERT_ROLE_ARN: ${env:MEDIA_CONVERT_ROLE_ARN}
+    S3_BUCKET: ${env:S3_BUCKET, 'hospup-videos'}
+    S3_OUTPUT_PREFIX: ${env:S3_OUTPUT_PREFIX, 'generated-videos/'}
+    AWS_REGION: ${env:AWS_REGION, 'eu-west-1'}
+  
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - mediaconvert:*
+        - s3:GetObject
+        - s3:PutObject
+        - s3:DeleteObject
+      Resource: 
+        - "arn:aws:s3:::hospup-videos/*"
+        - "arn:aws:mediaconvert:eu-west-1:*:*"
+
+functions:
+  generateVideo:
+    handler: video-generator.lambda_handler
+    events:
+      - http:
+          path: generate-video
+          method: post
+          cors: true
+  
+  checkStatus:
+    handler: video-generator.check_job_status
+    events:
+      - http:
+          path: status/{jobId}
+          method: get
+          cors: true
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    pipCmdExtraArgs:
+      - --no-cache-dir

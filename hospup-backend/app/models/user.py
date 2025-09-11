@@ -28,5 +28,6 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     
-    # Relationships
-    videos = relationship("Video", back_populates="user", cascade="all, delete-orphan")
+    # Relationships - SIMPLE comme avant migration
+    assets = relationship("Asset", back_populates="user", cascade="all, delete-orphan")  # Uploaded content
+    videos = relationship("Video", back_populates="user", cascade="all, delete-orphan")  # Generated videos

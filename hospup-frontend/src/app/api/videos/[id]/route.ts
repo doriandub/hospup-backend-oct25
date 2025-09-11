@@ -13,10 +13,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'Authorization required' }, { status: 401 })
     }
 
-    const { id: videoId } = await context.params
+    const { id: assetId } = await context.params
 
     // Forward delete request to Railway backend
-    const response = await fetch(`${BACKEND_URL}/api/v1/videos/${videoId}`, {
+    const response = await fetch(`${BACKEND_URL}/api/v1/assets/${assetId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': authHeader,
@@ -26,7 +26,7 @@ export async function DELETE(
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: 'Failed to delete video' }, 
+        { error: 'Failed to delete asset' }, 
         { status: response.status }
       )
     }

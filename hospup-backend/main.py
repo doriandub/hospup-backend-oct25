@@ -32,7 +32,7 @@ logger = structlog.get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    logger.info("Starting Hospup API", version="0.1.6", timestamp="2025-09-07-18:50:00")
+    logger.info("Starting Hospup API", version="0.1.7", timestamp="2025-09-11-10:05:00")
     # Create tables (in production, use Alembic migrations)
     if settings.APP_ENV == "development":
         async with engine.begin() as conn:
@@ -44,14 +44,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Hospup API",
     description="Viral video generation platform for hotels", 
-    version="0.1.6",  # Video upload system with AWS S3 integration
+    version="0.1.7",  # Video upload system with AWS S3 integration
     lifespan=lifespan
 )
 
-# CORS Configuration - Allow all Vercel domains dynamically
+# CORS Configuration - Restored to working version like before migration  
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -87,7 +87,7 @@ async def health_check():
         return {
             "status": overall_status,
             "service": "hospup-api", 
-            "timestamp": "2025-09-08-13:00:00",
+            "timestamp": "2025-09-11-10:05:00",
             "components": {
                 "auth": {
                     "bcrypt_working": bcrypt_works,
@@ -102,18 +102,18 @@ async def health_check():
             "status": "unhealthy",
             "service": "hospup-api", 
             "error": str(e)[:200],
-            "timestamp": "2025-09-08-13:00:00"
+            "timestamp": "2025-09-11-10:05:00"
         }
 
 @app.get("/")
 async def root():
-    return {"message": "Hospup API v0.1.6", "docs": "/docs", "deployed": "2025-09-07-18:50:00"}
+    return {"message": "Hospup API v0.1.7", "docs": "/docs", "deployed": "2025-09-07-18:50:00"}
 
 @app.get("/version")
 async def version():
     """Version information endpoint"""
     return {
-        "version": "0.1.6",
+        "version": "0.1.7",
         "service": "hospup-api", 
         "build_date": "2025-09-07-18:50:00",
         "description": "Viral video generation platform for hotels"
@@ -130,11 +130,11 @@ async def test_direct_db():
             "status": "success",
             "message": "Direct database test completed",
             "database": db_health["database"],
-            "timestamp": "2025-09-08-13:00:00"
+            "timestamp": "2025-09-11-10:05:00"
         }
     except Exception as e:
         return {
             "status": "error",
             "message": f"Direct database test failed: {str(e)[:100]}",
-            "timestamp": "2025-09-08-13:00:00"
+            "timestamp": "2025-09-11-10:05:00"
         }

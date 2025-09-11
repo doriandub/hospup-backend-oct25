@@ -8,11 +8,14 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import logging
 
-from app.auth.dependencies import get_current_user_sync
-from app.core.database import get_sync_db
-from sqlalchemy.orm import Session
+from app.auth.dependencies import get_current_user, get_current_user_sync
+from app.core.database import get_db, get_sync_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session  
+from sqlalchemy import select
 from app.models.user import User
 from app.models.property import Property
+from app.models.asset import Asset
 from app.models.video import Video
 from app.models.template import Template
 
@@ -44,14 +47,14 @@ class SlotAssignment(BaseModel):
 class SmartMatchResponse(BaseModel):
     slot_assignments: List[SlotAssignment]
     matching_scores: Dict[str, Any]
-    total_videos: int
+    total_assets: int
     total_slots: int
 
 @router.post("/smart-match", response_model=SmartMatchResponse)
-def smart_match_videos_to_slots(
+async def smart_match_videos_to_slots(
     request: SmartMatchRequest,
-    current_user: User = Depends(get_current_user_sync),
-    db: Session = Depends(get_sync_db)
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     AI-powered smart matching of videos to template slots
@@ -60,34 +63,42 @@ def smart_match_videos_to_slots(
         logger.info(f"🧠 Smart matching request for property: {request.property_id}, template: {request.template_id}")
         
         # Get property details
-        property = db.query(Property).filter(
-            Property.id == request.property_id,
+        try:
+            property_id = int(request.property_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid property_id format")
+        
+        result = await db.execute(select(Property).filter(
+            Property.id == property_id,
             Property.user_id == current_user.id
-        ).first()
+        ))
+        property = result.scalar_one_or_none()
         
         if not property:
             raise HTTPException(status_code=404, detail="Property not found")
         
         # Get template details 
-        template = db.query(Template).filter(
+        result = await db.execute(select(Template).filter(
             Template.id == request.template_id,
             Template.is_active == True
-        ).first()
+        ))
+        template = result.scalar_one_or_none()
         
         if not template:
             raise HTTPException(status_code=404, detail="Template not found")
         
-        # Get available videos for this property
-        videos = db.query(Video).filter(
-            Video.property_id == request.property_id,
-            Video.user_id == current_user.id,
-            Video.status.in_(['uploaded', 'ready', 'completed'])
-        ).all()
+        # Get available assets for this property
+        result = await db.execute(select(Asset).filter(
+            Asset.property_id == property_id,
+            Asset.user_id == current_user.id,
+            Asset.status.in_(['uploaded', 'ready', 'completed'])
+        ))
+        assets = result.scalars().all()
         
-        if not videos:
+        if not assets:
             raise HTTPException(status_code=404, detail="No videos found for this property")
         
-        logger.info(f"📚 Found {len(videos)} videos for property {property.name}")
+        logger.info(f"📚 Found {len(assets)} assets for property {property.name}")
         
         # Parse template script to get slots
         template_slots = parse_template_slots(template.script)
@@ -99,7 +110,7 @@ def smart_match_videos_to_slots(
         
         # Perform smart matching
         assignments = perform_smart_matching(
-            videos=videos,
+            assets=assets,
             template_slots=template_slots,
             property=property,
             template=template
@@ -122,7 +133,7 @@ def smart_match_videos_to_slots(
         return SmartMatchResponse(
             slot_assignments=assignments,
             matching_scores=matching_scores,
-            total_videos=len(videos),
+            total_assets=len(assets),
             total_slots=len(template_slots)
         )
         
@@ -172,7 +183,7 @@ def parse_template_slots(script: Any) -> List[Dict[str, Any]]:
         return []
 
 def perform_smart_matching(
-    videos: List[Video],
+    assets: List[Asset],
     template_slots: List[Dict[str, Any]],
     property: Property,
     template: Template
@@ -184,7 +195,7 @@ def perform_smart_matching(
     
     try:
         # Use OpenAI for smart matching
-        openai_assignments = perform_openai_matching(videos, template_slots, property, template)
+        openai_assignments = perform_openai_matching(assets, template_slots, property, template)
         if openai_assignments:
             logger.info(f"✅ OpenAI smart matching successful: {len(openai_assignments)} assignments")
             return openai_assignments
@@ -194,10 +205,10 @@ def perform_smart_matching(
         logger.error(f"❌ OpenAI matching failed: {str(e)}, falling back to keyword matching")
     
     # Fallback to keyword-based matching if OpenAI fails
-    return perform_keyword_matching(videos, template_slots, property, template)
+    return perform_keyword_matching(assets, template_slots, property, template)
 
 def perform_openai_matching(
-    videos: List[Video],
+    assets: List[Asset],
     template_slots: List[Dict[str, Any]],
     property: Property,
     template: Template
@@ -222,14 +233,14 @@ def perform_openai_matching(
         property_context = f"Property: {property.name} - {property.description or 'Luxury hotel'} in {property.city}, {property.country}"
         template_context = f"Template: {template.title} - {template.description or 'Viral video template'}"
         
-        # Prepare video descriptions
+        # Prepare asset descriptions
         video_descriptions = []
-        for video in videos:
+        for asset in assets:
             video_desc = {
-                "id": video.id,
-                "title": video.title or "Untitled",
-                "description": video.description or "No description",
-                "duration": video.duration or 10
+                "id": asset.id,
+                "title": asset.title or "Untitled",
+                "description": asset.description or "No description",
+                "duration": asset.duration or 10
             }
             video_descriptions.append(video_desc)
         
@@ -313,10 +324,10 @@ Focus on creating the most compelling narrative flow by matching content that te
                 assignments.append(assignment)
                 
                 if assignment.videoId:
-                    video = next((v for v in videos if v.id == assignment.videoId), None)
-                    video_title = video.title if video else "Unknown"
+                    asset = next((v for v in assets if v.id == assignment.videoId), None)
+                    asset_title = asset.title if asset else "Unknown"
                     slot_desc = next((s['description'] for s in template_slots if s['id'] == assignment.slotId), "Unknown")
-                    logger.info(f"🎯 AI matched slot '{slot_desc}' to video '{video_title}' (confidence: {assignment.confidence:.3f})")
+                    logger.info(f"🎯 AI matched slot '{slot_desc}' to asset '{asset_title}' (confidence: {assignment.confidence:.3f})")
             
             return assignments
             
@@ -330,7 +341,7 @@ Focus on creating the most compelling narrative flow by matching content that te
         return []
 
 def perform_keyword_matching(
-    videos: List[Video],
+    assets: List[Asset],
     template_slots: List[Dict[str, Any]],
     property: Property,
     template: Template
@@ -359,27 +370,27 @@ def perform_keyword_matching(
         slot_description = slot.get('description', '').lower()
         slot_words = slot_description.split()
         
-        for video in videos:
-            if video.id in used_video_ids:
+        for asset in assets:
+            if asset.id in used_video_ids:
                 continue
             
             # Skip very short videos
-            if video.duration and video.duration < 1:
+            if asset.duration and asset.duration < 1:
                 continue
             
             # Calculate matching score
             score = 0
             reasoning_parts = []
             
-            video_text = f"{video.title or ''} {video.description or ''}".lower()
-            video_words = video_text.split()
+            asset_text = f"{asset.title or ''} {asset.description or ''}".lower()
+            asset_words = asset_text.split()
             
             # 1. Direct word matching
             word_matches = 0
             for slot_word in slot_words:
                 if len(slot_word) > 3:  # Ignore short words
-                    for video_word in video_words:
-                        if slot_word in video_word or video_word in slot_word:
+                    for asset_word in asset_words:
+                        if slot_word in asset_word or asset_word in slot_word:
                             word_matches += 1
                             score += 0.2
             
@@ -389,15 +400,15 @@ def perform_keyword_matching(
             # 2. Semantic/thematic matching
             for category, keywords in hospitality_keywords.items():
                 slot_has_category = any(keyword in slot_description for keyword in keywords)
-                video_has_category = any(keyword in video_text for keyword in keywords)
+                asset_has_category = any(keyword in asset_text for keyword in keywords)
                 
-                if slot_has_category and video_has_category:
+                if slot_has_category and asset_has_category:
                     score += 0.4
                     reasoning_parts.append(f"{category} theme match")
             
             # 3. Duration compatibility bonus
             slot_duration = slot.get('duration', 3)
-            if video.duration and video.duration >= slot_duration:
+            if asset.duration and asset.duration >= slot_duration:
                 score += 0.1
                 reasoning_parts.append("duration compatible")
             
@@ -409,7 +420,7 @@ def perform_keyword_matching(
             
             if final_score > best_score:
                 best_score = final_score
-                best_match = video
+                best_match = asset
                 best_reasoning = ", ".join(reasoning_parts) if reasoning_parts else "basic compatibility"
         
         # Create assignment
@@ -435,10 +446,10 @@ def perform_keyword_matching(
     return assignments
 
 @router.post("/generate-from-viral-template", response_model=VideoGenerationResponse)
-def generate_video_from_viral_template(
+async def generate_video_from_viral_template(
     request: VideoGenerationRequest,
-    current_user: User = Depends(get_current_user_sync),
-    db: Session = Depends(get_sync_db)
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Generate a video from viral template with slot assignments and text overlays
@@ -447,10 +458,16 @@ def generate_video_from_viral_template(
         logger.info(f"🎬 Video generation request from user {current_user.id} for property {request.property_id}")
         
         # Validate property ownership
-        property = db.query(Property).filter(
-            Property.id == request.property_id,
+        try:
+            property_id = int(request.property_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid property_id format")
+        
+        result = await db.execute(select(Property).filter(
+            Property.id == property_id,
             Property.user_id == current_user.id
-        ).first()
+        ))
+        property = result.scalar_one_or_none()
         
         if not property:
             raise HTTPException(status_code=404, detail="Property not found")
@@ -470,7 +487,7 @@ def generate_video_from_viral_template(
             id=str(uuid.uuid4()),
             title=f"Generated from {template_id}",
             description=f"Video generated from viral template for {property.name}",
-            property_id=request.property_id,
+            property_id=property_id,  # Already converted to int above
             user_id=current_user.id,
             status='queued',  # Initial status
             duration=custom_script.get('total_duration', 30),
@@ -479,15 +496,15 @@ def generate_video_from_viral_template(
         )
         
         db.add(new_video)
-        db.commit()
-        db.refresh(new_video)
+        await db.commit()
+        await db.refresh(new_video)
         
         logger.info(f"✅ Video generation queued with ID: {new_video.id}")
         
         # In a real implementation, this would trigger background video processing
         # For now, we'll mark it as processing and return success
         new_video.status = 'processing'
-        db.commit()
+        await db.commit()
         
         return VideoGenerationResponse(
             video_id=str(new_video.id),
@@ -495,8 +512,40 @@ def generate_video_from_viral_template(
             message="Video generation started successfully"
         )
         
-    except HTTPException:
-        raise
+    except HTTPException as he:
+        logger.error(f"❌ HTTPException in video generation: {he.status_code} - {he.detail}")
+        raise he
     except Exception as e:
         logger.error(f"❌ Error in video generation: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
+
+
+# Alias endpoint for frontend compatibility - USING SYNC AUTH TO FIX 403 ERROR
+@router.post("/aws-generate", response_model=VideoGenerationResponse)
+def aws_generate_video_sync(
+    request: VideoGenerationRequest,
+    current_user: User = Depends(get_current_user_sync),
+    db: Session = Depends(get_sync_db)
+):
+    """
+    AWS video generation alias - SYNC VERSION TO FIX AUTH ISSUES (like /auth/me)
+    """
+    logger.info(f"🎬 AWS Generate SYNC called for property {request.property_id} by user {current_user.id}")
+    try:
+        # Convert to async for the main function call
+        import asyncio
+        from app.core.database import get_db as get_async_db
+        
+        async def _execute_async():
+            async_db_gen = get_async_db()
+            async_db = await anext(async_db_gen)
+            try:
+                return await generate_video_from_viral_template(request, current_user, async_db)
+            finally:
+                await async_db.close()
+        
+        return asyncio.run(_execute_async())
+        
+    except Exception as e:
+        logger.error(f"❌ Error in aws_generate_video_sync: {str(e)}")
+        raise e

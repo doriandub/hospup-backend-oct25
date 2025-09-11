@@ -8,7 +8,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { FolderOpen, Building2, Video, Grid3X3, List, Upload, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useProperties } from '@/hooks/useProperties'
-import { useVideos } from '@/hooks/useVideos'
+import { useAssets } from '@/hooks/useAssets'
 import { api } from '@/lib/api'
 
 export default function AssetsPage() {
@@ -24,33 +24,33 @@ export default function AssetsPage() {
   const [processingStartTime, setProcessingStartTime] = useState<{[key: string]: number}>({})  
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest')
 
-  // Fetch properties and uploaded videos only (not generated videos)
+  // Fetch properties and uploaded assets only (not generated videos)
   const { properties, loading: propertiesLoading } = useProperties()
-  const { videos, loading: videosLoading, refetch: refetchVideos } = useVideos(undefined, 'uploaded')
+  const { assets, loading: assetsLoading, refetch: refetchAssets } = useAssets(undefined, 'uploaded')
 
   // Enhanced real-time refresh system: 10s for status checks, 60s restart for stuck processing
   useEffect(() => {
-    const activeVideos = videos.filter(video => video.property_id === activePropertyId)
-    const processingVideos = activeVideos.filter(video => 
-      video.status?.toLowerCase() === 'processing' || 
-      video.status?.toLowerCase() === 'uploaded'
+    const activeAssets = assets.filter(asset => asset.property_id === activePropertyId)
+    const processingAssets = activeAssets.filter(asset => 
+      asset.status?.toLowerCase() === 'processing' || 
+      asset.status?.toLowerCase() === 'uploaded'
     )
 
-    if (processingVideos.length === 0 || !activePropertyId) {
+    if (processingAssets.length === 0 || !activePropertyId) {
       return
     }
 
-    // Track processing start times - only update if there are new processing videos
+    // Track processing start times - only update if there are new processing assets
     const now = Date.now()
     const newProcessingTimes = { ...processingStartTime }
-    let hasNewVideos = false
-    processingVideos.forEach(video => {
-      if (!newProcessingTimes[video.id]) {
-        newProcessingTimes[video.id] = now
-        hasNewVideos = true
+    let hasNewAssets = false
+    processingAssets.forEach(asset => {
+      if (!newProcessingTimes[asset.id]) {
+        newProcessingTimes[asset.id] = now
+        hasNewAssets = true
       }
     })
-    if (hasNewVideos) {
+    if (hasNewAssets) {
       setProcessingStartTime(newProcessingTimes)
     }
     
@@ -59,17 +59,17 @@ export default function AssetsPage() {
       let needsFullRefresh = false
       let statusChanges: any[] = []
       
-      // Check status for each processing video
-      const statusChecks = processingVideos.map(async (video) => {
+      // Check status for each processing asset
+      const statusChecks = processingAssets.map(async (asset) => {
         try {
-          const updatedVideo = await api.getVideo(video.id) as any
-          // If video status changed, we need a full refresh
-          if (updatedVideo?.status && updatedVideo.status !== video.status) {
-            statusChanges.push({ id: video.id, from: video.status, to: updatedVideo.status })
+          const updatedAsset = await api.getAsset(asset.id) as any
+          // If asset status changed, we need a full refresh
+          if (updatedAsset?.status && updatedAsset.status !== asset.status) {
+            statusChanges.push({ id: asset.id, from: asset.status, to: updatedAsset.status })
             needsFullRefresh = true
           }
         } catch (error) {
-          console.error(`Network error checking status for video ${video.id}:`, error)
+          console.error(`Network error checking status for asset ${asset.id}:`, error)
         }
       })
       
@@ -77,42 +77,48 @@ export default function AssetsPage() {
       
       // If any status changed, refresh the entire list
       if (needsFullRefresh) {
-        refetchVideos()
+        refetchAssets()
       }
     }, 10000) // 10 seconds for real-time feel
 
-    // 60 second check for stuck processing videos + 24h cleanup
+    // 60 second check for stuck processing assets + 24h cleanup
     const stuckCheckInterval = setInterval(() => {
-      processingVideos.forEach(async (video) => {
-        const processingTime = now - (newProcessingTimes[video.id] || now)
+      processingAssets.forEach(async (asset) => {
+        const processingTime = now - (newProcessingTimes[asset.id] || now)
         
         // 24 hour cleanup (86400000 ms = 24 hours)
         if (processingTime > 86400000) {
           try {
-            await api.deleteVideo(video.id)
+            await api.deleteAsset(asset.id)
             
             // Remove from processing times and refresh list
             const updatedTimes = { ...processingStartTime }
-            delete updatedTimes[video.id]
+            delete updatedTimes[asset.id]
             setProcessingStartTime(updatedTimes)
-            refetchVideos()
+            refetchAssets()
           } catch (error) {
-            console.error(`Failed to delete video ${video.id}:`, error)
+            console.error(`Failed to delete asset ${asset.id}:`, error)
           }
           return
         }
         
-        // 60 second restart logic
-        if (processingTime > 60000) { // 60 seconds
+        // 5 minute restart logic (300000ms) - more reasonable
+        if (processingTime > 300000) { // 5 minutes
           try {
-            // Restart processing by calling the backend
-            await api.restartVideoProcessing(video.id)
-            
-            // Reset the start time
-            newProcessingTimes[video.id] = Date.now()
-            setProcessingStartTime({ ...newProcessingTimes })
+            // Only restart if not already restarted recently
+            const lastRestart = localStorage.getItem(`asset_restart_${asset.id}`)
+            const now = Date.now()
+            if (!lastRestart || (now - parseInt(lastRestart)) > 600000) { // 10 minute cooldown
+              await api.restartAssetProcessing(asset.id)
+              localStorage.setItem(`asset_restart_${asset.id}`, now.toString())
+              
+              // Reset the start time
+              newProcessingTimes[asset.id] = Date.now()
+              setProcessingStartTime({ ...newProcessingTimes })
+              console.log(`🔄 Restarted processing for asset ${asset.id} after ${Math.round(processingTime/60000)} minutes`)
+            }
           } catch (error) {
-            console.error(`Failed to restart processing for video ${video.id}:`, error)
+            console.error(`Failed to restart processing for asset ${asset.id}:`, error)
           }
         }
       })
@@ -122,7 +128,7 @@ export default function AssetsPage() {
       clearInterval(fastRefreshInterval)
       clearInterval(stuckCheckInterval)
     }
-  }, [videos, refetchVideos, activePropertyId])
+  }, [assets, refetchAssets, activePropertyId])
 
   // Handle URL params and property persistence
   useEffect(() => {
@@ -153,25 +159,25 @@ export default function AssetsPage() {
     router.replace(`/dashboard/assets?${newSearchParams.toString()}` as any)
   }, [searchParams, router])
 
-  const filteredVideos = videos.filter(video => {
+  const filteredAssets = assets.filter(asset => {
     if (!activePropertyId) return false
-    return video.property_id.toString() === activePropertyId
+    return asset.property_id.toString() === activePropertyId
   }).sort((a, b) => {
     const dateA = new Date(a.created_at).getTime()
     const dateB = new Date(b.created_at).getTime()
     return sortOrder === 'newest' ? dateB - dateA : dateA - dateB
   })
 
-  const getVideosCount = (propertyId: number) => {
-    return videos.filter(v => v.property_id.toString() === propertyId.toString()).length
+  const getAssetsCount = (propertyId: number) => {
+    return assets.filter(v => v.property_id.toString() === propertyId.toString()).length
   }
 
   // Check if auto-refresh is active (only for active property)
-  const hasProcessingVideos = videos
-    .filter(video => video.property_id.toString() === activePropertyId)
-    .some(video => 
-      video.status?.toLowerCase() === 'processing' || 
-      video.status?.toLowerCase() === 'uploaded'
+  const hasProcessingAssets = assets
+    .filter(asset => asset.property_id.toString() === activePropertyId)
+    .some(asset => 
+      asset.status?.toLowerCase() === 'processing' || 
+      asset.status?.toLowerCase() === 'uploaded'
     )
 
   // Handle property navigation with transform instead of scroll
@@ -316,8 +322,8 @@ export default function AssetsPage() {
         await uploadSingleFile(file, activePropertyId)
       }
 
-      // Refresh videos list
-      await refetchVideos()
+      // Refresh assets list
+      await refetchAssets()
     } catch (error) {
       console.error('Upload error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.'
@@ -327,7 +333,7 @@ export default function AssetsPage() {
     }
   }, [activePropertyId])
 
-  const loading = propertiesLoading || videosLoading
+  const loading = propertiesLoading || assetsLoading
 
   if (loading) {
     return (
@@ -404,7 +410,7 @@ export default function AssetsPage() {
                           ? 'bg-[#09725c]/10 text-[#09725c]'
                           : 'bg-gray-100 text-gray-500'
                       }`}>
-                        {getVideosCount(property.id)}
+                        {getAssetsCount(property.id)}
                       </span>
                     </div>
                   ))}
@@ -453,7 +459,7 @@ export default function AssetsPage() {
         </div>
       </div>
 
-      {/* Videos Grid/List */}
+      {/* Assets Grid/List */}
       {activePropertyId ? (
         <div className={
           viewMode === 'grid'
@@ -563,13 +569,13 @@ export default function AssetsPage() {
               </div>
             )}
             
-            {/* Show videos if any exist */}
-            {filteredVideos.map((video) => {
-              const property = properties.find(p => p.id.toString() === video.property_id.toString())
+            {/* Show assets if any exist */}
+            {filteredAssets.map((asset) => {
+              const property = properties.find(p => p.id.toString() === asset.property_id.toString())
               return (
                 <VideoCard
-                  key={video.id}
-                  video={video}
+                  key={asset.id}
+                  video={asset}
                   property={property}
                   viewMode={viewMode}
                   showProperty={false}
@@ -577,8 +583,8 @@ export default function AssetsPage() {
               )
             })}
             
-            {/* Empty state message when no videos - but upload card still visible */}
-            {filteredVideos.length === 0 && (
+            {/* Empty state message when no assets - but upload card still visible */}
+            {filteredAssets.length === 0 && (
               <div className="col-span-full text-center py-8">
                 <Video className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <h3 className="text-base font-medium text-gray-600 mb-2">No assets uploaded yet</h3>
@@ -603,13 +609,13 @@ export default function AssetsPage() {
       )}
 
       {/* Stats */}
-      {filteredVideos.length > 0 && (
+      {filteredAssets.length > 0 && (
         <div className="mt-8 text-center text-sm text-gray-500">
-          Showing {filteredVideos.length} asset{filteredVideos.length !== 1 ? 's' : ''}
+          Showing {filteredAssets.length} asset{filteredAssets.length !== 1 ? 's' : ''}
           {activePropertyId && (
             <span> for {properties.find(p => p.id.toString() === activePropertyId)?.name}</span>
           )}
-          {hasProcessingVideos && (
+          {hasProcessingAssets && (
             <div className="mt-2 flex items-center justify-center text-blue-600">
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>

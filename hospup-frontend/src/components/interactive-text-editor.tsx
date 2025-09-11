@@ -5,25 +5,7 @@ import { AlignLeft, AlignCenter, AlignRight, Trash2, Move } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-interface TextOverlay {
-  id: string
-  content: string
-  start_time: number
-  end_time: number
-  position: { x: number; y: number; anchor: string }
-  style: {
-    font_family: string
-    font_size: number
-    color: string
-    bold: boolean
-    italic: boolean
-    shadow: boolean
-    outline: boolean
-    background: boolean
-    opacity: number
-  }
-  textAlign?: 'left' | 'center' | 'right'
-}
+import { TextOverlay } from '@/types/text-overlay'
 
 interface InteractiveTextEditorProps {
   textOverlays: TextOverlay[]

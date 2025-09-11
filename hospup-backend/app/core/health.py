@@ -28,7 +28,7 @@ async def check_database_health() -> dict:
                 timeout=5.0  # 5 second timeout
             )
             # Consume the result to ensure the query actually executed
-            await result.fetchone()
+            result.fetchone()
             
         end_time = asyncio.get_event_loop().time()
         latency_ms = round((end_time - start_time) * 1000, 2)

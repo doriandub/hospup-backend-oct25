@@ -1,3 +1,0 @@
-Deployment trigger for environment variable changes
-Updated: 2025-09-08
-Added STORAGE_PUBLIC_BASE to Railway worker configuration

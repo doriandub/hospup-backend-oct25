@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     // Extract query parameters from the request
     const { searchParams } = new URL(request.url)
     const queryString = searchParams.toString()
-    const backendUrl = `${BACKEND_URL}/api/v1/videos${queryString ? `?${queryString}` : ''}`
+    const backendUrl = `${BACKEND_URL}/api/v1/assets${queryString ? `?${queryString}` : ''}`
     
     console.log('🔍 Proxying request to:', backendUrl)
     
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: 'Failed to fetch videos' }, 
+        { error: 'Failed to fetch assets' }, 
         { status: response.status }
       )
     }

@@ -13,7 +13,7 @@ from app.core.database import get_db
 from app.auth.dependencies import get_current_user
 from app.models.user import User
 from app.models.property import Property
-from app.models.video import Video
+from app.models.asset import Asset
 from app.core.config import settings
 
 logger = structlog.get_logger(__name__)
@@ -217,7 +217,7 @@ async def complete_upload(
         file_url = validate_and_clean_url(f"{settings.STORAGE_PUBLIC_BASE}/{request.s3_key}")
         
         # Create video record
-        video = Video(
+        video = Asset(
             id=video_id,
             title=request.file_name.split('.')[0],  # Use filename without extension as title
             file_url=file_url,
@@ -321,7 +321,7 @@ async def debug_video_headers(
     """Debug S3 headers for a specific video"""
     try:
         # Get video record
-        result = await db.execute(select(Video).where(Video.id == video_id))
+        result = await db.execute(select(Asset).where(Asset.id == video_id))
         video = result.scalar_one_or_none()
         
         if not video:
@@ -397,7 +397,7 @@ async def debug_s3_config():
 async def fix_s3_headers(db: AsyncSession = Depends(get_db)):
     """Fix S3 Content-Type headers for all videos"""
     try:
-        result = await db.execute(select(Video))
+        result = await db.execute(select(Asset))
         videos = result.scalars().all()
         
         s3_client = get_s3_client()
@@ -452,7 +452,7 @@ async def fix_duplicate_bucket_urls(db: AsyncSession = Depends(get_db)):
     from sqlalchemy import select
     
     try:
-        result = await db.execute(select(Video))
+        result = await db.execute(select(Asset))
         videos = result.scalars().all()
         
         updated_count = 0
@@ -483,7 +483,7 @@ async def restore_public_urls(db: AsyncSession = Depends(get_db)):
     
     try:
         # Get all videos
-        result = await db.execute(select(Video))
+        result = await db.execute(select(Asset))
         videos = result.scalars().all()
         
         updated_count = 0
@@ -533,7 +533,7 @@ async def reprocess_video(
     logger.info(f"🔄 Forcing reprocess of video {video_id}")
     
     # Get video record
-    stmt = select(Video).where(Video.id == video_id)
+    stmt = select(Asset).where(Asset.id == video_id)
     result = await db.execute(stmt)
     video = result.scalar_one_or_none()
     
@@ -622,7 +622,7 @@ async def get_video_status(
 ):
     """Get current status of a video"""
     
-    stmt = select(Video).where(Video.id == video_id)
+    stmt = select(Asset).where(Asset.id == video_id)
     result = await db.execute(stmt)
     video = result.scalar_one_or_none()
     
@@ -682,8 +682,8 @@ async def debug_processing_system():
     try:
         from app.core.database import SessionLocal
         db = SessionLocal()
-        from app.models.video import Video
-        count = db.query(Video).count()
+        from app.models.asset import Asset
+        count = db.query(Asset).count()
         db.close()
         results["tests"].append({"test": f"Database connection", "status": f"✅ SUCCESS ({count} videos)"})
     except Exception as e:
@@ -781,7 +781,7 @@ async def force_process_test():
 async def list_videos_status(db: AsyncSession = Depends(get_db)):
     """List all videos and their processing status"""
     try:
-        result = await db.execute(select(Video).order_by(Video.created_at.desc()).limit(20))
+        result = await db.execute(select(Asset).order_by(Asset.created_at.desc()).limit(20))
         videos = result.scalars().all()
         
         video_status = []
@@ -816,7 +816,7 @@ async def test_video_processing(
     """Test endpoint to manually trigger video processing"""
     try:
         # Get video record
-        result = await db.execute(select(Video).where(Video.id == video_id))
+        result = await db.execute(select(Asset).where(Asset.id == video_id))
         video = result.scalar_one_or_none()
         
         if not video:
@@ -871,7 +871,7 @@ async def regenerate_presigned_urls(db: AsyncSession = Depends(get_db)):
     
     try:
         # Get all videos
-        result = await db.execute(select(Video))
+        result = await db.execute(select(Asset))
         videos = result.scalars().all()
         
         s3_client = get_s3_client()
@@ -920,14 +920,14 @@ async def fix_video_urls(db: AsyncSession = Depends(get_db)):
     try:
         # Update file_url
         result = await db.execute(text("""
-            UPDATE videos 
+            UPDATE assets 
             SET file_url = REPLACE(file_url, 's3.us-east-1.amazonaws.com', 's3-eu-west-1.amazonaws.com')
             WHERE file_url LIKE '%s3.us-east-1.amazonaws.com%'
         """))
         
         # Update thumbnail_url  
         result2 = await db.execute(text("""
-            UPDATE videos 
+            UPDATE assets 
             SET thumbnail_url = REPLACE(thumbnail_url, 's3.us-east-1.amazonaws.com', 's3-eu-west-1.amazonaws.com')
             WHERE thumbnail_url LIKE '%s3.us-east-1.amazonaws.com%'
         """))
@@ -939,13 +939,13 @@ async def fix_video_urls(db: AsyncSession = Depends(get_db)):
             SELECT COUNT(*) as total,
                    COUNT(CASE WHEN file_url LIKE '%us-east-1%' THEN 1 END) as old_urls,
                    COUNT(CASE WHEN file_url LIKE '%eu-west-1%' THEN 1 END) as new_urls
-            FROM videos
+            FROM assets
         """))
         stats = check.fetchone()
         
         return {
-            "message": "Video URLs updated successfully",
-            "total_videos": stats.total,
+            "message": "Asset URLs updated successfully",
+            "total_assets": stats.total,
             "old_urls_remaining": stats.old_urls, 
             "new_urls": stats.new_urls
         }
@@ -964,8 +964,8 @@ async def get_download_url(
     """Get presigned download URL for video viewing"""
     
     # Security: verify user owns a video with this S3 key
-    stmt = select(Video).where(
-        and_(Video.file_url.like(f"%{s3_key}%"), Video.user_id == current_user.id)
+    stmt = select(Asset).where(
+        and_(Asset.file_url.like(f"%{s3_key}%"), Asset.user_id == current_user.id)
     )
     result = await db.execute(stmt)
     video = result.scalar_one_or_none()

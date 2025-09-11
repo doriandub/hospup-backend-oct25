@@ -5,11 +5,12 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { VideoTimelineEditor } from '@/components/video-timeline-editor'
 import { VideoGenerationNavbar } from '@/components/video-generation/VideoGenerationNavbar'
 import { useProperties } from '@/hooks/useProperties'
-import { useVideos } from '@/hooks/useVideos'
+import { useAssets } from '@/hooks/useAssets'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
 import { TextOverlay } from '@/types/text-overlay'
+import { awsVideoService, AWSVideoGenerationService } from '@/services/aws-video-generation'
 
 interface ViralTemplate {
   id: string
@@ -47,46 +48,29 @@ export default function ComposePage() {
   const [templateSlots, setTemplateSlots] = useState<TemplateSlot[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedProperty, setSelectedProperty] = useState<string>('')
+  const [error, setError] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
   
-  // 🎯 DIRECT COPY from Assets page - load videos with direct API call like Assets does
-  const [allVideos, setAllVideos] = useState<any[]>([])
-  const [videosLoading, setVideosLoading] = useState(true)
+  // ✅ Use proper useAssets hook instead of direct API call
+  const { 
+    assets: allAssets, 
+    loading: assetsLoading,
+    error: assetsError 
+  } = useAssets(selectedProperty, 'uploaded')
   
-  // Load videos exactly like Assets page does
-  const loadVideosLikeAssets = useCallback(async () => {
-    try {
-      setVideosLoading(true)
-      // Use EXACT same API call as working Assets page  
-      const response = await api.get(`/api/v1/videos?property_id=${selectedProperty}&status=uploaded,ready,completed`)
-      console.log('📚 Direct Assets-style API response:', response)
-      setAllVideos(Array.isArray(response) ? response : [])
-    } catch (error) {
-      console.error('❌ Assets-style video loading failed:', error)
-      setAllVideos([])
-    } finally {
-      setVideosLoading(false)
-    }
-  }, [selectedProperty])
-  
-  // Load videos when property changes
-  useEffect(() => {
-    if (selectedProperty) {
-      loadVideosLikeAssets()
-    }
-  }, [selectedProperty, loadVideosLikeAssets])
 
   const templateId = params.templateId as string
   const propertyFromUrl = searchParams.get('property')
   const promptFromUrl = searchParams.get('prompt')
   
-  // Convert to ContentVideo format for VideoTimelineEditor compatibility (direct from allVideos)
-  const contentVideos: ContentVideo[] = allVideos.map((video) => ({
-    id: video.id,
-    title: video.title,
-    thumbnail_url: video.thumbnail_url || '',
-    video_url: video.file_url || video.video_url,
-    duration: video.duration || 10,
-    description: video.description || ''
+  // Convert to ContentVideo format for VideoTimelineEditor compatibility (direct from allAssets)
+  const contentVideos: ContentVideo[] = allAssets.map((asset) => ({
+    id: asset.id,
+    title: asset.title,
+    thumbnail_url: asset.thumbnail_url || '',
+    video_url: asset.file_url,
+    duration: asset.duration || 10,
+    description: asset.description || ''
   }))
 
   // Auto-select property from URL parameter
@@ -104,24 +88,10 @@ export default function ComposePage() {
     loadTemplateAndSegments()
   }, [templateId])
 
-  // Debug log when videos change
-  useEffect(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-    console.log('🎬 Assets-style Videos updated:', {
-      selectedProperty,
-      allVideos: allVideos.length,
-      contentVideos: contentVideos.length,
-      videosLoading,
-      hasToken: !!token,
-      tokenPreview: token ? `${token.slice(0, 10)}...` : 'NO TOKEN',
-      sampleVideo: allVideos[0]
-    })
-  }, [allVideos, videosLoading, selectedProperty, contentVideos])
 
   // Auto-match when both templateSlots and contentVideos are loaded
   useEffect(() => {
     if (templateSlots.length > 0 && contentVideos.length > 0) {
-      console.log('Auto-matching:', templateSlots.length, 'slots with', contentVideos.length, 'videos')
     }
   }, [templateSlots, contentVideos])
 
@@ -129,20 +99,18 @@ export default function ComposePage() {
     try {
       // Load template info
       const templateData = await api.get<ViralTemplate>(`/api/v1/viral-matching/viral-templates/${templateId}`)
-      console.log('🎬 Template data loaded:', templateData)
       setTemplate(templateData)
 
       // Parse slots from script
       if (templateData.script) {
-        console.log('📜 Template script:', templateData.script)
         const parsedSlots = parseTemplateScript(templateData.script)
-        console.log('🎯 Parsed template slots:', parsedSlots)
         setTemplateSlots(parsedSlots)
       } else {
-        console.warn('⚠️ No script found in template data')
+        setError('Ce template ne contient pas de structure de vidéo valide.')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading template:', error)
+      setError(error.message || 'Impossible de charger ce template. Il se peut qu\'il n\'existe pas ou soit temporairement indisponible.')
     } finally {
       setLoading(false)
     }
@@ -151,8 +119,6 @@ export default function ComposePage() {
 
   const parseTemplateScript = (script: any): TemplateSlot[] => {
     try {
-      console.log('🔧 DEBUG: Full script object/string received:', script)
-      console.log('🔧 DEBUG: Script type:', typeof script)
       
       let scriptData: any = script
       
@@ -165,8 +131,6 @@ export default function ComposePage() {
           cleanScript = cleanScript.slice(1).trim()
         }
         
-        console.log('🔧 Original script string:', script.substring(0, 200))
-        console.log('🔧 Cleaned script string:', cleanScript.substring(0, 200))
         
         // Check if it's valid JSON
         if (!cleanScript.startsWith('{') && !cleanScript.startsWith('[')) {
@@ -177,9 +141,7 @@ export default function ComposePage() {
         scriptData = JSON.parse(cleanScript)
       }
       
-      console.log('🔧 DEBUG: Final script data:', scriptData)
       const clips = scriptData.clips || []
-      console.log('🎯 Found clips:', clips.length, clips)
 
       if (clips.length === 0) {
         console.warn('⚠️ No clips found in script data')
@@ -198,7 +160,6 @@ export default function ComposePage() {
           end_time: currentTime + duration
         }
         currentTime += duration
-        console.log('🎬 Created slot:', slot)
         return slot
       })
     } catch (error) {
@@ -249,39 +210,46 @@ export default function ComposePage() {
   }
 
   const handleGenerate = async (assignments: any[], textOverlays: any[]) => {
-    console.log('🎬 handleGenerate called with:', { assignments, textOverlays })
-    console.log('📍 Text overlays positions:')
-    textOverlays.forEach((text, i) => {
-      console.log(`   Text ${i+1}: "${text.content}" -> x:${text.position.x}, y:${text.position.y} (${text.position.anchor})`)
-    })
+    if (isGenerating) return // Prevent double-clicks
+    
     try {
-      // Create custom script based on timeline
-      const customScript = createScriptFromTimeline(assignments, textOverlays)
-      console.log('📜 Generated custom script:', customScript)
+      setIsGenerating(true)
+      setError(null)
       
-      const generationData = {
-        property_id: selectedProperty,
-        source_type: 'viral_template_composer',
-        source_data: {
-          template_id: templateId,
-          slot_assignments: assignments,
-          text_overlays: textOverlays,
-          custom_script: customScript,
-          total_duration: template?.duration || 30,
-          user_input: promptFromUrl || ''  // Store user's original idea for AI description generation
-        },
-        language: 'fr'
-      }
+      console.log('🚀 Starting AWS video generation...')
       
-      console.log('📤 Sending generation request:', generationData)
-
-      const result = await api.post<{ video_id?: string }>('/api/v1/video-generation/generate-from-viral-template', generationData)
-      console.log('✅ Video generation successful:', result)
-      // Redirect to videos page
-      router.push('/dashboard/videos')
-    } catch (error) {
-      console.error('Error generating video:', error)
-      alert('Erreur lors de la génération de la vidéo')
+      // Convert timeline data to AWS format
+      const awsRequest = AWSVideoGenerationService.convertTimelineToAWS(
+        templateSlots,
+        assignments,
+        textOverlays,
+        contentVideos
+      )
+      
+      // Add property and template IDs
+      awsRequest.property_id = selectedProperty
+      awsRequest.source_data.template_id = templateId
+      
+      console.log('📊 AWS Generation Request:', {
+        segments: awsRequest.source_data.segments.length,
+        texts: awsRequest.source_data.text_overlays.length,
+        duration: awsRequest.source_data.total_duration
+      })
+      
+      // Launch AWS MediaConvert video generation
+      const result = await awsVideoService.generateVideo(awsRequest)
+      
+      console.log('✅ AWS job created:', result.job_id)
+      console.log('🎬 Video ID:', result.video_id)
+      
+      // Redirect to video preview page to show progress and final result
+      router.push(`/dashboard/videos/${result.video_id}/preview`)
+      
+    } catch (error: any) {
+      console.error('❌ AWS video generation failed:', error)
+      setError(error.message || 'Erreur lors de la génération de la vidéo avec AWS. Veuillez réessayer.')
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -369,8 +337,55 @@ export default function ComposePage() {
             (window as any).videoTimelineGenerateVideo()
           }
         }}
-        isGenerating={false}
+        isGenerating={isGenerating}
       />
+      
+      {/* Error display */}
+      {error && (
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+                <button 
+                  onClick={() => setError(null)}
+                  className="mt-2 text-sm text-red-600 underline hover:text-red-800"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assets loading error fallback */}
+      {assetsError && (
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  Impossible de charger les assets. Vous pouvez continuer sans assets ou 
+                  <button className="ml-1 underline hover:text-yellow-900" onClick={() => window.location.reload()}>
+                    recharger la page
+                  </button>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       <VideoTimelineEditor
         templateTitle={template.title}

@@ -46,14 +46,14 @@ export default function ContentLibraryPage() {
   const fetchVideos = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/videos', {
+      const response = await fetch('/api/assets', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       })
       
       if (!response.ok) {
-        throw new Error('Failed to fetch videos')
+        throw new Error('Failed to fetch assets')
       }
       
       const data = await response.json()
@@ -101,7 +101,7 @@ export default function ContentLibraryPage() {
 
   const handleVideoDelete = async (videoId: string) => {
     try {
-      const response = await fetch(`/api/videos/${videoId}`, {
+      const response = await fetch(`/api/assets/${videoId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

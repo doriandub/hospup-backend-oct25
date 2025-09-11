@@ -1,7 +1,7 @@
 from celery import current_task
 from .worker import celery_app
 from app.core.database import get_db
-from app.models.video import Video
+from app.models.asset import Asset
 from app.models.property import Property
 from app.services.video_conversion_service import video_conversion_service
 from app.services.openai_vision_service import openai_vision_service
@@ -72,7 +72,7 @@ def process_uploaded_video(
         db = SessionLocal()
         
         # Get video record
-        video = db.query(Video).filter(Video.id == video_id).first()
+        video = db.query(Asset).filter(Asset.id == video_id).first()
         if not video:
             raise ValueError(f"Video {video_id} not found")
         

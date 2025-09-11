@@ -11,7 +11,7 @@ from app.core.database import get_sync_db
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.property import Property
-from app.models.video import Video
+from app.models.asset import Asset
 
 logger = logging.getLogger(__name__)
 
@@ -83,9 +83,9 @@ def seed_test_data(
             first_property_id = property_ids[0]
             
             # Check if videos already exist
-            existing_videos = db.query(Video).filter(
-                Video.property_id == first_property_id,
-                Video.user_id == current_user.id
+            existing_videos = db.query(Asset).filter(
+                Asset.property_id == first_property_id,
+                Asset.user_id == current_user.id
             ).count()
             
             if existing_videos == 0:
@@ -96,7 +96,7 @@ def seed_test_data(
                         "status": "ready",
                         "duration": 15,
                         "thumbnail_url": "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=300&fit=crop",
-                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4"
+                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleAsset_640x360_1mb.mp4"
                     },
                     {
                         "title": "Suite luxueuse",
@@ -104,7 +104,7 @@ def seed_test_data(
                         "status": "ready",
                         "duration": 12,
                         "thumbnail_url": "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400&h=300&fit=crop",
-                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_2mb.mp4"
+                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleAsset_640x360_2mb.mp4"
                     },
                     {
                         "title": "Restaurant gastronomique",
@@ -112,7 +112,7 @@ def seed_test_data(
                         "status": "ready",
                         "duration": 18,
                         "thumbnail_url": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop",
-                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_5mb.mp4"
+                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleAsset_640x360_5mb.mp4"
                     },
                     {
                         "title": "Spa et détente",
@@ -120,7 +120,7 @@ def seed_test_data(
                         "status": "ready",
                         "duration": 20,
                         "thumbnail_url": "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=300&fit=crop",
-                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4"
+                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleAsset_640x360_1mb.mp4"
                     },
                     {
                         "title": "Terrasse avec vue",
@@ -128,13 +128,13 @@ def seed_test_data(
                         "status": "ready",
                         "duration": 14,
                         "thumbnail_url": "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=300&fit=crop",
-                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_2mb.mp4"
+                        "file_url": "https://sample-videos.com/zip/10/mp4/SampleAsset_640x360_2mb.mp4"
                     }
                 ]
                 
                 import uuid
                 for video_data in test_videos:
-                    new_video = Video(
+                    new_video = Asset(
                         id=str(uuid.uuid4()),
                         title=video_data["title"],
                         description=video_data["description"],

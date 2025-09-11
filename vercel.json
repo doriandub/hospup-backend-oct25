@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd hospup-frontend && npm run build",
-  "outputDirectory": "hospup-frontend/.next",
-  "installCommand": "cd hospup-frontend && npm install"
-}
