@@ -8,10 +8,9 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import logging
 
-from app.auth.dependencies import get_current_user, get_current_user_sync
-from app.core.database import get_db, get_sync_db
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session  
+from app.auth.dependencies import get_current_user
+from app.core.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession  
 from sqlalchemy import select
 from app.models.user import User
 from app.models.property import Property
@@ -520,32 +519,17 @@ async def generate_video_from_viral_template(
         raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
 
 
-# Alias endpoint for frontend compatibility - USING SYNC AUTH TO FIX 403 ERROR
+# Alias endpoint for frontend compatibility - ASYNC VERSION TO FIX ASYNCIO ERRORS
 @router.post("/aws-generate", response_model=VideoGenerationResponse)
-def aws_generate_video_sync(
+async def aws_generate_video_async(
     request: VideoGenerationRequest,
-    current_user: User = Depends(get_current_user_sync),
-    db: Session = Depends(get_sync_db)
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    AWS video generation alias - SYNC VERSION TO FIX AUTH ISSUES (like /auth/me)
+    AWS video generation alias - ASYNC VERSION TO FIX EVENT LOOP CONFLICTS
     """
-    logger.info(f"🎬 AWS Generate SYNC called for property {request.property_id} by user {current_user.id}")
-    try:
-        # Convert to async for the main function call
-        import asyncio
-        from app.core.database import get_db as get_async_db
-        
-        async def _execute_async():
-            async_db_gen = get_async_db()
-            async_db = await anext(async_db_gen)
-            try:
-                return await generate_video_from_viral_template(request, current_user, async_db)
-            finally:
-                await async_db.close()
-        
-        return asyncio.run(_execute_async())
-        
-    except Exception as e:
-        logger.error(f"❌ Error in aws_generate_video_sync: {str(e)}")
-        raise e
+    logger.info(f"🎬 AWS Generate ASYNC called for property {request.property_id} by user {current_user.id}")
+    
+    # Direct call to the main async function - no event loop conflicts
+    return await generate_video_from_viral_template(request, current_user, db)
