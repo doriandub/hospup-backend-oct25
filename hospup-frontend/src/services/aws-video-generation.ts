@@ -39,7 +39,6 @@ export interface VideoGenerationRequest {
   source_type?: string
   source_data: {
     template_id: string
-    segments: VideoSegment[]
     text_overlays: TextOverlay[]
     total_duration: number
     slot_assignments?: any[]
@@ -77,7 +76,7 @@ export class AWSVideoGenerationService {
   async generateVideo(request: VideoGenerationRequest): Promise<VideoGenerationResponse> {
     try {
       console.log('🚀 Starting AWS video generation:', {
-        segments: request.source_data.segments.length,
+        slot_assignments: request.source_data.slot_assignments?.length || 0,
         texts: request.source_data.text_overlays.length,
         duration: request.source_data.total_duration
       })
@@ -145,35 +144,13 @@ export class AWSVideoGenerationService {
     textOverlays: TextOverlay[],
     contentVideos: any[]
   ): VideoGenerationRequest {
-    // Convertir les slots assignés en segments vidéo
-    const segments: VideoSegment[] = assignments
-      .filter(assignment => assignment.videoId)
-      .map(assignment => {
-        const slot = templateSlots.find(s => s.id === assignment.slotId)
-        const video = contentVideos.find(v => v.id === assignment.videoId)
-        
-        if (!slot || !video) {
-          throw new Error(`Missing slot or video for assignment ${assignment.slotId}`)
-        }
-
-        return {
-          id: assignment.slotId,
-          video_url: video.video_url,
-          start_time: slot.start_time,
-          end_time: slot.end_time, 
-          duration: slot.duration,
-          order: slot.order
-        }
-      })
-      .sort((a, b) => a.order - b.order)
-
-    // Valider les segments
-    if (segments.length === 0) {
+    // Valider les assignments
+    if (assignments.filter(assignment => assignment.videoId).length === 0) {
       throw new Error('No video segments assigned')
     }
 
-    // Calculer la durée totale
-    const totalDuration = segments.reduce((sum, segment) => sum + segment.duration, 0)
+    // Calculer la durée totale à partir des slots
+    const totalDuration = templateSlots.reduce((sum, slot) => sum + slot.duration, 0)
 
     // Convertir segments en slot_assignments selon le format backend
     const slot_assignments = assignments
@@ -190,7 +167,6 @@ export class AWSVideoGenerationService {
       source_type: "viral_template_composer",
       source_data: {
         template_id: '', // À remplir par l'appelant
-        segments,
         text_overlays: textOverlays,
         total_duration: totalDuration,
         slot_assignments,

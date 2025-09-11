@@ -231,7 +231,7 @@ export default function ComposePage() {
       awsRequest.source_data.template_id = templateId
       
       console.log('📊 AWS Generation Request:', {
-        segments: awsRequest.source_data.segments.length,
+        slot_assignments: awsRequest.source_data.slot_assignments?.length || 0,
         texts: awsRequest.source_data.text_overlays.length,
         duration: awsRequest.source_data.total_duration
       })
