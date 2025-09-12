@@ -7,6 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import logging
+import boto3
+import json
+import os
+import asyncio
+from botocore.exceptions import ClientError
+import uuid
 
 from app.auth.dependencies import get_current_user
 from app.core.database import get_db
@@ -482,16 +488,19 @@ async def generate_video_from_viral_template(
         
         # Create a new video record to track the generation
         import uuid
+        # Générer l'UUID du job pour lier avec AWS MediaConvert
+        job_id = str(uuid.uuid4())
+        
         new_video = Video(
             id=str(uuid.uuid4()),
             title=f"Generated from {template_id}",
-            description=f"Video generated from viral template for {property.name}",
+            description=f"Video generated from viral template for {property.name} [JOB:{job_id}]",
             property_id=property_id,  # Already converted to int above
             user_id=current_user.id,
             status='queued',  # Initial status
             duration=custom_script.get('total_duration', 30),
-            file_url='',  # Will be populated after processing
-            thumbnail_url=''  # Will be populated after processing
+            file_url=None,  # Will be populated by webhook after MediaConvert completion
+            thumbnail_url=None  # Will be populated by webhook after MediaConvert completion
         )
         
         db.add(new_video)
@@ -500,16 +509,38 @@ async def generate_video_from_viral_template(
         
         logger.info(f"✅ Video generation queued with ID: {new_video.id}")
         
-        # In a real implementation, this would trigger background video processing
-        # For now, we'll mark it as processing and return success
-        new_video.status = 'processing'
-        await db.commit()
-        
-        return VideoGenerationResponse(
-            video_id=str(new_video.id),
-            status="queued",
-            message="Video generation started successfully"
+        # 🚀 REAL AWS LAMBDA VIDEO GENERATION
+        aws_payload = await prepare_aws_lambda_payload(
+            property_id=property_id,
+            video_id=new_video.id,
+            job_id=job_id,
+            slot_assignments=slot_assignments,
+            text_overlays=text_overlays,
+            custom_script=custom_script,
+            template_id=template_id,
+            db=db
         )
+        
+        try:
+            lambda_result = await invoke_aws_lambda_video_generation(aws_payload)
+            new_video.status = 'processing'
+            await db.commit()
+            
+            return VideoGenerationResponse(
+                video_id=str(new_video.id),
+                status="processing",
+                message="Video generation started on AWS MediaConvert"
+            )
+        except Exception as aws_error:
+            logger.error(f"❌ AWS Lambda invocation failed: {str(aws_error)}")
+            new_video.status = 'failed'
+            await db.commit()
+            
+            return VideoGenerationResponse(
+                video_id=str(new_video.id),
+                status="failed",
+                message=f"AWS video generation failed: {str(aws_error)}"
+            )
         
     except HTTPException as he:
         logger.error(f"❌ HTTPException in video generation: {he.status_code} - {he.detail}")
@@ -533,3 +564,192 @@ async def aws_generate_video_async(
     
     # Direct call to the main async function - no event loop conflicts
     return await generate_video_from_viral_template(request, current_user, db)
+
+
+# 🚀 AWS LAMBDA HELPER FUNCTIONS
+async def prepare_aws_lambda_payload(
+    property_id: str,
+    video_id: str,
+    job_id: str,
+    slot_assignments: List[Dict],
+    text_overlays: List[Dict],
+    custom_script: Dict,
+    template_id: str,
+    db: AsyncSession = None
+) -> Dict:
+    """
+    Transform timeline data into AWS Lambda-compatible format
+    """
+    try:
+        logger.info(f"🔄 Preparing AWS Lambda payload for video {video_id}")
+        
+        segments = []
+        
+        logger.info(f"🔍 PROCESSING CUSTOM SCRIPT - Use clips from frontend like local version")
+        
+        # 🎯 CRITICAL FIX: Use custom_script.clips like the working local version!
+        if custom_script and 'clips' in custom_script:
+            clips = custom_script['clips']
+            logger.info(f"🎬 Found {len(clips)} clips in custom_script (like local version)")
+            
+            for i, clip in enumerate(clips):
+                logger.info(f"🔍 Processing clip {i + 1}: {clip}")
+                
+                # Get video_id from clip (this is how local version works)
+                video_id_from_clip = clip.get("video_id", "")
+                logger.info(f"🔍 Video ID from clip: '{video_id_from_clip}'")
+                
+                video_url = ""
+                if video_id_from_clip and video_id_from_clip != "" and db:
+                    try:
+                        # Fetch asset from database to get file_url
+                        from app.models.asset import Asset
+                        result = await db.execute(select(Asset).filter(Asset.id == video_id_from_clip))
+                        asset = result.scalar_one_or_none()
+                        
+                        if asset and asset.file_url:
+                            video_url = asset.file_url
+                            logger.info(f"✅ FOUND ASSET FILE_URL: '{video_id_from_clip}' -> '{video_url}'")
+                        else:
+                            logger.warning(f"⚠️ Asset not found or no file_url: {video_id_from_clip}")
+                            video_url = clip.get("video_url", "")  # Fallback to clip's video_url
+                    except Exception as e:
+                        logger.error(f"❌ Error fetching asset {video_id_from_clip}: {str(e)}")
+                        video_url = clip.get("video_url", "")  # Fallback to clip's video_url
+                else:
+                    logger.warning(f"⚠️ No video_id in clip or no database session")
+                    video_url = clip.get("video_url", "")
+                
+                # 🎬 Use exact same structure as local version
+                segment_duration = clip.get("duration", 3)
+                logger.info(f"🕒 Clip {i + 1} duration: {segment_duration} seconds (from custom_script)")
+                
+                segment = {
+                    "id": f"segment_{i + 1}",
+                    "video_url": video_url,
+                    "start_time": clip.get("start_time", 0),
+                    "end_time": clip.get("end_time", segment_duration),
+                    "duration": segment_duration,
+                    "order": clip.get("order", i + 1)
+                }
+                logger.info(f"✅ Created segment {i + 1} with duration {segment_duration}s and video_url: '{video_url}'")
+                segments.append(segment)
+        else:
+            logger.error("❌ No custom_script.clips found! Cannot process like local version")
+            # Fallback to old logic if custom_script is missing
+            logger.info(f"🔍 FALLBACK: Processing {len(slot_assignments)} slot assignments")
+            for i, assignment in enumerate(slot_assignments):
+                asset_id = assignment.get("videoId", "")
+                video_url = ""
+                if asset_id and db:
+                    try:
+                        from app.models.asset import Asset
+                        result = await db.execute(select(Asset).filter(Asset.id == asset_id))
+                        asset = result.scalar_one_or_none()
+                        if asset and asset.file_url:
+                            video_url = asset.file_url
+                    except Exception as e:
+                        logger.error(f"❌ Error in fallback: {str(e)}")
+                
+                segment = {
+                    "id": f"segment_{i + 1}",
+                    "video_url": video_url,
+                    "start_time": 0,
+                    "end_time": 3,
+                    "duration": 3,
+                    "order": i + 1
+                }
+                segments.append(segment)
+        
+        logger.info(f"🎯 SEGMENTS READY FOR LAMBDA: {len(segments)} segments with file URLs")
+        
+        payload = {
+            "property_id": property_id,
+            "video_id": video_id,
+            "job_id": job_id,
+            "template_id": template_id,
+            "segments": segments,
+            "text_overlays": [
+                {
+                    "content": text.get("content", ""),
+                    "start_time": text.get("start_time", 0),
+                    "end_time": text.get("end_time", 3),
+                    "position": text.get("position", {"x": 50, "y": 50}),
+                    "style": text.get("style", {"color": "#ffffff", "font_size": 24})
+                } for text in (custom_script.get("texts", []) if custom_script else text_overlays)
+            ],
+            "custom_script": custom_script,
+            "total_duration": sum(s.get("duration", 3) for s in segments) or 30,
+            "webhook_url": f"https://hospup-backend-production.up.railway.app/api/v1/videos/aws-callback"
+        }
+        
+        logger.info(f"✅ AWS payload prepared: {len(segments)} segments, {len(text_overlays)} overlays")
+        return payload
+        
+    except Exception as e:
+        logger.error(f"❌ Error preparing AWS payload: {str(e)}")
+        raise e
+
+
+async def invoke_aws_lambda_video_generation(payload: Dict) -> Dict:
+    """
+    Invoke AWS Lambda function for video generation
+    """
+    try:
+        logger.info(f"🚀 Invoking AWS Lambda for video generation")
+        
+        # Get AWS credentials from environment
+        aws_access_key_id = os.getenv('S3_ACCESS_KEY_ID')
+        aws_secret_access_key = os.getenv('S3_SECRET_ACCESS_KEY')
+        aws_region = os.getenv('S3_REGION', 'eu-west-1')
+        lambda_function_name = os.getenv('AWS_LAMBDA_FUNCTION_NAME', 'hospup-video-generator')
+        
+        if not aws_access_key_id or not aws_secret_access_key:
+            raise ValueError("AWS credentials not found in environment variables")
+        
+        # Create Lambda client
+        lambda_client = boto3.client(
+            'lambda',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=aws_region
+        )
+        
+        # Prepare Lambda event payload
+        lambda_event = {
+            "body": json.dumps(payload),
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }
+        
+        # 🔍 CRITICAL DEBUG: Log payload before Lambda invocation
+        logger.info(f"🔍 LAMBDA PAYLOAD FINAL CHECK - Video URLs in segments:")
+        for i, segment in enumerate(payload.get("segments", [])):
+            logger.info(f"  Segment {i+1}: '{segment.get('video_url', 'MISSING')}'")
+        logger.info(f"🔍 Full Lambda payload JSON: {json.dumps(lambda_event, indent=2)}")
+        
+        # Invoke Lambda function asynchronously
+        response = lambda_client.invoke(
+            FunctionName=lambda_function_name,
+            InvocationType='Event',  # Async invocation
+            Payload=json.dumps(lambda_event)
+        )
+        
+        logger.info(f"✅ AWS Lambda invoked successfully. StatusCode: {response['StatusCode']}")
+        
+        return {
+            "lambda_request_id": response.get('ResponseMetadata', {}).get('RequestId'),
+            "status_code": response['StatusCode'],
+            "message": "AWS Lambda video generation started successfully"
+        }
+        
+    except ClientError as e:
+        error_code = e.response['Error']['Code']
+        error_message = e.response['Error']['Message']
+        logger.error(f"❌ AWS ClientError: {error_code} - {error_message}")
+        raise Exception(f"AWS Lambda invocation failed: {error_code} - {error_message}")
+        
+    except Exception as e:
+        logger.error(f"❌ Error invoking AWS Lambda: {str(e)}")
+        raise Exception(f"AWS Lambda invocation failed: {str(e)}")

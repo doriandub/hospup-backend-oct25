@@ -10,7 +10,6 @@ import { Loader2, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
 import { TextOverlay } from '@/types/text-overlay'
-import { awsVideoService, AWSVideoGenerationService } from '@/services/aws-video-generation'
 
 interface ViralTemplate {
   id: string
@@ -150,11 +149,13 @@ export default function ComposePage() {
 
       let currentTime = 0
       return clips.map((clip: any, index: number) => {
-        const duration = clip.duration || clip.end - clip.start || 3
+        // Use template duration for slot structure (will be overridden by user video choices)
+        const duration = clip.duration || clip.end - clip.start || 2
+        
         const slot: TemplateSlot = {
           id: `slot_${index}`,
           order: clip.order || index + 1,
-          duration,
+          duration: duration,
           description: clip.description || `Slot ${index + 1}`,
           start_time: currentTime,
           end_time: currentTime + duration
@@ -182,14 +183,23 @@ export default function ComposePage() {
         const slot = templateSlots.find(slot => slot.id === assignment.slotId)
         const video = contentVideos.find(video => video.id === assignment.videoId)
         
+        // 🎯 CRITICAL FIX: Use user's video duration, ignore template slot duration
+        // This respects user's video choice and creates proper timing
+        const videoDuration = video?.duration || 0
+        const userDuration = videoDuration > 0 
+          ? Math.min(Math.max(videoDuration, 1.5), 6) // Use video duration: 1.5s min, 6s max
+          : 2.0 // Default 2s if no video duration available
+        
+        console.log(`📊 Segment ${index + 1}: video=${videoDuration}s → using ${userDuration}s (ignoring template)`)
+        
         return {
           order: index + 1,
-          duration: slot?.duration || 3,
+          duration: userDuration,
           description: slot?.description || `Segment ${index + 1}`,
           video_url: video?.video_url || '',
           video_id: video?.id || '',
-          start_time: slot?.start_time || 0,
-          end_time: slot?.end_time || 3
+          start_time: 0, // Reset timing for user composition
+          end_time: userDuration
         }
       })
 
@@ -202,52 +212,63 @@ export default function ComposePage() {
       style: text.style
     }))
 
+    // Calculate real total duration from actual clips generated
+    const realTotalDuration = clips.reduce((sum, clip) => sum + clip.duration, 0)
+    
+    console.log(`🎬 Generated custom script: ${clips.length} clips, total: ${realTotalDuration}s`)
+    
     return {
       clips,
       texts,
-      total_duration: templateSlots.reduce((sum, slot) => sum + slot.duration, 0)
+      total_duration: realTotalDuration
     }
   }
 
   const handleGenerate = async (assignments: any[], textOverlays: any[]) => {
-    if (isGenerating) return // Prevent double-clicks
+    if (isGenerating) return
     
+    console.log('🎬 handleGenerate called with:', { assignments, textOverlays })
+    console.log('📍 Text overlays positions:')
+    textOverlays.forEach((text, i) => {
+      console.log(`   Text ${i+1}: "${text.content}" -> x:${text.position.x}, y:${text.position.y} (${text.position.anchor})`)
+    })
     try {
       setIsGenerating(true)
       setError(null)
       
-      console.log('🚀 Starting AWS video generation...')
+      // Create custom script based on timeline (like working version)
+      const customScript = createScriptFromTimeline(assignments, textOverlays)
+      console.log('📜 Generated custom script:', customScript)
       
-      // Convert timeline data to AWS format
-      const awsRequest = AWSVideoGenerationService.convertTimelineToAWS(
-        templateSlots,
-        assignments,
-        textOverlays,
-        contentVideos
-      )
+      const generationData = {
+        property_id: selectedProperty,
+        source_type: 'viral_template_composer',
+        source_data: {
+          template_id: templateId,
+          slot_assignments: assignments,
+          text_overlays: textOverlays,
+          custom_script: customScript,
+          total_duration: customScript.total_duration,
+          user_input: promptFromUrl || ''
+        },
+        language: 'fr'
+      }
       
-      // Add property and template IDs
-      awsRequest.property_id = selectedProperty
-      awsRequest.source_data.template_id = templateId
+      console.log('📤 Sending generation request:', generationData)
+
+      const response = await api.post('/api/v1/video-generation/aws-generate', generationData)
       
-      console.log('📊 AWS Generation Request:', {
-        slot_assignments: awsRequest.source_data.slot_assignments?.length || 0,
-        texts: awsRequest.source_data.text_overlays.length,
-        duration: awsRequest.source_data.total_duration
-      })
+      const result = response.data
+      console.log('✅ Video generation successful:', result)
       
-      // Launch AWS MediaConvert video generation
-      const result = await awsVideoService.generateVideo(awsRequest)
-      
-      console.log('✅ AWS job created:', result.job_id)
-      console.log('🎬 Video ID:', result.video_id)
-      
-      // Redirect to video preview page to show progress and final result
-      router.push(`/dashboard/videos/${result.video_id}/preview`)
-      
+      if (result.video_id) {
+        router.push(`/dashboard/videos/${result.video_id}/preview`)
+      } else {
+        router.push('/dashboard/videos')
+      }
     } catch (error: any) {
-      console.error('❌ AWS video generation failed:', error)
-      setError(error.message || 'Erreur lors de la génération de la vidéo avec AWS. Veuillez réessayer.')
+      console.error('Error generating video:', error)
+      setError(error.message || 'Erreur lors de la génération de la vidéo')
     } finally {
       setIsGenerating(false)
     }

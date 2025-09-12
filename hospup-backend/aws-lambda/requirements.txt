@@ -1,3 +1,4 @@
-# AWS Lambda Dependencies pour la génération vidéo
+# AWS Lambda Dependencies pour la génération vidéo (test temporaire)
 boto3>=1.26.0
 botocore>=1.29.0
+requests>=2.28.0

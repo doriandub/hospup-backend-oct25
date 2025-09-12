@@ -1,0 +1,1 @@
+{"statusCode": 200, "body": "{\"success\": true, \"video_id\": \"test-ffmpeg\", \"job_id\": \"3dcff627-def9-45c1-ad9a-522cc5e9e8ff\", \"file_url\": \"https://hospup-files.s3.eu-west-1.amazonaws.com/generated-videos/2/test-ffmpeg.mp4\", \"thumbnail_url\": null, \"segments_processed\": 1}"}

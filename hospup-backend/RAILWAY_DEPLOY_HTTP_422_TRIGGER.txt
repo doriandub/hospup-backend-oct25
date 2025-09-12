@@ -1,0 +1,3 @@
+RAILWAY_FORCE_REDEPLOY_HTTP_422_FIX_1757599262
+Trigger Railway deployment to activate HTTP 422 fixes that are already in backend code.
+Backend contains correct code expecting template_id in source_data.template_id but Railway has not deployed the latest version.

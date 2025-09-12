@@ -12,7 +12,7 @@ class Video(Base):
     description = Column(Text)
     
     # File URLs
-    file_url = Column(String, nullable=False)  # Original uploaded file
+    file_url = Column(String, nullable=True)  # Original uploaded file - nullable for generated videos
     thumbnail_url = Column(String)  # Generated thumbnail
     
     # Metadata  

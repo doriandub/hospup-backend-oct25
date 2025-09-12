@@ -1,0 +1,11 @@
+🚀 RAILWAY DEPLOY TRIGGER - Generated Videos Endpoint Fix
+
+Timestamp: 2025-01-11 14:42:00 UTC
+Commit: cce75a0
+
+CRITICAL FIX: Frontend appelle /api/v1/generated-videos/ mais endpoint manque
+- Alias ajouté dans app/api/__init__.py ligne 24
+- Route /generated-videos pointant vers videos_router
+- Nécessaire pour affichage des vidéos générées dans l'interface
+
+Railway doit déployer ce commit pour résoudre "Vidéos introuvables"
