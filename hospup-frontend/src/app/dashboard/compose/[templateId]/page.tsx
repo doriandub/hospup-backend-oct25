@@ -50,6 +50,8 @@ export default function ComposePage() {
   const [selectedProperty, setSelectedProperty] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [currentAssignments, setCurrentAssignments] = useState<any[]>([])
+  const [currentTextOverlays, setCurrentTextOverlays] = useState<any[]>([])
   
   // ✅ Use proper useAssets hook instead of direct API call
   const { 
@@ -225,9 +227,20 @@ export default function ComposePage() {
     }
   }
 
+  const handleTimelineUpdate = (assignments: any[], textOverlays: any[]) => {
+    setCurrentAssignments(assignments)
+    setCurrentTextOverlays(textOverlays)
+  }
+
   const handleGenerate = async (assignments: any[], textOverlays: any[]) => {
+    console.log('🚨🚨🚨 HANDLEGENERATE FUNCTION CALLED! 🚨🚨🚨')
+    console.log('🎬 handleGenerate called with:', { assignments, textOverlays })
+    console.log('📍 Text overlays positions:')
+    textOverlays.forEach((text, i) => {
+      console.log(`   Text ${i+1}: "${text.content}" -> x:${text.position.x}, y:${text.position.y} (${text.position.anchor})`)
+    })
     if (isGenerating) return // Prevent double-clicks
-    
+
     try {
       setIsGenerating(true)
       setError(null)
@@ -348,10 +361,11 @@ export default function ComposePage() {
           }
         }}
         onGenerateTemplate={() => {
-          // Create video functionality
-          if ((window as any).videoTimelineGenerateVideo) {
-            (window as any).videoTimelineGenerateVideo()
-          }
+          // Create video functionality - call handleGenerate with current assignments and text overlays
+          console.log('🔘 Create Video button clicked - calling handleGenerate with current state')
+          console.log('📊 Current assignments:', currentAssignments.length)
+          console.log('📝 Current text overlays:', currentTextOverlays.length)
+          handleGenerate(currentAssignments, currentTextOverlays)
         }}
         isGenerating={isGenerating}
       />
@@ -412,6 +426,7 @@ export default function ComposePage() {
         templateId={templateId}
         onAddText={() => {}}
         onGenerateVideo={() => {}}
+        onTimelineUpdate={handleTimelineUpdate}
       />
     </div>
   )
