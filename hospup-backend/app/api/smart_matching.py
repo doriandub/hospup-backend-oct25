@@ -680,7 +680,7 @@ async def prepare_aws_lambda_payload(
             ],
             "custom_script": custom_script,
             "total_duration": sum(s.get("duration", 3) for s in segments) or 30,
-            "webhook_url": f"https://hospup-backend-production.up.railway.app/api/v1/videos/aws-callback"
+            "webhook_url": f"https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
         }
         
         logger.info(f"✅ AWS payload prepared: {len(segments)} segments, {len(text_overlays)} overlays")

@@ -10,6 +10,7 @@ import { Loader2, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
 import { TextOverlay } from '@/types/text-overlay'
+import { awsVideoService, AWSVideoGenerationService } from '@/services/aws-video-generation'
 
 interface ViralTemplate {
   id: string
@@ -225,50 +226,44 @@ export default function ComposePage() {
   }
 
   const handleGenerate = async (assignments: any[], textOverlays: any[]) => {
-    if (isGenerating) return
+    if (isGenerating) return // Prevent double-clicks
     
-    console.log('🎬 handleGenerate called with:', { assignments, textOverlays })
-    console.log('📍 Text overlays positions:')
-    textOverlays.forEach((text, i) => {
-      console.log(`   Text ${i+1}: "${text.content}" -> x:${text.position.x}, y:${text.position.y} (${text.position.anchor})`)
-    })
     try {
       setIsGenerating(true)
       setError(null)
       
-      // Create custom script based on timeline (like working version)
-      const customScript = createScriptFromTimeline(assignments, textOverlays)
-      console.log('📜 Generated custom script:', customScript)
+      console.log('🚀 Starting AWS video generation...')
       
-      const generationData = {
-        property_id: selectedProperty,
-        source_type: 'viral_template_composer',
-        source_data: {
-          template_id: templateId,
-          slot_assignments: assignments,
-          text_overlays: textOverlays,
-          custom_script: customScript,
-          total_duration: customScript.total_duration,
-          user_input: promptFromUrl || ''
-        },
-        language: 'fr'
-      }
+      // Convert timeline data to AWS format
+      const awsRequest = AWSVideoGenerationService.convertTimelineToAWS(
+        templateSlots,
+        assignments,
+        textOverlays,
+        contentVideos
+      )
       
-      console.log('📤 Sending generation request:', generationData)
-
-      const response = await api.post('/api/v1/video-generation/aws-generate', generationData)
+      // Add property and template IDs
+      awsRequest.property_id = selectedProperty
+      awsRequest.source_data.template_id = templateId
       
-      const result = response.data
-      console.log('✅ Video generation successful:', result)
+      console.log('📊 AWS Generation Request:', {
+        slot_assignments: awsRequest.source_data.slot_assignments?.length || 0,
+        texts: awsRequest.source_data.text_overlays.length,
+        duration: awsRequest.source_data.total_duration
+      })
       
-      if (result.video_id) {
-        router.push(`/dashboard/videos/${result.video_id}/preview`)
-      } else {
-        router.push('/dashboard/videos')
-      }
+      // Launch AWS MediaConvert video generation
+      const result = await awsVideoService.generateVideo(awsRequest)
+      
+      console.log('✅ AWS job created:', result.job_id)
+      console.log('🎬 Video ID:', result.video_id)
+      
+      // Redirect to video preview page to show progress and final result
+      router.push(`/dashboard/videos/${result.video_id}/preview`)
+      
     } catch (error: any) {
-      console.error('Error generating video:', error)
-      setError(error.message || 'Erreur lors de la génération de la vidéo')
+      console.error('❌ AWS video generation failed:', error)
+      setError(error.message || 'Erreur lors de la génération de la vidéo avec AWS. Veuillez réessayer.')
     } finally {
       setIsGenerating(false)
     }
