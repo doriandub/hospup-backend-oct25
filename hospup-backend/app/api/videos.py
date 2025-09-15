@@ -39,7 +39,7 @@ class MediaConvertCallback(BaseModel):
     error: Optional[str] = None       # FFmpeg Lambda format
     progress: Optional[int] = None
     processing_time: Optional[str] = None  # FFmpeg Lambda format
-    duration: Optional[int] = None    # FFmpeg Lambda format
+    duration: Optional[float] = None    # FFmpeg Lambda format
     segments_processed: Optional[int] = None  # FFmpeg Lambda format
 
 class VideoUpdateRequest(BaseModel):
@@ -63,16 +63,22 @@ async def aws_mediaconvert_callback(
 
 # Endpoint séparé pour FFmpeg Lambda (pour éviter les conflits de validation)
 class FFmpegCallback(BaseModel):
-    """Schema spécifique pour les callbacks FFmpeg Lambda"""
+    """Schema spécifique pour les callbacks FFmpeg Lambda - version flexible"""
     video_id: str
     job_id: str
     status: str  # COMPLETE, ERROR
     file_url: Optional[str] = None
     thumbnail_url: Optional[str] = None
-    duration: Optional[int] = None
+    duration: Optional[float] = None  # Accept float or int
     processing_time: Optional[str] = None
     segments_processed: Optional[int] = None
     error: Optional[str] = None
+
+    # Extra fields that Lambda might send
+    total_duration: Optional[float] = None  # Fallback if duration not set
+
+    class Config:
+        extra = "ignore"  # Ignore extra fields Lambda might send
 
 @router.post("/ffmpeg-callback") 
 async def aws_ffmpeg_callback(
@@ -83,6 +89,9 @@ async def aws_ffmpeg_callback(
     🔄 Webhook endpoint spécifique pour les callbacks FFmpeg Lambda
     """
     # Convertir en format compatible
+    # Utiliser duration ou total_duration comme fallback
+    final_duration = callback_data.duration or callback_data.total_duration
+
     compat_data = MediaConvertCallback(
         job_id=callback_data.job_id,
         status=callback_data.status,
@@ -90,7 +99,7 @@ async def aws_ffmpeg_callback(
         thumbnail_url=callback_data.thumbnail_url,
         video_id=callback_data.video_id,
         error=callback_data.error,
-        duration=callback_data.duration
+        duration=final_duration
     )
     return await process_video_callback(compat_data, db)
 
@@ -313,6 +322,7 @@ async def get_video(
             "status": video.status,
             "duration": video.duration,
             "file_url": video.file_url,
+            "video_url": video.file_url,  # Frontend compatibility
             "thumbnail_url": video.thumbnail_url,
             "created_at": video.created_at.isoformat() if video.created_at else None,
             "updated_at": video.updated_at.isoformat() if video.updated_at else None
@@ -353,6 +363,7 @@ async def list_user_videos(
                     "status": video.status,
                     "duration": video.duration,
                     "file_url": video.file_url,
+                    "video_url": video.file_url,  # Frontend compatibility
                     "thumbnail_url": video.thumbnail_url,
                     "created_at": video.created_at.isoformat() if video.created_at else None,
                     "updated_at": video.updated_at.isoformat() if video.updated_at else None

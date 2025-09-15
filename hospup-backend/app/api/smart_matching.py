@@ -28,6 +28,8 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Request logging will be handled at app level
+
 class SmartMatchRequest(BaseModel):
     property_id: str
     template_id: str
@@ -447,8 +449,103 @@ def perform_keyword_matching(
                 reasoning="no suitable match found"
             ))
             logger.warning(f"⚠️ No match found for slot '{slot['description']}'")
-    
+
     return assignments
+
+async def create_script_from_timeline(
+    slot_assignments: List[Dict],
+    text_overlays: List[Dict],
+    template_clips: List[Dict],
+    property_id: int,
+    db: AsyncSession
+) -> Dict:
+    """
+    Generate custom script from slot assignments exactly like local system
+    Reproduces the logic from /hospup/src/app/dashboard/compose/[templateId]/page.tsx:191-229
+    """
+
+    # Get videos for this property to match assignments
+    try:
+        videos_result = await db.execute(
+            select(Video).filter(
+                Video.property_id == property_id,
+                Video.status.in_(['uploaded', 'ready', 'completed']),
+                Video.video_type == 'uploaded'
+            )
+        )
+        content_videos = videos_result.scalars().all()
+    except Exception as db_error:
+        logger.error(f"❌ Database error fetching videos for property {property_id}: {str(db_error)}")
+        content_videos = []  # Use empty list as fallback
+
+    logger.info(f"📹 Found {len(content_videos)} content videos for property {property_id}")
+
+    # Create clips from assignments (exact same logic as local system)
+    clips = []
+
+    # Filter and sort assignments by slot order
+    valid_assignments = [a for a in slot_assignments if a.get('videoId')]
+
+    # Sort by template clip order
+    valid_assignments.sort(key=lambda a: next(
+        (i for i, clip in enumerate(template_clips) if clip.get('id') == a.get('slotId')),
+        999
+    ))
+
+    logger.info(f"🎬 Processing {len(valid_assignments)} valid slot assignments")
+
+    for index, assignment in enumerate(valid_assignments):
+        slot_id = assignment.get('slotId')
+        video_id = assignment.get('videoId')
+
+        # Find corresponding template slot
+        template_slot = next((clip for clip in template_clips if clip.get('id') == slot_id), None)
+
+        # Find corresponding video
+        video = next((v for v in content_videos if str(v.id) == str(video_id)), None)
+
+        if template_slot and video:
+            clip = {
+                'order': index + 1,
+                'duration': template_slot.get('duration', 3),  # Use template slot duration!
+                'description': template_slot.get('description', f'Segment {index + 1}'),
+                'video_url': video.file_url or '',
+                'video_id': str(video.id),
+                'start_time': template_slot.get('start', 0),
+                'end_time': template_slot.get('end', template_slot.get('duration', 3))
+            }
+            clips.append(clip)
+
+            logger.info(f"📋 Clip {index+1}: '{clip['description']}' - {clip['duration']}s - {video.title}")
+        else:
+            logger.warning(f"⚠️ Could not create clip for assignment slot:{slot_id} video:{video_id}")
+
+    # Process text overlays (same logic as local system)
+    texts = []
+    for text in text_overlays:
+        processed_text = {
+            'content': text.get('content', ''),
+            'start_time': text.get('start_time', 0),
+            'end_time': text.get('end_time', text.get('start_time', 0) + 3),
+            'position': text.get('position', {'x': 50, 'y': 50}),
+            'style': text.get('style', {'color': '#ffffff', 'font_size': 24})
+        }
+        texts.append(processed_text)
+
+        logger.info(f"📝 Text: '{processed_text['content'][:30]}' at {processed_text['start_time']}-{processed_text['end_time']}s")
+
+    # Calculate total duration from template slots
+    total_duration = sum(clip.get('duration', 3) for clip in template_clips) if template_clips else 30
+
+    custom_script = {
+        'clips': clips,
+        'texts': texts,
+        'total_duration': total_duration
+    }
+
+    logger.info(f"🎯 Custom script created: {len(clips)} clips, {len(texts)} texts, {total_duration}s total")
+
+    return custom_script
 
 @router.post("/generate-from-viral-template", response_model=VideoGenerationResponse)
 async def generate_video_from_viral_template(
@@ -459,41 +556,120 @@ async def generate_video_from_viral_template(
     """
     Generate a video from viral template with slot assignments and text overlays
     """
+    # 🔧 CRITICAL FIX: Add comprehensive error handling to prevent HTTP 500 errors
+    new_video = None
+
     try:
         logger.info(f"🎬 Video generation request from user {current_user.id} for property {request.property_id}")
-        
-        # Validate property ownership
+
+        # Validate property ownership with better error handling
         try:
             property_id = int(request.property_id)
-        except ValueError:
+        except (ValueError, TypeError) as e:
+            logger.error(f"❌ Invalid property_id format: {request.property_id}")
             raise HTTPException(status_code=400, detail="Invalid property_id format")
-        
-        result = await db.execute(select(Property).filter(
-            Property.id == property_id,
-            Property.user_id == current_user.id
-        ))
-        property = result.scalar_one_or_none()
-        
+
+        # 🔧 FIX: Wrap database operations in try-catch to prevent 500 errors
+        try:
+            result = await db.execute(select(Property).filter(
+                Property.id == property_id,
+                Property.user_id == current_user.id
+            ))
+            property = result.scalar_one_or_none()
+        except Exception as db_error:
+            logger.error(f"❌ Database error fetching property: {str(db_error)}")
+            raise HTTPException(status_code=500, detail="Database error while fetching property")
+
         if not property:
+            logger.warning(f"❌ Property {property_id} not found for user {current_user.id}")
             raise HTTPException(status_code=404, detail="Property not found")
-        
-        # Extract source data
+
+        # Extract and validate source data
+        if not request.source_data:
+            logger.error(f"❌ No source_data provided in request")
+            raise HTTPException(status_code=400, detail="Missing source_data in request")
+
         source_data = request.source_data
         template_id = source_data.get('template_id')
         slot_assignments = source_data.get('slot_assignments', [])
         text_overlays = source_data.get('text_overlays', [])
         custom_script = source_data.get('custom_script', {})
-        
+
         logger.info(f"📜 Processing {len(slot_assignments)} slot assignments and {len(text_overlays)} text overlays")
-        
+        logger.info(f"🔍 TEXT OVERLAY DEBUG - Raw text_overlays: {text_overlays}")
+        logger.info(f"🔍 CUSTOM SCRIPT DEBUG - custom_script.texts: {custom_script.get('texts', [])}")
+
+        # Force print to Railway logs
+        print(f"🚨 RAILWAY DEBUG - TEXT OVERLAYS COUNT: {len(text_overlays)}")
+        for i, overlay in enumerate(text_overlays):
+            print(f"🚨 RAILWAY DEBUG - Text {i+1}: '{overlay.get('content', '')}'")
+        print(f"🚨 RAILWAY DEBUG - CUSTOM SCRIPT TEXTS: {custom_script.get('texts', [])}")
+
+        # 🎯 CRITICAL FIX: Use custom_script from frontend if available (frontend already calculated correct durations)
+        logger.info(f"🔍 RECEIVED CUSTOM_SCRIPT DEBUG: {custom_script}")
+        if custom_script and custom_script.get('clips'):
+            logger.info(f"✅ Using custom_script from frontend with {len(custom_script['clips'])} clips (has correct durations)")
+            # Log each clip in detail
+            for i, clip in enumerate(custom_script['clips']):
+                logger.info(f"   📋 Backend received clip {i+1}: duration={clip.get('duration', 'MISSING')}s, video_url='{clip.get('video_url', 'MISSING')}', video_id='{clip.get('video_id', 'MISSING')}'")
+            logger.info(f"   🕒 Backend received total_duration: {custom_script.get('total_duration', 'MISSING')}s")
+        elif slot_assignments and template_id:
+            logger.info(f"🔧 Generating custom script from slot assignments (fallback)")
+
+            # 🔧 FIX: Wrap template lookup in try-catch
+            try:
+                template_result = await db.execute(
+                    select(Template).filter(Template.id == template_id)
+                )
+                template = template_result.scalar_one_or_none()
+            except Exception as db_error:
+                logger.error(f"❌ Database error fetching template: {str(db_error)}")
+                # Don't fail completely, just use original custom_script
+                logger.warning(f"⚠️ Template lookup failed, using original custom_script")
+                template = None
+
+            if template:
+                try:
+                    # Parse template script to get slots with durations
+                    import json
+                    template_script_data = json.loads(template.script)
+                    template_clips = template_script_data.get('clips', [])
+
+                    logger.info(f"📋 Template has {len(template_clips)} clips defined")
+
+                    # Generate custom script exactly like local system
+                    custom_script = await create_script_from_timeline(
+                        slot_assignments=slot_assignments,
+                        text_overlays=text_overlays,
+                        template_clips=template_clips,
+                        property_id=property_id,
+                        db=db
+                    )
+
+                    logger.info(f"✅ Generated custom script: {len(custom_script.get('clips', []))} clips, {len(custom_script.get('texts', []))} texts, {custom_script.get('total_duration', 0)}s total")
+
+                except Exception as e:
+                    logger.error(f"❌ Failed to generate custom script: {str(e)}")
+                    logger.warning(f"⚠️ Falling back to original custom_script from request")
+                    # Use original custom_script from request
+            else:
+                logger.warning(f"⚠️ Template {template_id} not found, using original custom_script")
+        else:
+            logger.info(f"ℹ️ No slot assignments or template_id provided, using original custom_script")
+
+        # Validate that we have a valid custom_script
+        if not custom_script or not custom_script.get('clips'):
+            logger.error(f"❌ No valid custom_script found - cannot generate video")
+            raise HTTPException(status_code=400, detail="No valid video configuration found")
+
         # Create a new video record to track the generation
         import uuid
         # Générer l'UUID du job pour lier avec AWS MediaConvert
         job_id = str(uuid.uuid4())
-        
+
         new_video = Video(
             id=str(uuid.uuid4()),
-            title=f"Generated from {template_id}",
+            title=f"Generated from {template_id}" if template_id else "Generated Video",
             description=f"Video generated from viral template for {property.name} [JOB:{job_id}]",
             property_id=property_id,  # Already converted to int above
             user_id=current_user.id,
@@ -502,53 +678,100 @@ async def generate_video_from_viral_template(
             file_url=None,  # Will be populated by webhook after MediaConvert completion
             thumbnail_url=None  # Will be populated by webhook after MediaConvert completion
         )
-        
-        db.add(new_video)
-        await db.commit()
-        await db.refresh(new_video)
-        
-        logger.info(f"✅ Video generation queued with ID: {new_video.id}")
-        
+
+        # 🔧 FIX: Wrap database operations in try-catch to prevent 500 errors
+        try:
+            db.add(new_video)
+            await db.commit()
+            await db.refresh(new_video)
+            logger.info(f"✅ Video generation queued with ID: {new_video.id}")
+        except Exception as db_error:
+            logger.error(f"❌ Database error creating video record: {str(db_error)}")
+            await db.rollback()  # Rollback the failed transaction
+            raise HTTPException(status_code=500, detail="Database error while creating video record")
+
+        # 🎯 SMART LAMBDA ROUTING: Choose the right service based on content
+        has_text_overlays = bool(text_overlays) or bool(custom_script.get('texts', []))
+        logger.info(f"🔍 LAMBDA ROUTING DECISION:")
+        logger.info(f"  • text_overlays count: {len(text_overlays)}")
+        logger.info(f"  • custom_script.texts count: {len(custom_script.get('texts', []))}")
+        logger.info(f"  • Decision: {'FFmpeg Lambda (text support)' if has_text_overlays else 'MediaConvert Lambda (fast concatenation)'}")
+
         # 🚀 REAL AWS LAMBDA VIDEO GENERATION
-        aws_payload = await prepare_aws_lambda_payload(
-            property_id=property_id,
-            video_id=new_video.id,
-            job_id=job_id,
-            slot_assignments=slot_assignments,
-            text_overlays=text_overlays,
-            custom_script=custom_script,
-            template_id=template_id,
-            db=db
-        )
-        
+        try:
+            aws_payload = await prepare_aws_lambda_payload(
+                property_id=property_id,
+                video_id=new_video.id,
+                job_id=job_id,
+                slot_assignments=slot_assignments,
+                text_overlays=text_overlays,
+                custom_script=custom_script,
+                template_id=template_id,
+                db=db,
+                force_ffmpeg=has_text_overlays  # Force FFmpeg for text overlays
+            )
+        except Exception as payload_error:
+            logger.error(f"❌ Failed to prepare AWS payload: {str(payload_error)}")
+            # Mark video as failed
+            try:
+                new_video.status = 'failed'
+                await db.commit()
+            except:
+                pass
+            raise HTTPException(status_code=500, detail=f"Failed to prepare video generation: {str(payload_error)}")
+
         try:
             lambda_result = await invoke_aws_lambda_video_generation(aws_payload)
-            new_video.status = 'processing'
-            await db.commit()
-            
+
+            # Update video status
+            try:
+                new_video.status = 'processing'
+                await db.commit()
+            except Exception as db_error:
+                logger.error(f"❌ Database error updating video status: {str(db_error)}")
+                # Continue anyway since Lambda was invoked successfully
+
             return VideoGenerationResponse(
                 video_id=str(new_video.id),
                 status="processing",
                 message="Video generation started on AWS MediaConvert"
             )
+
         except Exception as aws_error:
             logger.error(f"❌ AWS Lambda invocation failed: {str(aws_error)}")
-            new_video.status = 'failed'
-            await db.commit()
-            
+
+            # Mark video as failed
+            try:
+                new_video.status = 'failed'
+                await db.commit()
+            except Exception as db_error:
+                logger.error(f"❌ Failed to update video status to failed: {str(db_error)}")
+
             return VideoGenerationResponse(
                 video_id=str(new_video.id),
                 status="failed",
                 message=f"AWS video generation failed: {str(aws_error)}"
             )
-        
+
     except HTTPException as he:
         logger.error(f"❌ HTTPException in video generation: {he.status_code} - {he.detail}")
         raise he
     except Exception as e:
-        logger.error(f"❌ Error in video generation: {str(e)}")
+        logger.error(f"❌ Unexpected error in video generation: {str(e)}")
+        logger.error(f"❌ Full error traceback: ", exc_info=True)
+
+        # Try to mark video as failed if we created one
+        if new_video:
+            try:
+                new_video.status = 'failed'
+                await db.commit()
+            except:
+                pass
+
         raise HTTPException(status_code=500, detail=f"Video generation failed: {str(e)}")
 
+
+# Video generation endpoints
 
 # Alias endpoint for frontend compatibility - ASYNC VERSION TO FIX ASYNCIO ERRORS
 @router.post("/aws-generate", response_model=VideoGenerationResponse)
@@ -575,7 +798,8 @@ async def prepare_aws_lambda_payload(
     text_overlays: List[Dict],
     custom_script: Dict,
     template_id: str,
-    db: AsyncSession = None
+    db: AsyncSession = None,
+    force_ffmpeg: bool = False
 ) -> Dict:
     """
     Transform timeline data into AWS Lambda-compatible format
@@ -606,15 +830,15 @@ async def prepare_aws_lambda_payload(
                         from app.models.asset import Asset
                         result = await db.execute(select(Asset).filter(Asset.id == video_id_from_clip))
                         asset = result.scalar_one_or_none()
-                        
+
                         if asset and asset.file_url:
                             video_url = asset.file_url
                             logger.info(f"✅ FOUND ASSET FILE_URL: '{video_id_from_clip}' -> '{video_url}'")
                         else:
                             logger.warning(f"⚠️ Asset not found or no file_url: {video_id_from_clip}")
                             video_url = clip.get("video_url", "")  # Fallback to clip's video_url
-                    except Exception as e:
-                        logger.error(f"❌ Error fetching asset {video_id_from_clip}: {str(e)}")
+                    except Exception as db_error:
+                        logger.error(f"❌ Database error fetching asset {video_id_from_clip}: {str(db_error)}")
                         video_url = clip.get("video_url", "")  # Fallback to clip's video_url
                 else:
                     logger.warning(f"⚠️ No video_id in clip or no database session")
@@ -648,8 +872,9 @@ async def prepare_aws_lambda_payload(
                         asset = result.scalar_one_or_none()
                         if asset and asset.file_url:
                             video_url = asset.file_url
-                    except Exception as e:
-                        logger.error(f"❌ Error in fallback: {str(e)}")
+                    except Exception as db_error:
+                        logger.error(f"❌ Database error in fallback fetching asset {asset_id}: {str(db_error)}")
+                        video_url = ""  # Fallback to empty URL
                 
                 segment = {
                     "id": f"segment_{i + 1}",
@@ -663,11 +888,12 @@ async def prepare_aws_lambda_payload(
         
         logger.info(f"🎯 SEGMENTS READY FOR LAMBDA: {len(segments)} segments with file URLs")
         
+        # 🔍 CRITICAL FIX: Ensure ALL required fields are present and correctly formatted
         payload = {
-            "property_id": property_id,
-            "video_id": video_id,
-            "job_id": job_id,
-            "template_id": template_id,
+            "property_id": str(property_id),  # Ensure string format
+            "video_id": str(video_id),        # Ensure string format
+            "job_id": str(job_id),            # Ensure string format
+            "template_id": str(template_id),
             "segments": segments,
             "text_overlays": [
                 {
@@ -676,12 +902,40 @@ async def prepare_aws_lambda_payload(
                     "end_time": text.get("end_time", 3),
                     "position": text.get("position", {"x": 50, "y": 50}),
                     "style": text.get("style", {"color": "#ffffff", "font_size": 24})
-                } for text in (custom_script.get("texts", []) if custom_script else text_overlays)
+                } for text in (custom_script.get("texts", []) if custom_script and custom_script.get("texts") else text_overlays)
             ],
-            "custom_script": custom_script,
+            "custom_script": custom_script if custom_script else {},  # Always provide custom_script
             "total_duration": sum(s.get("duration", 3) for s in segments) or 30,
-            "webhook_url": f"https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
+            "webhook_url": f"https://web-production-b52f.up.railway.app/api/v1/videos/{'ffmpeg-callback' if force_ffmpeg else 'aws-callback'}",
+            "force_ffmpeg": force_ffmpeg  # Tell Lambda which processing method to use
         }
+
+        # 🔍 CRITICAL DEBUG: Log all required fields before sending to Lambda
+        logger.info(f"🔍 PAYLOAD VALIDATION CHECK:")
+        logger.info(f"  ✓ property_id: '{payload['property_id']}' (type: {type(payload['property_id'])})")
+        logger.info(f"  ✓ video_id: '{payload['video_id']}' (type: {type(payload['video_id'])})")
+        logger.info(f"  ✓ custom_script present: {payload['custom_script'] is not None}")
+        logger.info(f"  ✓ custom_script clips: {len(payload['custom_script'].get('clips', []))} clips" if payload['custom_script'] else "  ✗ custom_script is None")
+        logger.info(f"  ✓ segments count: {len(payload['segments'])}")
+        logger.info(f"  ✓ text_overlays count: {len(payload['text_overlays'])}")
+        logger.info(f"  ✓ force_ffmpeg: {payload['force_ffmpeg']}")
+        logger.info(f"  ✓ webhook_url: {payload['webhook_url']}")
+
+        print(f"🚨 RAILWAY DEBUG - LAMBDA ROUTING: {'FFmpeg' if force_ffmpeg else 'MediaConvert'}")
+        print(f"🚨 RAILWAY DEBUG - FINAL PAYLOAD TEXT_OVERLAYS: {payload['text_overlays']}")
+        for i, text in enumerate(payload['text_overlays']):
+            logger.info(f"    Text {i+1}: '{text.get('content', '')}' at {text.get('position', {})}")
+            print(f"🚨 RAILWAY DEBUG - Text {i+1} going to Lambda: '{text.get('content', '')}' size: {text.get('style', {}).get('font_size', 'none')}")
+
+        # 🎯 ADDITIONAL VALIDATION: Make sure we have the basic required fields that Lambda expects
+        required_fields = ['property_id', 'video_id', 'custom_script']
+        missing_fields = [field for field in required_fields if not payload.get(field)]
+
+        if missing_fields:
+            logger.error(f"❌ MISSING REQUIRED FIELDS: {missing_fields}")
+            raise ValueError(f"Missing required fields for Lambda: {missing_fields}")
+
+        logger.info(f"✅ All required fields validated - payload ready for Lambda")
         
         logger.info(f"✅ AWS payload prepared: {len(segments)} segments, {len(text_overlays)} overlays")
         return payload
