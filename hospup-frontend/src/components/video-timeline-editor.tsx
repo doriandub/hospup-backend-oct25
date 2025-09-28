@@ -130,7 +130,7 @@ export function VideoTimelineEditor({
       position: { x: 540, y: 960, anchor: 'center' }, // Centre de l'écran en pixels vidéo
       style: {
         font_family: 'Arial',
-        font_size: 60, // Taille normale pour le système InteractiveTextEditor
+        font_size: 80, // Taille normale dans le range 20-200px
         color: '#FFFFFF',
         bold: false,
         italic: false,
@@ -665,13 +665,13 @@ export function VideoTimelineEditor({
                               
                               <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                                  Taille: {selectedText.style.font_size.toFixed(1)}%
+                                  Taille: {selectedText.style.font_size}px
                                 </label>
                                 <input
                                   type="range"
-                                  min="2"
-                                  max="15"
-                                  step="0.5"
+                                  min="20"
+                                  max="200"
+                                  step="5"
                                   value={selectedText.style.font_size}
                                   onChange={(e) => {
                                     const newSize = parseFloat(e.target.value)

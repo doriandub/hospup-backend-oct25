@@ -19,42 +19,7 @@ import {
   AlignRight
 } from 'lucide-react'
 
-export interface TextOverlay {
-  id: string
-  content: string
-  start_time: number
-  end_time: number
-  position: {
-    x: number
-    y: number
-    anchor: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
-  }
-  style: {
-    font_family: string
-    font_size: number
-    color: string
-    shadow: boolean
-    outline: boolean
-    background: boolean
-    bold: boolean
-    italic: boolean
-    opacity: number
-    text_align: 'left' | 'center' | 'right'
-  }
-}
-
-interface VideoSlot {
-  id: string
-  order: number
-  duration: number
-  description: string
-  start_time: number
-  end_time: number
-  assignedVideo?: {
-    title: string
-    thumbnail_url?: string
-  }
-}
+import { TextOverlay, VideoSlot } from '@/types/video'
 
 interface UnifiedTextEditorProps {
   texts: TextOverlay[]
@@ -236,7 +201,7 @@ export function UnifiedTextEditor({
                   left: `${selectedText.position.x}%`,
                   top: `${selectedText.position.y}%`,
                   fontFamily: fonts.find(f => f.id === selectedText.style.font_family)?.display_name || 'Helvetica',
-                  fontSize: `${Math.max(6, selectedText.style.font_size / 4)}px`,
+                  fontSize: `${Math.max(6, selectedText.style.font_size * (12 / 1920))}px`,
                   color: selectedText.style.color,
                   textShadow: selectedText.style.shadow ? '1px 1px 2px rgba(0,0,0,0.8)' : 'none',
                   WebkitTextStroke: selectedText.style.outline ? '0.5px black' : 'none',
@@ -248,7 +213,7 @@ export function UnifiedTextEditor({
                   opacity: selectedText.style.opacity,
                   whiteSpace: 'nowrap',
                   maxWidth: '80%',
-                  textAlign: selectedText.style.text_align || 'center'
+                  textAlign: selectedText.textAlign || 'center'
                 }}
               >
                 {selectedText.content || 'Votre texte'}
@@ -488,25 +453,25 @@ export function UnifiedTextEditor({
               <Label className="text-xs text-gray-600 mb-1 block">Alignement</Label>
               <div className="grid grid-cols-3 gap-1">
                 <ToggleButton
-                  active={selectedText.style.text_align === 'left'}
+                  active={selectedText.textAlign === 'left'}
                   onClick={() => updateText(selectedText.id, {
-                    style: { ...selectedText.style, text_align: 'left' }
+                    textAlign: 'left'
                   })}
                 >
                   <AlignLeft className="w-3 h-3" />
                 </ToggleButton>
                 <ToggleButton
-                  active={selectedText.style.text_align === 'center'}
+                  active={selectedText.textAlign === 'center'}
                   onClick={() => updateText(selectedText.id, {
-                    style: { ...selectedText.style, text_align: 'center' }
+                    textAlign: 'center'
                   })}
                 >
                   <AlignCenter className="w-3 h-3" />
                 </ToggleButton>
                 <ToggleButton
-                  active={selectedText.style.text_align === 'right'}
+                  active={selectedText.textAlign === 'right'}
                   onClick={() => updateText(selectedText.id, {
-                    style: { ...selectedText.style, text_align: 'right' }
+                    textAlign: 'right'
                   })}
                 >
                   <AlignRight className="w-3 h-3" />

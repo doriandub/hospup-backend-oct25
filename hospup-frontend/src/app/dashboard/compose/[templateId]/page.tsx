@@ -425,7 +425,7 @@ export default function ComposePage() {
         propertyId={selectedProperty}
         templateId={templateId}
         onAddText={() => {}}
-        onGenerateVideo={() => {}}
+        onGenerateVideo={() => handleGenerate(currentAssignments, currentTextOverlays)}
         onTimelineUpdate={handleTimelineUpdate}
       />
     </div>

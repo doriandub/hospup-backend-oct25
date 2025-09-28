@@ -23,7 +23,21 @@ import {
   Edit
 } from 'lucide-react'
 
-import { TextOverlay, Font, Color } from '@/types/text-overlay'
+import { TextOverlay } from '@/types/video'
+
+interface Font {
+  id: string
+  name: string
+  display_name: string
+  style: string
+  description: string
+}
+
+interface Color {
+  name: string
+  hex: string
+  description: string
+}
 
 interface VideoSlot {
   id: string
@@ -68,7 +82,7 @@ export function TimelineTextEditor({
 
   const fetchFontsData = async () => {
     try {
-      const response = await fetch('/api/v1/text/fonts')
+      const response = await fetch('https://web-production-93a0d.up.railway.app/api/v1/text/fonts')
       const data = await response.json()
       setFonts(data.fonts || [])
       setColors(data.colors || [])
@@ -85,22 +99,22 @@ export function TimelineTextEditor({
     start_time: 0,
     end_time: Math.min(3, totalDuration),
     position: {
-      x: 540,
-      y: 1536,
+      x: 540,  // Centre horizontal (1080/2)
+      y: 1536, // 80% de 1920 = 1536px
       anchor: 'bottom-center'
     },
     style: {
       font_family: fonts[0]?.id || 'helvetica',
-      font_size: 4.8,
+      font_size: 80, // Taille normale dans le range 20-200px
       color: '#FFFFFF',
       shadow: true,
       outline: false,
       background: false,
       bold: false,
       italic: false,
-      opacity: 1,
-      text_align: 'center' as const
-    }
+      opacity: 1
+    },
+    textAlign: 'center'
   })
 
   const addText = () => {
@@ -167,9 +181,9 @@ export function TimelineTextEditor({
   }
 
   const presetPositions = [
-    { name: 'Haut centre', anchor: 'top-center' as const, x: 540, y: 384 },
-    { name: 'Centre', anchor: 'center' as const, x: 540, y: 960 },
-    { name: 'Bas centre', anchor: 'bottom-center' as const, x: 540, y: 1536 },
+    { name: 'Haut centre', anchor: 'top-center' as const, x: 540, y: 384 },   // 20% de 1920 = 384px
+    { name: 'Centre', anchor: 'center' as const, x: 540, y: 960 },             // 50% de 1920 = 960px
+    { name: 'Bas centre', anchor: 'bottom-center' as const, x: 540, y: 1536 }, // 80% de 1920 = 1536px
   ]
 
   return (
@@ -201,6 +215,7 @@ export function TimelineTextEditor({
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Aperçu rapide des textes */}
         {texts.length > 0 && (
           <div className="space-y-2">
             <Label className="text-sm font-medium">Textes sur la vidéo ({texts.length})</Label>
@@ -222,6 +237,7 @@ export function TimelineTextEditor({
           </div>
         )}
 
+        {/* Liste des textes */}
         <div className="space-y-2">
           <Label className="text-sm font-medium">Textes ({texts.length})</Label>
           {texts.length === 0 ? (
@@ -280,6 +296,7 @@ export function TimelineTextEditor({
           )}
         </div>
 
+        {/* Suggestions */}
         {suggestions.length > 0 && (
           <div className="space-y-2">
             <Label className="text-sm font-medium flex items-center">
@@ -300,6 +317,7 @@ export function TimelineTextEditor({
           </div>
         )}
 
+        {/* Éditeur détaillé du texte sélectionné */}
         {selectedText && (
           <div className="border rounded-lg p-4 bg-gray-50">
             <h3 className="font-medium mb-4 flex items-center">
@@ -381,6 +399,7 @@ export function TimelineTextEditor({
                   <Label className="text-sm mb-2 block">Positions rapides</Label>
                   <div className="flex gap-2 mb-4">
                     {presetPositions.map((preset) => {
+                      // Vérifie si la position actuelle correspond exactement au preset
                       const isActive = selectedText.position.anchor === preset.anchor && 
                                      selectedText.position.x === preset.x && 
                                      selectedText.position.y === preset.y
@@ -408,11 +427,12 @@ export function TimelineTextEditor({
                       value={selectedText.position.x}
                       onChange={(e) => {
                         const newX = parseInt(e.target.value)
+                        // Réinitialise l'anchor quand on ajuste manuellement
                         updateText(selectedText.id, {
                           position: { 
                             ...selectedText.position, 
                             x: newX,
-                            anchor: 'center'
+                            anchor: 'center' // Position neutre quand on ajuste manuellement
                           }
                         })
                       }}
@@ -433,11 +453,12 @@ export function TimelineTextEditor({
                       value={selectedText.position.y}
                       onChange={(e) => {
                         const newY = parseInt(e.target.value)
+                        // Réinitialise l'anchor quand on ajuste manuellement
                         updateText(selectedText.id, {
                           position: { 
                             ...selectedText.position, 
                             y: newY,
-                            anchor: 'center'
+                            anchor: 'center' // Position neutre quand on ajuste manuellement
                           }
                         })
                       }}
@@ -453,6 +474,7 @@ export function TimelineTextEditor({
                   </div>
                 </div>
 
+                {/* Aperçu de position avec simulation vidéo */}
                 <div className="bg-black rounded aspect-[9/16] relative overflow-hidden max-w-32 mx-auto">
                   <div
                     className="absolute transform -translate-x-1/2 -translate-y-1/2"
@@ -508,10 +530,10 @@ export function TimelineTextEditor({
                       type="number"
                       value={selectedText.style.font_size}
                       onChange={(e) => updateText(selectedText.id, {
-                        style: { ...selectedText.style, font_size: parseInt(e.target.value) || 24 }
+                        style: { ...selectedText.style, font_size: parseInt(e.target.value) || 80 }
                       })}
-                      min={12}
-                      max={120}
+                      min={20}
+                      max={200}
                       className="mt-1"
                     />
                   </div>
@@ -587,11 +609,12 @@ export function TimelineTextEditor({
                   </div>
                 </div>
 
+                {/* Aperçu du style */}
                 <div className="bg-gray-900 rounded p-4 text-center">
                   <div
                     style={{
                       fontFamily: fonts.find(f => f.id === selectedText.style.font_family)?.display_name || 'Helvetica',
-                      fontSize: `${Math.max(12, selectedText.style.font_size / 3)}px`,
+                      fontSize: `${Math.max(12, Math.min(selectedText.style.font_size * (16 / 1920), 32))}px`,
                       color: selectedText.style.color,
                       textShadow: selectedText.style.shadow ? '1px 1px 2px rgba(0,0,0,0.8)' : 'none',
                       WebkitTextStroke: selectedText.style.outline ? '0.5px black' : 'none',

@@ -136,7 +136,7 @@ export function CanvasVideoEditorMasterclass({
 
     const x = (text.position.x / 100) * CANVAS_WIDTH
     const y = (text.position.y / 100) * CANVAS_HEIGHT
-    const fontSize = (text.style.font_size / 100) * CANVAS_HEIGHT
+    const fontSize = text.style.font_size * (CANVAS_HEIGHT / 1920)
 
     const fontWeight = text.style.bold ? 'bold' : 'normal'
     const fontStyle = text.style.italic ? 'italic' : 'normal'
@@ -250,7 +250,7 @@ export function CanvasVideoEditorMasterclass({
     visibleTexts.forEach(text => {
       const x = (text.position.x / 100) * CANVAS_WIDTH
       const y = (text.position.y / 100) * CANVAS_HEIGHT
-      const fontSize = (text.style.font_size / 100) * CANVAS_HEIGHT
+      const fontSize = text.style.font_size * (CANVAS_HEIGHT / 1920)
 
       ctx.save()
 
@@ -471,7 +471,7 @@ export function CanvasVideoEditorMasterclass({
       
       const direction = (deltaX + deltaY) > 0 ? 1 : -1
       const scaleFactor = 1 + (direction * deltaDistance / 400) // MOINS sensible (400 au lieu de 200)
-      const newFontSize = Math.max(0.5, Math.min(10, originalText.style.font_size * scaleFactor)) // Limites plus restrictives
+      const newFontSize = Math.max(20, Math.min(200, originalText.style.font_size * scaleFactor)) // Range simple 20-200px
 
       setTextOverlays(textOverlays.map(text => 
         text.id === selectedTextId 
@@ -672,8 +672,8 @@ export function CanvasVideoEditorMasterclass({
       content: original.content + ' Copy',
       position: {
         ...original.position,
-        x: Math.min(90, original.position.x + 5),
-        y: Math.min(90, original.position.y + 5)
+        x: Math.min(1030, original.position.x + 50),
+        y: Math.min(1870, original.position.y + 50)
       }
     }
 

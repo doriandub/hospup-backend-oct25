@@ -1,0 +1,3 @@
+{
+  "body": "{\"property_id\":\"prop456\",\"video_id\":\"video789\",\"job_id\":\"test-restored-123\",\"custom_script\":{\"clips\":[{\"video_url\":\"s3://hospup-files/videos/test/sample1.mp4\"},{\"video_url\":\"s3://hospup-files/videos/test/sample2.mp4\"}]},\"text_overlays\":[{\"content\":\"Test Restored Version\",\"start_time\":1.0,\"end_time\":4.0}],\"webhook_url\":\"https://web-production-b52f.up.railway.app/api/v1/videos/aws-callback\"}"
+}
