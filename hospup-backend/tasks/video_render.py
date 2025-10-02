@@ -41,7 +41,7 @@ def render_video(self, project_id: int, assets_data: dict, template_data: dict):
             for asset_key, asset_info in assets_data.items():
                 temp_asset_path = temp_path / f"asset_{asset_key}"
                 s3_client.download_file(
-                    settings.S3_BUCKET,
+                    settings.bucket_name,
                     asset_info['s3_key'],
                     str(temp_asset_path)
                 )
@@ -70,7 +70,7 @@ def render_video(self, project_id: int, assets_data: dict, template_data: dict):
             output_s3_key = f"renders/{project_id}/{task_id}/video.mp4"
             s3_client.upload_file(
                 str(output_path),
-                settings.S3_BUCKET,
+                settings.bucket_name,
                 output_s3_key
             )
             

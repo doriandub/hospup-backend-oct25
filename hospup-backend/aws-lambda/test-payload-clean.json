@@ -1,3 +1,0 @@
-{
-  "body": "{\"user_id\":\"user123\",\"property_id\":\"prop456\",\"video_id\":\"video789\",\"job_id\":\"test-job-clean-123\",\"custom_script\":{\"clips\":[{\"video_url\":\"s3://hospup-files/videos/test/sample1.mp4\"},{\"video_url\":\"s3://hospup-files/videos/test/sample2.mp4\"}]},\"text_overlays\":[{\"content\":\"Clean Solution Test\",\"start_time\":1.5,\"end_time\":4.5,\"style\":{\"font_family\":\"Arial\",\"font_size\":\"6%\",\"color\":\"#FFFFFF\",\"bold\":true,\"shadow\":true},\"position\":{\"x\":50,\"y\":85,\"anchor\":\"center\"}}],\"webhook_url\":\"https://web-production-b52f.up.railway.app/api/v1/videos/aws-callback\"}"
-}

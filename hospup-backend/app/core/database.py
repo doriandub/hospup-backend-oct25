@@ -13,19 +13,19 @@ logger = structlog.get_logger(__name__)
 raw_db_url = settings.DATABASE_URL
 
 if "pooler.supabase.com" in raw_db_url or True:  # Force Supabase pooler path
-    # Direct Supabase pooler configuration  
+    # Direct Supabase pooler configuration
     # Remove pgbouncer param that causes SQLAlchemy issues
     clean_url = raw_db_url.split('?')[0] if '?' in raw_db_url else raw_db_url
     username = "postgres.vvyhkjwymytnowsiwajm"
     password = ".mvR66vs7YGQXJ%23"  # URL encoded # as %23
     hostname = "aws-1-eu-west-1.pooler.supabase.com"
-    port = 5432  # Session pooler port - use 5432 not 6543 for better compatibility
+    port = 6543  # Transaction pooler port - better for concurrent connections
     database = "postgres"
-    
+
     # Construct clean SQLAlchemy URL
     sqlalchemy_url = f"postgresql+asyncpg://{username}:{password}@{hostname}:{port}/{database}"
-    
-    logger.info("Supabase pooler connection configured", hostname=hostname, port=port)
+
+    logger.info("Supabase transaction pooler connection configured", hostname=hostname, port=port)
 else:
     # Standard URL transformation (fallback)
     sqlalchemy_url = raw_db_url.replace("postgresql://", "postgresql+asyncpg://")
@@ -35,13 +35,16 @@ else:
 engine = create_async_engine(
     sqlalchemy_url,
     echo=False,
-    pool_size=1,  # Minimal pool size for Supabase free tier
-    max_overflow=1,  # Minimal overflow to respect connection limits
+    pool_size=2,  # Conservative pool size for Supabase transaction mode
+    max_overflow=3,  # Conservative overflow
     pool_pre_ping=True,
     pool_recycle=180,  # 3 minutes - faster recycling
-    pool_timeout=10,  # Shorter timeout to fail fast
+    pool_timeout=30,  # Increased timeout for better reliability
+    pool_reset_on_return='rollback',  # Always rollback to clean state
     connect_args={
         "command_timeout": 30,  # Shorter command timeout
+        "prepared_statement_cache_size": 0,  # Disable problematic prepared statements
+        "statement_cache_size": 0,  # Disable statement cache
         "server_settings": {
             "application_name": "hospup_cloud_backend",
             "jit": "off",  # Disable JIT for faster connection
@@ -60,11 +63,11 @@ else:
 sync_engine = create_engine(
     sync_sqlalchemy_url,
     echo=False,
-    pool_size=1,  # Minimal pool size for Supabase cloud limits
-    max_overflow=1,  # Minimal overflow
+    pool_size=2,  # Conservative pool size for Supabase transaction mode
+    max_overflow=3,  # Conservative overflow
     pool_pre_ping=True,
     pool_recycle=180,  # 3 minutes - faster recycling
-    pool_timeout=10  # Shorter timeout to fail fast
+    pool_timeout=30  # Increased timeout for better reliability
 )
 
 # Create session factories

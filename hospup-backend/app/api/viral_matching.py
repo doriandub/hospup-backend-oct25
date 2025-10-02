@@ -50,134 +50,6 @@ class SmartMatchRequest(BaseModel):
 # Supabase-powered viral templates system
 # Templates are now stored in Supabase database and accessed via Template model
 
-@router.get("/viral-templates-debug")
-def debug_viral_templates_processing(current_user: User = Depends(get_current_user_sync)):
-    """Debug endpoint to test individual template processing - SYNCHRONOUS VERSION"""
-    try:
-        from app.core.database import SessionLocal
-        
-        db = SessionLocal()
-        try:
-            # Get first template
-            template = db.query(Template).filter(Template.is_active == True).first()
-            
-            if not template:
-                return {"status": "error", "message": "No templates found"}
-            
-            # Try to process it step by step
-            processing_log = []
-            
-            try:
-                processing_log.append(f"✅ Found template: {template.hotel_name}")
-                
-                # Test script handling
-                script_data = template.script
-                if script_data is None:
-                    script_data = {}
-                processing_log.append(f"✅ Script processed: {type(script_data)}")
-                
-                # Test creating ViralTemplateResponse
-                template_response = ViralTemplateResponse(
-                    id=str(template.id),
-                    title=template.title or f"{template.hotel_name or 'Hotel'} - {template.country or 'Location'}",
-                    description=template.description or f"Viral video from {template.hotel_name or 'Hotel'} in {template.country or 'Location'}",
-                    category=template.category or "hotel",
-                    popularity_score=float(template.popularity_score or 5.0),
-                    total_duration_min=max(15.0, float(template.duration or 30.0) - 5),
-                    total_duration_max=min(60.0, float(template.duration or 30.0) + 10),
-                    tags=template.tags or [],
-                    views=int(template.views or 0),
-                    likes=int(template.likes or 0),
-                    comments=int(template.comments or 0),
-                    followers=int(template.followers or 0),
-                    username=template.username,
-                    video_link=template.video_link,
-                    audio_url=template.audio,
-                    script=script_data,
-                    duration=float(template.duration) if template.duration else None,
-                    country=template.country,
-                    hotel_name=template.hotel_name
-                )
-                processing_log.append("✅ ViralTemplateResponse created successfully")
-                
-                return {
-                    "status": "success",
-                    "processing_log": processing_log,
-                    "template": template_response.dict()
-                }
-                
-            except Exception as processing_error:
-                processing_log.append(f"❌ Processing error: {str(processing_error)}")
-                return {
-                    "status": "error", 
-                    "processing_log": processing_log,
-                    "error": str(processing_error),
-                    "raw_template_data": {
-                        "id": str(template.id),
-                        "hotel_name": template.hotel_name,
-                        "title": template.title,
-                        "category": template.category,
-                        "views": template.views,
-                        "likes": template.likes,
-                        "tags": template.tags,
-                        "duration": template.duration
-                    }
-                }
-            
-        finally:
-            db.close()
-            
-    except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e)
-        }
-
-@router.get("/viral-templates-test")
-def list_viral_templates_test():
-    """Test endpoint without authentication to debug database connection"""
-    try:
-        from app.core.database import SessionLocal
-        
-        db = SessionLocal()
-        try:
-            templates_count = db.query(Template).filter(Template.is_active == True).count()
-            sample_template = db.query(Template).filter(Template.is_active == True).first()
-            
-            # Get full debug info about the first template
-            sample_data = None
-            if sample_template:
-                sample_data = {
-                    "id": str(sample_template.id),
-                    "hotel_name": sample_template.hotel_name,
-                    "country": sample_template.country,
-                    "title": sample_template.title,
-                    "category": sample_template.category,
-                    "views": sample_template.views,
-                    "likes": sample_template.likes,
-                    "comments": sample_template.comments,
-                    "followers": sample_template.followers,
-                    "duration": sample_template.duration,
-                    "popularity_score": sample_template.popularity_score,
-                    "is_active": sample_template.is_active,
-                    "script": sample_template.script,
-                    "tags": sample_template.tags
-                }
-            
-            return {
-                "status": "success",
-                "templates_count": templates_count,
-                "sample_template": sample_data,
-                "database_connection": "working"
-            }
-        finally:
-            db.close()
-    except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "database_connection": "failed"
-        }
 
 @router.get("/viral-templates")
 def list_viral_templates(
@@ -301,6 +173,10 @@ def get_viral_template(
                     script_data = json.loads(clean_script)
                 except json.JSONDecodeError:
                     script_data = {}
+
+            # Log basic template info
+            if script_data and 'clips' in script_data:
+                logger.info(f"📋 Template {template.hotel_name} has {len(script_data['clips'])} clips")
             
             # Return simple dict without Pydantic model validation
             return {

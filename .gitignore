@@ -40,3 +40,43 @@ next-env.d.ts
 .idea/
 *.swp
 *.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Backup files
+*.bak
+*.backup
+*-old
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# AWS Lambda
+hospup-backend/aws-lambda/package/
+hospup-backend/aws-lambda/*.zip
+hospup-backend/aws-lambda/ffmpeg-*
+*.tar.xz
+*.tar.gz
+
+# Deployment triggers (use git commits instead!)
+*FORCE_DEPLOY*.txt
+*TRIGGER*.txt
+*REDEPLOY*.txt
+
+# Test files (keep in tests/ directory)
+test-*.json
+*-response.json
+response*.json

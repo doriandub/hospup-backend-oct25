@@ -51,7 +51,13 @@ class VideoUpdateRequest(BaseModel):
     status: Optional[str] = None
     duration: Optional[int] = None
 
-@router.post("/aws-callback")  
+@router.post("/test-callback")
+async def test_callback():
+    """Debug endpoint to test if AWS Lambda can reach us"""
+    logger.info("🧪 TEST CALLBACK RECEIVED from AWS Lambda")
+    return {"status": "success", "message": "Callback endpoint reachable"}
+
+@router.post("/aws-callback")
 async def aws_mediaconvert_callback(
     callback_data: MediaConvertCallback,
     db: AsyncSession = Depends(get_db)
@@ -59,6 +65,9 @@ async def aws_mediaconvert_callback(
     """
     🔄 Webhook endpoint pour recevoir les callbacks AWS (MediaConvert + FFmpeg Lambda)
     """
+    # Log tous les callbacks pour debugging
+    logger.info(f"🔄 AWS CALLBACK RECEIVED: job_id={callback_data.job_id}, status={callback_data.status}")
+    logger.info(f"📋 Full callback data: {callback_data.dict()}")
     return await process_video_callback(callback_data, db)
 
 # Endpoint séparé pour FFmpeg Lambda (pour éviter les conflits de validation)
@@ -123,7 +132,7 @@ async def process_video_callback(
         # Trouver la vidéo correspondante
         # On peut utiliser soit video_id (si fourni) soit job_id pour matcher
         video_query = select(Video)
-        
+
         if callback_data.video_id:
             video_query = video_query.where(Video.id == callback_data.video_id)
         else:
@@ -131,14 +140,14 @@ async def process_video_callback(
             video_query = video_query.where(
                 Video.description.contains(callback_data.job_id)
             )
-        
+
         result = await db.execute(video_query)
         video = result.scalar_one_or_none()
-        
+
         if not video:
             logger.warning(f"❌ Video not found for job_id: {callback_data.job_id}")
             raise HTTPException(
-                status_code=404, 
+                status_code=404,
                 detail=f"Video not found for job_id: {callback_data.job_id}"
             )
         
@@ -148,23 +157,23 @@ async def process_video_callback(
         # Traitement selon le statut
         if callback_data.status == "COMPLETE":
             logger.info(f"✅ Video generation completed for video {video.id}")
-            
+
             # Support des deux formats: MediaConvert (output_url) et FFmpeg Lambda (file_url)
             final_file_url = callback_data.file_url or callback_data.output_url
-            
+
             if final_file_url:
                 file_url = final_file_url
-                
+
                 # Convertir s3://bucket/key en URL HTTPS si nécessaire
                 if file_url.startswith("s3://"):
                     bucket_key = file_url.replace("s3://", "").split("/", 1)
                     if len(bucket_key) == 2:
                         bucket, key = bucket_key
-                        file_url = f"https://{bucket}.s3.eu-west-1.amazonaws.com/{key}"
-                
+                        file_url = f"https://s3.eu-west-1.amazonaws.com/{bucket}/{key}"
+
                 updates["file_url"] = file_url
                 logger.info(f"📁 Video file URL: {file_url}")
-            
+
             # Thumbnail URL (des deux formats)
             if callback_data.thumbnail_url:
                 thumbnail_url = callback_data.thumbnail_url
@@ -172,24 +181,24 @@ async def process_video_callback(
                     bucket_key = thumbnail_url.replace("s3://", "").split("/", 1)
                     if len(bucket_key) == 2:
                         bucket, key = bucket_key
-                        thumbnail_url = f"https://{bucket}.s3.eu-west-1.amazonaws.com/{key}"
-                
+                        thumbnail_url = f"https://s3.eu-west-1.amazonaws.com/{bucket}/{key}"
+
                 updates["thumbnail_url"] = thumbnail_url
                 logger.info(f"🖼️ Thumbnail URL: {thumbnail_url}")
-            
+
             # Durée si fournie par FFmpeg Lambda
             if callback_data.duration:
                 updates["duration"] = callback_data.duration
-            
+
             updates["status"] = "completed"
             logger.info(f"✅ Video {video.id} marked as completed with file_url: {updates.get('file_url')}")
-            
+
         elif callback_data.status == "ERROR":
             # Support des deux formats d'erreur
             error_msg = callback_data.error or callback_data.error_message or "Unknown error"
             logger.error(f"❌ Video generation failed for video {video.id}: {error_msg}")
             updates["status"] = "failed"
-            
+
         elif callback_data.status == "PROGRESSING":
             logger.info(f"⏳ MediaConvert job progressing for video {video.id}: {callback_data.progress}%")
             updates["status"] = "processing"
@@ -201,12 +210,12 @@ async def process_video_callback(
                 .where(Video.id == video.id)
                 .values(**updates)
             )
-            
+
             await db.execute(update_stmt)
             await db.commit()
-            
+
             logger.info(f"✅ Video {video.id} updated: {updates}")
-        
+
         return {
             "status": "success",
             "video_id": video.id,

@@ -13,9 +13,9 @@ import tempfile
 import os
 import subprocess
 import json
-import boto3
 from datetime import datetime
 import structlog
+from app.infrastructure.storage.s3_service import S3StorageService
 
 logger = structlog.get_logger(__name__)
 
@@ -36,15 +36,6 @@ def update_task_progress(stage: str, progress: int, video_id: str):
         pass
 
 
-def get_s3_client():
-    """Get configured S3 client"""
-    return boto3.client(
-        's3',
-        aws_access_key_id=settings.S3_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
-        region_name=settings.S3_REGION,
-        endpoint_url=f"https://s3.{settings.S3_REGION}.amazonaws.com"
-    )
 
 
 @celery_app.task(bind=True, name="process_uploaded_video")
@@ -89,10 +80,12 @@ def process_uploaded_video(
         
         # Step 1: Download original video from S3
         logger.info("📥 Downloading original video from S3...")
-        s3_client = get_s3_client()
-        
+        s3_service = S3StorageService()
+
         try:
-            s3_client.download_file(settings.S3_BUCKET, s3_key, original_path)
+            file_content = s3_service.download_file_sync(s3_key)
+            with open(original_path, 'wb') as f:
+                f.write(file_content)
         except Exception as e:
             raise Exception(f"Failed to download video from S3: {e}")
         
@@ -118,8 +111,8 @@ def process_uploaded_video(
             update_task_progress("converting", 40, video_id)
             
             # Step 4: Convert video to standard format
-            conversion_result = video_conversion_service.convert_to_standard_format(
-                original_path, 
+            conversion_result = video_conversion_service.convert_video_to_standard_format(
+                original_path,
                 converted_path
             )
             
@@ -159,28 +152,30 @@ def process_uploaded_video(
             final_s3_key = f"{base_key}_processed.mp4"
             
             logger.info(f"☁️ Uploading converted video to S3: {final_s3_key}")
-            s3_client.upload_file(
-                final_video_path, 
-                settings.S3_BUCKET, 
-                final_s3_key,
-                ExtraArgs={
-                    'ContentType': 'video/mp4',
-                    'ContentDisposition': 'inline'  # Play in browser instead of download
-                }
+
+            with open(final_video_path, 'rb') as f:
+                file_content = f.read()
+
+            s3_service.upload_file_sync(
+                key=final_s3_key,
+                content=file_content,
+                content_type='video/mp4',
+                metadata={'processed': 'true'}
             )
-            
+
             logger.info("✅ Converted video uploaded to S3")
-            
+
             # Clean up original file to save storage costs
             try:
                 logger.info(f"🗑️ Deleting original file: {s3_key}")
-                s3_client.delete_object(Bucket=settings.S3_BUCKET, Key=s3_key)
+                s3_service.delete_file_sync(s3_key)
                 logger.info("✅ Original file deleted successfully")
             except Exception as e:
                 logger.warning(f"⚠️ Error deleting original file: {e}")
         
         # Step 8: Update video record with processed information
-        video.file_url = f"{settings.STORAGE_PUBLIC_BASE}/{final_s3_key}"
+        # Generate the public URL based on S3 structure
+        video.file_url = f"https://s3.{settings.S3_REGION}.amazonaws.com/{settings.S3_BUCKET}/{final_s3_key}"
         video.duration = final_metadata.get("duration")
         video.file_size = final_metadata.get("size", os.path.getsize(final_video_path))
         
@@ -388,20 +383,17 @@ def generate_video_thumbnail(video_path: str, video_id: str, temp_dir: str) -> s
             return None
         
         # Upload thumbnail to S3
-        s3_client = get_s3_client()
+        s3_service = S3StorageService()
         thumbnail_s3_key = f"thumbnails/{video_id}/thumb.jpg"
-        
-        s3_client.upload_file(
-            thumbnail_path, 
-            settings.S3_BUCKET, 
-            thumbnail_s3_key,
-            ExtraArgs={
-                'ContentType': 'image/jpeg'
-                # Note: ACL removed as bucket has ACLs disabled - relying on bucket policy for public access
-            }
+
+        with open(thumbnail_path, 'rb') as f:
+            thumbnail_content = f.read()
+
+        thumbnail_url = s3_service.upload_file_sync(
+            key=thumbnail_s3_key,
+            content=thumbnail_content,
+            content_type='image/jpeg'
         )
-        
-        thumbnail_url = f"{settings.STORAGE_PUBLIC_BASE}/{thumbnail_s3_key}"
         logger.info(f"✅ Thumbnail uploaded: {thumbnail_url}")
         
         return thumbnail_url

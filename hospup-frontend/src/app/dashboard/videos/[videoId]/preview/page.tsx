@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { VideoGenerationNavbar } from '@/components/video-generation/VideoGenerationNavbar'
+import { VideoGenerationHeader } from '@/components/video-generation/VideoGenerationHeader'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -261,7 +261,7 @@ export default function VideoPreviewPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <VideoGenerationNavbar 
+      <VideoGenerationHeader
         currentStep={4}
         propertyId={video.property_id}
         templateId={viralTemplate?.id}

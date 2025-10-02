@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useProperties } from '@/hooks/useProperties'
-import { VideoGenerationNavbar } from '@/components/video-generation/VideoGenerationNavbar'
+import { VideoGenerationHeader } from '@/components/video-generation/VideoGenerationHeader'
 import { api } from '@/lib/api'
-import { 
-  Building2,
+import {
   Plus,
   Loader2
 } from 'lucide-react'
@@ -103,7 +102,9 @@ export default function GenerateVideoPage() {
       <div className="min-h-screen bg-gray-50 font-inter">
         <div className="grid grid-cols-1 gap-3 p-8">
           <div className="text-center py-12">
-            <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <div className="w-16 h-16 bg-[#09725c] text-white rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold">H</span>
+            </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No properties yet</h3>
             <p className="text-gray-600 mb-6">Add your first property to start generating viral videos</p>
             <Link href="/dashboard/properties/new">
@@ -120,12 +121,10 @@ export default function GenerateVideoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-inter">
-      <VideoGenerationNavbar 
+      <VideoGenerationHeader
         currentStep={1}
         propertyId={selectedProperty}
         showGenerationButtons={!!selectedProperty}
-        showRandomTemplate={!!selectedProperty}
-        showGenerateTemplate={!!selectedProperty && !!prompt.trim()}
         onRandomTemplate={handleRandomTemplate}
         onGenerateTemplate={handleGenerateTemplate}
         isGenerating={loading}

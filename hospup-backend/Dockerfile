@@ -1,9 +1,8 @@
 # Production Docker build
 FROM python:3.11-slim as base
 
-# Install system dependencies for video processing and PostgreSQL
+# Install system dependencies for PostgreSQL, compilation, and OpenCV
 RUN apt-get update && apt-get install -y \
-    ffmpeg \
     libpq-dev \
     gcc \
     g++ \
@@ -11,6 +10,14 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     libssl-dev \
     curl \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libfontconfig1 \
+    libxrender1 \
+    libgl1 \
+    libglib2.0-0 \
+    python3-opencv \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user

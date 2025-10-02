@@ -8,14 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { 
-  Type, 
-  Palette, 
-  Wand2, 
-  Plus, 
-  Trash2, 
-  Clock, 
-  Move, 
+import {
+  Type,
+  Palette,
+  Zap,
+  Plus,
+  Trash2,
+  Clock,
+  Move,
   Eye,
   Lightbulb,
   Copy,

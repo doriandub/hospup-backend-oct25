@@ -63,6 +63,7 @@ interface TimelineEditorProps {
   onAddText?: () => void
   onGenerateVideo?: () => void
   onTimelineUpdate?: (assignments: SlotAssignment[], texts: any[]) => void
+  draggedVideo?: ContentVideo | null
 }
 
 export function VideoTimelineEditor({
@@ -74,11 +75,11 @@ export function VideoTimelineEditor({
   templateId,
   onAddText,
   onGenerateVideo,
-  onTimelineUpdate
+  onTimelineUpdate,
+  draggedVideo
 }: TimelineEditorProps) {
   const [assignments, setAssignments] = useState<SlotAssignment[]>([])
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
-  const [draggedVideo, setDraggedVideo] = useState<ContentVideo | null>(null)
   const [textOverlays, setTextOverlays] = useState<TextOverlay[]>([])
   const [dragOverSlot, setDragOverSlot] = useState<string | null>(null)
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null)
@@ -548,8 +549,9 @@ export function VideoTimelineEditor({
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 font-inter">
-      <div className="grid grid-cols-1 gap-3 p-8">
+    <div className="h-full bg-gray-50 font-inter flex flex-col">
+      {/* Main content area with video preview */}
+      <div className="flex-1 flex items-center justify-center p-8">
         
 
         {/* Collapsible Preview Section */}
@@ -832,7 +834,6 @@ export function VideoTimelineEditor({
                           } else {
                             alert(`This video (${draggedVideo.duration}s) is too short for this slot (${slot.duration}s)`)
                           }
-                          setDraggedVideo(null)
                           setDragOverSlot(null)
                         }
                       }}
@@ -984,56 +985,6 @@ export function VideoTimelineEditor({
         </div>
 
 
-        {/* Content Library */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Content Library</h2>
-            <div className="text-sm text-gray-600">{contentVideos.length} video{contentVideos.length !== 1 ? 's' : ''} available</div>
-          </div>
-
-          {contentVideos.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <Video className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-              <p>No videos in your Content Library</p>
-            </div>
-          ) : (
-            <div className="flex space-x-4 overflow-x-auto pb-4">
-              {contentVideos.map((video) => {
-                const isUsed = assignments.some(a => a.videoId === video.id)
-                
-                return (
-                  <div
-                    key={video.id}
-                    className={`flex-shrink-0 w-40 bg-gray-50 rounded-lg p-3 cursor-move hover:bg-gray-100 transition-colors ${
-                      isUsed ? 'opacity-50' : ''
-                    }`}
-                    draggable
-                    onDragStart={() => {
-                      setDraggedVideo(video)
-                    }}
-                    onDragEnd={() => {
-                      setDraggedVideo(null)
-                    }}
-                  >
-                    <img
-                      src={video.thumbnail_url || '/placeholder-video.jpg'}
-                      alt={video.title}
-                      className="w-full h-24 object-cover rounded mb-2"
-                    />
-                    <p className="text-sm font-medium text-gray-900 truncate">{video.title}</p>
-                    <p className="text-xs text-gray-500">{formatTime(video.duration)}</p>
-                    {video.description && (
-                      <p className="text-xs text-gray-400 truncate mt-1">{video.description}</p>
-                    )}
-                    {isUsed && (
-                      <p className="text-xs text-green-600 mt-1">✓ Used</p>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )

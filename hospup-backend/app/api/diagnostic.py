@@ -102,7 +102,7 @@ async def test_s3_connection():
         )
         
         # Test bucket access
-        s3_client.head_bucket(Bucket=settings.S3_BUCKET)
+        s3_client.head_bucket(Bucket=settings.bucket_name)
         
         # Test basic operations
         test_key = "test/connection-test.txt"
@@ -110,7 +110,7 @@ async def test_s3_connection():
         
         # Upload test object
         s3_client.put_object(
-            Bucket=settings.S3_BUCKET,
+            Bucket=settings.bucket_name,
             Key=test_key,
             Body=test_content,
             ContentType="text/plain"
@@ -118,14 +118,14 @@ async def test_s3_connection():
         
         # Delete test object
         s3_client.delete_object(
-            Bucket=settings.S3_BUCKET,
+            Bucket=settings.bucket_name,
             Key=test_key
         )
         
         return {
             "status": "success",
             "message": "S3 connection and bucket access verified",
-            "bucket": settings.S3_BUCKET,
+            "bucket": settings.bucket_name,
             "region": settings.S3_REGION,
             "operations_tested": ["head_bucket", "put_object", "delete_object"]
         }
@@ -159,3 +159,406 @@ def get_s3_error_suggestion(error_code: str) -> str:
         "TokenRefreshRequired": "Token expired. Regenerate AWS credentials."
     }
     return suggestions.get(error_code, "Check AWS credentials and bucket configuration.")
+
+@router.get("/aws-lambda-config")
+async def check_aws_lambda_configuration():
+    """Check if AWS Lambda configuration is properly set up"""
+    import os
+
+    config_status = {
+        "lambda_configuration": {
+            "status": "healthy",
+            "issues": []
+        }
+    }
+
+    # Check required AWS Lambda environment variables
+    required_vars = {
+        "S3_ACCESS_KEY_ID": os.getenv('S3_ACCESS_KEY_ID'),
+        "S3_SECRET_ACCESS_KEY": os.getenv('S3_SECRET_ACCESS_KEY'),
+        "S3_REGION": os.getenv('S3_REGION', 'eu-west-1'),
+        "AWS_LAMBDA_FUNCTION_NAME": os.getenv('AWS_LAMBDA_FUNCTION_NAME', 'hospup-video-generator')
+    }
+
+    missing_vars = []
+    configured_vars = {}
+
+    for var_name, var_value in required_vars.items():
+        if not var_value:
+            missing_vars.append(var_name)
+        else:
+            # Show first 3 and last 3 chars for security
+            if var_name in ["S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY"]:
+                configured_vars[var_name] = f"{var_value[:3]}...{var_value[-3:]}" if len(var_value) > 6 else "***"
+            else:
+                configured_vars[var_name] = var_value
+
+    if missing_vars:
+        config_status["lambda_configuration"]["status"] = "missing_variables"
+        config_status["lambda_configuration"]["issues"] = missing_vars
+        config_status["lambda_configuration"]["missing_count"] = len(missing_vars)
+
+    config_status["lambda_configuration"]["configured_variables"] = configured_vars
+    config_status["lambda_configuration"]["total_required"] = len(required_vars)
+    config_status["lambda_configuration"]["configured_count"] = len(configured_vars)
+
+    return config_status
+
+@router.post("/test-lambda-function")
+async def test_lambda_function():
+    """Test AWS Lambda function invocation"""
+    import os
+    import boto3
+    import json
+    from botocore.exceptions import ClientError
+
+    # Check if variables are available
+    aws_access_key_id = os.getenv('S3_ACCESS_KEY_ID')
+    aws_secret_access_key = os.getenv('S3_SECRET_ACCESS_KEY')
+    aws_region = os.getenv('S3_REGION', 'eu-west-1')
+    lambda_function_name = os.getenv('AWS_LAMBDA_FUNCTION_NAME', 'hospup-video-generator')
+
+    if not aws_access_key_id or not aws_secret_access_key:
+        raise HTTPException(
+            status_code=503,
+            detail="AWS Lambda credentials not configured. Check S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY."
+        )
+
+    try:
+        # Create Lambda client
+        lambda_client = boto3.client(
+            'lambda',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=aws_region
+        )
+
+        # Test payload
+        test_payload = {
+            "body": json.dumps({
+                "property_id": "test",
+                "video_id": "test-video-123",
+                "job_id": "test-job-456",
+                "template_id": "test-template",
+                "segments": [
+                    {
+                        "id": "segment_1",
+                        "video_url": "https://test.com/video.mp4",
+                        "start_time": 0,
+                        "end_time": 3,
+                        "duration": 3,
+                        "order": 1
+                    }
+                ],
+                "text_overlays": [],
+                "total_duration": 3,
+                "webhook_url": "https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
+            }),
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }
+
+        # Check if function exists first
+        try:
+            lambda_client.get_function(FunctionName=lambda_function_name)
+            function_exists = True
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'ResourceNotFoundException':
+                function_exists = False
+            else:
+                raise e
+
+        if not function_exists:
+            return {
+                "status": "error",
+                "error_type": "function_not_found",
+                "message": f"Lambda function '{lambda_function_name}' not found",
+                "function_name": lambda_function_name,
+                "region": aws_region,
+                "suggestion": "Check AWS_LAMBDA_FUNCTION_NAME environment variable and ensure function is deployed"
+            }
+
+        # Try to invoke function (dry run)
+        response = lambda_client.invoke(
+            FunctionName=lambda_function_name,
+            InvocationType='RequestResponse',  # Sync for testing
+            Payload=json.dumps(test_payload)
+        )
+
+        # Parse response
+        response_payload = json.loads(response['Payload'].read())
+
+        return {
+            "status": "success",
+            "message": "AWS Lambda function accessible and invoked successfully",
+            "function_name": lambda_function_name,
+            "region": aws_region,
+            "status_code": response['StatusCode'],
+            "response_payload": response_payload
+        }
+
+    except ClientError as e:
+        error_code = e.response['Error']['Code']
+        error_message = e.response['Error']['Message']
+
+        return {
+            "status": "error",
+            "error_type": "aws_client_error",
+            "error_code": error_code,
+            "message": f"Lambda Error: {error_message}",
+            "function_name": lambda_function_name,
+            "region": aws_region
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "error_type": "unexpected_error",
+            "message": str(e)[:200],
+            "function_name": lambda_function_name
+        }
+
+@router.post("/simulate-video-callback")
+async def simulate_video_callback():
+    """Simulate a successful video generation callback"""
+    import uuid
+    import httpx
+
+    # Create test callback data
+    test_video_id = "test-video-" + str(uuid.uuid4())[:8]
+    test_job_id = "test-job-" + str(uuid.uuid4())[:8]
+
+    callback_data = {
+        "video_id": test_video_id,
+        "job_id": test_job_id,
+        "status": "COMPLETE",
+        "file_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video.mp4",
+        "thumbnail_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-thumbnail.jpg",
+        "duration": 30,
+        "processing_time": "45s",
+        "segments_processed": 3
+    }
+
+    webhook_url = "https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
+
+    try:
+        # First create a test video entry in database to callback to
+        from app.core.database import get_db
+        from app.models.video import Video
+        from sqlalchemy import select
+        from sqlalchemy.ext.asyncio import AsyncSession
+
+        # Get database session
+        async for db in get_db():
+            # Create test video
+            test_video = Video(
+                id=test_video_id,
+                title="Test Video Generation",
+                description=f"Test video for callback verification [JOB:{test_job_id}]",
+                property_id=1,  # Assuming property 1 exists
+                user_id="test-user",
+                status='processing',
+                duration=None,
+                file_url=None,
+                thumbnail_url=None
+            )
+
+            db.add(test_video)
+            await db.commit()
+
+            # Now send callback
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    webhook_url,
+                    json=callback_data,
+                    headers={"Content-Type": "application/json"}
+                )
+
+                return {
+                    "status": "success",
+                    "message": "Test callback sent successfully",
+                    "test_video_id": test_video_id,
+                    "test_job_id": test_job_id,
+                    "callback_data": callback_data,
+                    "webhook_response": {
+                        "status_code": response.status_code,
+                        "response": response.json() if response.status_code == 200 else response.text[:200]
+                    }
+                }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "error_type": "callback_simulation_failed",
+            "message": str(e)[:300]
+        }
+
+@router.post("/test-complete-lambda-payload")
+async def test_complete_lambda_payload():
+    """Test AWS Lambda with a complete realistic payload"""
+    import os
+    import boto3
+    import json
+    from botocore.exceptions import ClientError
+
+    # Check if variables are available
+    aws_access_key_id = os.getenv('S3_ACCESS_KEY_ID')
+    aws_secret_access_key = os.getenv('S3_SECRET_ACCESS_KEY')
+    aws_region = os.getenv('S3_REGION', 'eu-west-1')
+    lambda_function_name = os.getenv('AWS_LAMBDA_FUNCTION_NAME', 'hospup-video-generator')
+
+    if not aws_access_key_id or not aws_secret_access_key:
+        raise HTTPException(
+            status_code=503,
+            detail="AWS Lambda credentials not configured."
+        )
+
+    try:
+        # Create Lambda client
+        lambda_client = boto3.client(
+            'lambda',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=aws_region
+        )
+
+        # Create realistic payload matching local system
+        custom_script = {
+            "clips": [
+                {
+                    "order": 1,
+                    "duration": 5,
+                    "description": "Hotel exterior view",
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-1.mp4",
+                    "video_id": "test-video-1",
+                    "start_time": 0,
+                    "end_time": 5
+                },
+                {
+                    "order": 2,
+                    "duration": 4,
+                    "description": "Room showcase",
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-2.mp4",
+                    "video_id": "test-video-2",
+                    "start_time": 5,
+                    "end_time": 9
+                },
+                {
+                    "order": 3,
+                    "duration": 3,
+                    "description": "Pool area",
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-3.mp4",
+                    "video_id": "test-video-3",
+                    "start_time": 9,
+                    "end_time": 12
+                }
+            ],
+            "texts": [
+                {
+                    "content": "Luxury Hotel",
+                    "start_time": 0,
+                    "end_time": 3,
+                    "position": {"x": 50, "y": 20, "anchor": "top"},
+                    "style": {"color": "#ffffff", "font_size": 32, "font_weight": "bold"}
+                },
+                {
+                    "content": "Book Now!",
+                    "start_time": 9,
+                    "end_time": 12,
+                    "position": {"x": 50, "y": 80, "anchor": "bottom"},
+                    "style": {"color": "#FFD700", "font_size": 24, "font_weight": "bold"}
+                }
+            ],
+            "total_duration": 12
+        }
+
+        # Complete payload exactly like in the backend
+        complete_payload = {
+            "property_id": "1",
+            "video_id": "test-video-complete-123",
+            "job_id": "test-job-complete-456",
+            "template_id": "test-template",
+            "segments": [
+                {
+                    "id": "segment_1",
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-1.mp4",
+                    "start_time": 0,
+                    "end_time": 5,
+                    "duration": 5,
+                    "order": 1
+                },
+                {
+                    "id": "segment_2",
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-2.mp4",
+                    "start_time": 0,
+                    "end_time": 4,
+                    "duration": 4,
+                    "order": 2
+                },
+                {
+                    "id": "segment_3",
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-3.mp4",
+                    "start_time": 0,
+                    "end_time": 3,
+                    "duration": 3,
+                    "order": 3
+                }
+            ],
+            "text_overlays": custom_script["texts"],
+            "custom_script": custom_script,
+            "total_duration": 12,
+            "webhook_url": "https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
+        }
+
+        # Test payload wrapped in API Gateway format
+        test_payload = {
+            "body": json.dumps(complete_payload),
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        }
+
+        # Try to invoke function
+        response = lambda_client.invoke(
+            FunctionName=lambda_function_name,
+            InvocationType='RequestResponse',  # Sync for testing
+            Payload=json.dumps(test_payload)
+        )
+
+        # Parse response
+        response_payload = json.loads(response['Payload'].read())
+
+        return {
+            "status": "success",
+            "message": "AWS Lambda test with complete payload successful",
+            "function_name": lambda_function_name,
+            "region": aws_region,
+            "status_code": response['StatusCode'],
+            "payload_sent": complete_payload,
+            "custom_script_included": "custom_script" in complete_payload,
+            "clips_count": len(custom_script.get("clips", [])),
+            "texts_count": len(custom_script.get("texts", [])),
+            "response_payload": response_payload
+        }
+
+    except ClientError as e:
+        error_code = e.response['Error']['Code']
+        error_message = e.response['Error']['Message']
+
+        return {
+            "status": "error",
+            "error_type": "aws_client_error",
+            "error_code": error_code,
+            "message": f"Lambda Error: {error_message}",
+            "function_name": lambda_function_name,
+            "region": aws_region
+        }
+
+    except Exception as e:
+        return {
+            "status": "error",
+            "error_type": "unexpected_error",
+            "message": str(e)[:200],
+            "function_name": lambda_function_name
+        }

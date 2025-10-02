@@ -17,7 +17,7 @@ import {
   TrendingUp,
   Shuffle
 } from 'lucide-react'
-import { VideoGenerationNavbar } from '@/components/video-generation/VideoGenerationNavbar'
+import { VideoGenerationHeader } from '@/components/video-generation/VideoGenerationHeader'
 import { InstagramEmbed } from '@/components/social/InstagramEmbed'
 import { api } from '@/lib/api'
 
@@ -207,7 +207,7 @@ export default function TemplatePreviewPage({ params }: { params: Promise<{ temp
   if (error || !selectedTemplate) {
     return (
       <div className="min-h-screen bg-gray-50 font-inter">
-        <VideoGenerationNavbar 
+        <VideoGenerationHeader
           currentStep={2}
           propertyId={propertyId || undefined}
           templateId={resolvedParams.templateId}
@@ -245,7 +245,7 @@ export default function TemplatePreviewPage({ params }: { params: Promise<{ temp
 
   return (
     <div className="min-h-screen bg-gray-50 font-inter">
-      <VideoGenerationNavbar 
+      <VideoGenerationHeader
         currentStep={2}
         propertyId={propertyId || undefined}
         templateId={resolvedParams.templateId}

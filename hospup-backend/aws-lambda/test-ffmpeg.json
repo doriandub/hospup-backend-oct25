@@ -1,1 +1,0 @@
-{"body":"{\"property_id\":\"2\",\"video_id\":\"test-ffmpeg\",\"segments\":[{\"video_url\":\"https://hospup-files.s3.eu-west-1.amazonaws.com/videos/3/2/7c8dd82d-06fd-4b1f-8d88-36d011e22db8_processed.mp4\",\"duration\":3,\"order\":1}],\"webhook_url\":\"https://web-production-b52f.up.railway.app/api/v1/videos/aws-callback\"}"}

@@ -23,7 +23,7 @@ class VideoConversionService:
     def __init__(self):
         self.temp_dir = None
     
-    def convert_to_standard_format(
+    def convert_video_to_standard_format(
         self, 
         input_file_path: str, 
         output_file_path: str
@@ -214,6 +214,45 @@ class VideoConversionService:
         except:
             return 0.0
     
+    def needs_video_conversion(self, metadata: Dict[str, Any]) -> Tuple[bool, str]:
+        """
+        Check if video needs conversion to standard format
+
+        Args:
+            metadata: Video metadata from get_video_metadata()
+
+        Returns:
+            Tuple of (needs_conversion, reason)
+        """
+        reasons = []
+
+        # Check resolution
+        width = metadata.get('width', 0)
+        height = metadata.get('height', 0)
+
+        if width != self.TARGET_WIDTH or height != self.TARGET_HEIGHT:
+            reasons.append(f"Resolution {width}x{height} != {self.TARGET_WIDTH}x{self.TARGET_HEIGHT}")
+
+        # Check framerate (allow some tolerance)
+        fps = metadata.get('framerate', 0)
+        if abs(fps - self.TARGET_FRAMERATE) > 2:
+            reasons.append(f"Framerate {fps}fps != {self.TARGET_FRAMERATE}fps")
+
+        # Check video codec
+        video_codec = metadata.get('video_codec', '').lower()
+        if video_codec not in ['h264', 'avc']:
+            reasons.append(f"Codec {video_codec} != H.264")
+
+        # Check audio codec
+        audio_codec = metadata.get('audio_codec', '').lower()
+        if audio_codec not in ['aac']:
+            reasons.append(f"Audio codec {audio_codec} != AAC")
+
+        needs_conversion = len(reasons) > 0
+        reason_str = "; ".join(reasons) if reasons else "Already in standard format"
+
+        return needs_conversion, reason_str
+
     def is_conversion_needed(self, metadata: Dict[str, Any]) -> bool:
         """
         Check if video needs conversion based on current format

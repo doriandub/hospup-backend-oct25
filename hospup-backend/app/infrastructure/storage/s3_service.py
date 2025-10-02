@@ -32,7 +32,7 @@ class S3StorageService:
 
     def __init__(self):
         self._client = None
-        self._bucket_name = settings.bucket_name
+        self._bucket_name = settings.S3_BUCKET
         self._region = settings.S3_REGION
 
         # Validate configuration

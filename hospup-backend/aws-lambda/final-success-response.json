@@ -1,1 +1,0 @@
-{"statusCode": 200, "body": "{\"success\": true, \"video_id\": \"final-success-test\", \"job_id\": \"success-complete-123\", \"mediaconvert_job_id\": \"1758999426132-4rwwn0\", \"predicted_output_url\": \"https://s3.eu-west-1.amazonaws.com/hospup-files/generated-videos/success-complete-123.mp4\", \"message\": \"MediaConvert job submitted successfully with immediate webhook\"}"}

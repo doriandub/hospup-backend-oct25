@@ -42,7 +42,7 @@ def process_asset(self, asset_id: int, s3_key: str, asset_type: str):
             )
             
             original_path = temp_path / "original"
-            s3_client.download_file(settings.S3_BUCKET, s3_key, str(original_path))
+            s3_client.download_file(settings.bucket_name, s3_key, str(original_path))
             
             metadata = {'asset_id': asset_id, 'type': asset_type}
             
@@ -62,7 +62,7 @@ def process_asset(self, asset_id: int, s3_key: str, asset_type: str):
                     
                     # Upload thumbnail
                     thumb_s3_key = f"thumbnails/{asset_id}/thumb.jpg"
-                    s3_client.upload_file(str(thumb_path), settings.S3_BUCKET, thumb_s3_key)
+                    s3_client.upload_file(str(thumb_path), settings.bucket_name, thumb_s3_key)
                     metadata['thumbnail_url'] = validate_and_clean_url(f"{settings.STORAGE_PUBLIC_BASE}/{thumb_s3_key}")
             
             elif asset_type == 'video':
@@ -84,7 +84,7 @@ def process_asset(self, asset_id: int, s3_key: str, asset_type: str):
                     cv2.imwrite(str(thumb_path), frame)
                     
                     thumb_s3_key = f"thumbnails/{asset_id}/thumb.jpg"
-                    s3_client.upload_file(str(thumb_path), settings.S3_BUCKET, thumb_s3_key)
+                    s3_client.upload_file(str(thumb_path), settings.bucket_name, thumb_s3_key)
                     metadata['thumbnail_url'] = validate_and_clean_url(f"{settings.STORAGE_PUBLIC_BASE}/{thumb_s3_key}")
                 
                 cap.release()

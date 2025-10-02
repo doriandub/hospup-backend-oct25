@@ -13,7 +13,7 @@ from typing import Dict, Any
 
 # Configuration
 RAILWAY_CALLBACK_URL = os.environ.get('RAILWAY_CALLBACK_URL', 'https://web-production-b52f.up.railway.app/api/v1/videos/aws-callback')
-S3_BUCKET = os.environ.get('S3_BUCKET', 'hospup-videos')
+S3_BUCKET = os.environ.get('S3_BUCKET_NAME') or os.environ.get('S3_BUCKET', 'hospup-files')
 
 # HTTP client pour callback
 http = urllib3.PoolManager()
@@ -44,17 +44,28 @@ def lambda_handler(event, context):
         job_response = mediaconvert.get_job(Id=job_id)
         job = job_response['Job']
         
+        # Extraire les métadonnées utilisateur du job
+        user_metadata = job.get('UserMetadata', {})
+        user_id = user_metadata.get('user_id')
+        video_id = user_metadata.get('video_id')
+        property_id = user_metadata.get('property_id')
+        job_id_metadata = user_metadata.get('job_id')  # job_id from video generator
+        webhook_url = user_metadata.get('webhook_url')
+
         # Préparer les données du callback
         callback_data = {
             "job_id": job_id,
             "mediaconvert_job_id": job_id,
+            "video_id": video_id,
+            "property_id": property_id,
             "status": status,
-            "progress": progress
+            "progress": progress,
+            "processing_time": datetime.utcnow().isoformat()
         }
         
         # Si le job est terminé avec succès, extraire les URLs
         if status == 'COMPLETE' and 'OutputGroupDetails' in job:
-            output_urls = extract_output_urls(job, job_id)
+            output_urls = extract_output_urls(job, job_id_metadata or job_id, user_id, property_id, video_id)
             callback_data.update(output_urls)
             print(f"✅ Job completed successfully with outputs: {output_urls}")
             
@@ -84,7 +95,7 @@ def lambda_handler(event, context):
         print(f"❌ Error processing MediaConvert callback: {str(e)}")
         return create_error_response(f"Callback processing failed: {str(e)}")
 
-def extract_output_urls(job: Dict[str, Any], job_id: str) -> Dict[str, str]:
+def extract_output_urls(job: Dict[str, Any], filename_job_id: str, user_id: str, property_id: str, video_id: str) -> Dict[str, str]:
     """
     Extraire les URLs des fichiers de sortie du job MediaConvert
     """
@@ -112,13 +123,14 @@ def extract_output_urls(job: Dict[str, Any], job_id: str) -> Dict[str, str]:
                         urls['thumbnail_url'] = convert_s3_to_https_url(s3_path)
                         print(f"🖼️ Thumbnail output: {urls['thumbnail_url']}")
         
-        # Si pas d'URLs trouvées, construire manuellement à partir du job_id
-        if not urls.get('output_url'):
-            # Construction par défaut basée sur la structure S3 attendue
-            expected_key = f"generated-videos/{job_id}.mp4"
-            urls['output_url'] = f"https://{S3_BUCKET}.s3.eu-west-1.amazonaws.com/{expected_key}"
-            print(f"📹 Constructed fallback video URL: {urls['output_url']}")
-            
+        # Si pas d'URLs trouvées, construire manuellement avec le format job_id
+        if not urls.get('output_url') and filename_job_id:
+            # Construction par défaut basée sur la structure S3 attendue - utilise job_id comme filename
+            # Note: NameModifier est maintenant vide, donc pas de suffix
+            expected_key = f"videos/{user_id}/{property_id}/{filename_job_id}.mp4"
+            urls['output_url'] = f"https://s3.eu-west-1.amazonaws.com/{S3_BUCKET}/{expected_key}"
+            print(f"📹 Constructed fallback video URL with job_id: {urls['output_url']}")
+
         return urls
         
     except Exception as e:
@@ -127,21 +139,21 @@ def extract_output_urls(job: Dict[str, Any], job_id: str) -> Dict[str, str]:
 
 def convert_s3_to_https_url(s3_path: str) -> str:
     """
-    Convertir un chemin S3 en URL HTTPS publique
+    Convertir un chemin S3 en URL HTTPS publique - format compatible avec upload system
     """
     if s3_path.startswith('s3://'):
-        # Format: s3://bucket/key -> https://bucket.s3.region.amazonaws.com/key
+        # Format: s3://bucket/key -> https://s3.eu-west-1.amazonaws.com/bucket/key
         path_parts = s3_path.replace('s3://', '').split('/', 1)
         if len(path_parts) == 2:
             bucket, key = path_parts
-            return f"https://{bucket}.s3.eu-west-1.amazonaws.com/{key}"
+            return f"https://s3.eu-west-1.amazonaws.com/{bucket}/{key}"
     
     # Si c'est déjà une URL HTTPS, la retourner telle quelle
     if s3_path.startswith('https://'):
         return s3_path
         
     # Fallback: construire avec le bucket par défaut
-    return f"https://{S3_BUCKET}.s3.eu-west-1.amazonaws.com/{s3_path}"
+    return f"https://s3.eu-west-1.amazonaws.com/{S3_BUCKET}/{s3_path}"
 
 def send_callback_to_railway(callback_data: Dict[str, Any]) -> bool:
     """
@@ -202,8 +214,8 @@ def test_callback(event, context):
         "job_id": "test-job-123",
         "mediaconvert_job_id": "test-mediaconvert-456",
         "status": "COMPLETE",
-        "output_url": "https://hospup-videos.s3.eu-west-1.amazonaws.com/test-video.mp4",
-        "thumbnail_url": "https://hospup-videos.s3.eu-west-1.amazonaws.com/test-thumbnail.jpg"
+        "output_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video.mp4",
+        "thumbnail_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-thumbnail.jpg"
     }
     
     success = send_callback_to_railway(test_data)

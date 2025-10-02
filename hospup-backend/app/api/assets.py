@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc, and_
 import uuid
-import boto3
 from pathlib import Path
 from typing import Optional, List
 from datetime import datetime
@@ -16,6 +15,7 @@ from app.models.asset import Asset
 from app.models.property import Property
 from app.schemas.asset import AssetResponse, AssetList, AssetUpdate
 from app.core.config import settings
+from app.infrastructure.storage.s3_service import S3StorageService
 
 logger = structlog.get_logger(__name__)
 
@@ -29,15 +29,6 @@ def validate_and_clean_url(url: str) -> str:
     return url
 
 
-def get_s3_client():
-    """Get configured S3 client with forced regional endpoint"""
-    return boto3.client(
-        's3',
-        aws_access_key_id=settings.S3_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY,
-        region_name=settings.S3_REGION,
-        endpoint_url=f"https://s3.{settings.S3_REGION}.amazonaws.com"
-    )
 
 
 @router.post("/upload", response_model=AssetResponse)
@@ -89,25 +80,24 @@ async def upload_asset(
         file_extension = Path(file.filename).suffix if file.filename else ('.mp4' if asset_type == 'video' else '.jpg')
         s3_key = f"assets/{current_user.id}/{property_id}/{asset_id}{file_extension}"
         
-        # Upload to S3
-        s3_client = get_s3_client()
+        # Upload to S3 using centralized service
         file_content = await file.read()
-        
-        s3_client.put_object(
-            Bucket=settings.S3_BUCKET,
-            Key=s3_key,
-            Body=file_content,
-            ContentType=file.content_type,
-            Metadata={
+        s3_service = S3StorageService()
+
+        file_url = await s3_service.upload_file(
+            key=s3_key,
+            content=file_content,
+            content_type=file.content_type,
+            metadata={
                 'user_id': str(current_user.id),
                 'property_id': str(property_id),
                 'original_filename': file.filename or '',
                 'asset_type': asset_type
             }
         )
-        
-        # Generate public URL for asset and validate to prevent duplication
-        file_url = validate_and_clean_url(f"{settings.STORAGE_PUBLIC_BASE}/{s3_key}")
+
+        # Clean URL to prevent duplication
+        file_url = validate_and_clean_url(file_url)
         
         # Create asset record
         asset = Asset(
@@ -236,22 +226,16 @@ async def delete_asset(
         )
     
     try:
-        # Delete from S3
-        s3_client = get_s3_client()
+        # Delete from S3 using centralized service
+        s3_service = S3StorageService()
         s3_key = asset.file_url.replace(f"{settings.STORAGE_PUBLIC_BASE}/", "")
-        
-        s3_client.delete_object(
-            Bucket=settings.S3_BUCKET,
-            Key=s3_key
-        )
-        
+
+        await s3_service.delete_file(s3_key)
+
         # Delete thumbnail if exists
         if asset.thumbnail_url:
             thumb_key = asset.thumbnail_url.replace(f"{settings.STORAGE_PUBLIC_BASE}/", "")
-            s3_client.delete_object(
-                Bucket=settings.S3_BUCKET,
-                Key=thumb_key
-            )
+            await s3_service.delete_file(thumb_key)
         
         # Delete from database
         await db.delete(asset)

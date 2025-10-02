@@ -2,15 +2,19 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { VideoTimelineEditor } from '@/components/video-timeline-editor'
-import { VideoGenerationNavbar } from '@/components/video-generation/VideoGenerationNavbar'
+import { VideoTimelineEditor } from '@/components/video-timeline-editor-compact'
+import { VideoGenerationHeader } from '@/components/video-generation/VideoGenerationHeader'
+import { VideoAssetsSidebar } from '@/components/video-assets-sidebar'
+import { TextOverlayEditor } from '@/components/text-overlay-editor'
+import { PreviewVideoPlayer } from '@/components/preview-video-player'
 import { useProperties } from '@/hooks/useProperties'
 import { useAssets } from '@/hooks/useAssets'
-import { Loader2, ArrowLeft } from 'lucide-react'
+import { useSidebar } from '@/contexts/SidebarContext'
+import { Loader2, ArrowLeft, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
 import { TextOverlay } from '@/types/text-overlay'
-import { awsVideoService, AWSVideoGenerationService } from '@/services/aws-video-generation'
+import { SimpleVideoCapture } from '@/services/simple-video-capture-mediaconvert'
 
 interface ViralTemplate {
   id: string
@@ -52,6 +56,21 @@ export default function ComposePage() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [currentAssignments, setCurrentAssignments] = useState<any[]>([])
   const [currentTextOverlays, setCurrentTextOverlays] = useState<any[]>([])
+  const [showTextEditor, setShowTextEditor] = useState<boolean>(false)
+  const [editingTextId, setEditingTextId] = useState<string | null>(null)
+  const [draggedVideo, setDraggedVideo] = useState<ContentVideo | null>(null)
+  const [selectedTextId, setSelectedTextId] = useState<string | null>(null)
+  const [activeTool, setActiveTool] = useState<string | null>(null)
+  const [isTextTabActive, setIsTextTabActive] = useState<boolean>(false)
+  const [showPreview, setShowPreview] = useState<boolean>(false)
+
+  // Undo/Redo system
+  const [history, setHistory] = useState<{
+    assignments: any[]
+    textOverlays: any[]
+  }[]>([])
+  const [historyIndex, setHistoryIndex] = useState<number>(-1)
+  const { toggleSidebar } = useSidebar()
   
   // ✅ Use proper useAssets hook instead of direct API call
   const { 
@@ -75,6 +94,66 @@ export default function ComposePage() {
     description: asset.description || ''
   }))
 
+  // Undo/Redo functions
+  const saveToHistory = () => {
+    const newState = {
+      assignments: [...currentAssignments],
+      textOverlays: [...currentTextOverlays]
+    }
+
+    // Remove any future history if we're not at the end
+    const newHistory = history.slice(0, historyIndex + 1)
+    newHistory.push(newState)
+
+    // Keep only last 50 states to prevent memory issues
+    if (newHistory.length > 50) {
+      newHistory.shift()
+    } else {
+      setHistoryIndex(prev => prev + 1)
+    }
+
+    setHistory(newHistory)
+  }
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const previousState = history[historyIndex - 1]
+      setCurrentAssignments(previousState.assignments)
+      setCurrentTextOverlays(previousState.textOverlays)
+      setHistoryIndex(prev => prev - 1)
+    }
+  }
+
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      const nextState = history[historyIndex + 1]
+      setCurrentAssignments(nextState.assignments)
+      setCurrentTextOverlays(nextState.textOverlays)
+      setHistoryIndex(prev => prev + 1)
+    }
+  }
+
+  const canUndo = historyIndex > 0
+  const canRedo = historyIndex < history.length - 1
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === 'z' && !e.shiftKey) {
+          e.preventDefault()
+          undo()
+        } else if (e.key === 'z' && e.shiftKey) {
+          e.preventDefault()
+          redo()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [canUndo, canRedo])
+
   // Auto-select property from URL parameter
   useEffect(() => {
     if (propertyFromUrl && properties.length > 0) {
@@ -89,6 +168,18 @@ export default function ComposePage() {
   useEffect(() => {
     loadTemplateAndSegments()
   }, [templateId])
+
+  // Initialize history with first state
+  useEffect(() => {
+    if (currentAssignments.length === 0 && currentTextOverlays.length === 0 && history.length === 0) {
+      const initialState = {
+        assignments: [],
+        textOverlays: []
+      }
+      setHistory([initialState])
+      setHistoryIndex(0)
+    }
+  }, [currentAssignments, currentTextOverlays, history])
 
 
   // Auto-match when both templateSlots and contentVideos are loaded
@@ -227,57 +318,171 @@ export default function ComposePage() {
     }
   }
 
+  // Function to snap text timing to slot boundaries
+  const snapTextToSlots = (textOverlay: any) => {
+    if (!templateSlots.length) return textOverlay
+
+    // Calculate slot boundaries
+    const slotBoundaries = [0] // Start with 0
+    let cumulativeTime = 0
+    templateSlots.forEach(slot => {
+      cumulativeTime += slot.duration
+      slotBoundaries.push(cumulativeTime)
+    })
+
+    // Find closest boundaries for start and end times
+    const snapTime = (time: number, tolerance = 0.5) => {
+      for (const boundary of slotBoundaries) {
+        if (Math.abs(time - boundary) <= tolerance) {
+          return boundary
+        }
+      }
+      return time
+    }
+
+    return {
+      ...textOverlay,
+      start_time: snapTime(textOverlay.start_time),
+      end_time: snapTime(textOverlay.end_time)
+    }
+  }
+
   const handleTimelineUpdate = (assignments: any[], textOverlays: any[]) => {
+    // Apply snap to all text overlays
+    const snappedTexts = textOverlays.map(snapTextToSlots)
+
     setCurrentAssignments(assignments)
-    setCurrentTextOverlays(textOverlays)
+    setCurrentTextOverlays(snappedTexts)
+  }
+
+  // Text management functions for the sidebar
+  const handleAddText = () => {
+    // Save current state to history before making changes
+    saveToHistory()
+
+    // Create a new text overlay automatically with first segment duration
+    const firstSegment = templateSlots[0]
+    const duration = firstSegment ? firstSegment.duration : 2
+
+    const newTextOverlay = {
+      id: `text_${Date.now()}`,
+      content: 'Nouveau texte',
+      start_time: 0,
+      end_time: duration,
+      position: { x: 50, y: 50 }, // Center position
+      style: { color: '#ffffff', font_size: 24 }
+    }
+
+    // Apply snap to the new text
+    const snappedText = snapTextToSlots(newTextOverlay)
+    const updatedTexts = [...currentTextOverlays, snappedText]
+    setCurrentTextOverlays(updatedTexts)
+
+    // Don't open modal editor anymore - text editing will be direct on video
+  }
+
+  const handleEditText = (textId: string) => {
+    setEditingTextId(textId)
+    setShowTextEditor(true)
+  }
+
+  const handleDeleteText = (textId: string) => {
+    // Save current state to history before making changes
+    saveToHistory()
+
+    const updatedTexts = currentTextOverlays.filter(text => text.id !== textId)
+    setCurrentTextOverlays(updatedTexts)
+    handleTimelineUpdate(currentAssignments, updatedTexts)
+  }
+
+  const handleUpdateTextOverlay = (textId: string, updates: any) => {
+    // Save current state to history before making changes (for major updates)
+    if (updates.content || updates.position || updates.start_time || updates.end_time) {
+      saveToHistory()
+    }
+
+    const updatedTexts = currentTextOverlays.map(text =>
+      text.id === textId ? { ...text, ...updates } : text
+    )
+    setCurrentTextOverlays(updatedTexts)
+  }
+
+  const handleTextSelect = (textId: string | null) => {
+    setSelectedTextId(textId)
+  }
+
+  const handleToolChange = (tool: string | null) => {
+    setActiveTool(tool)
+
+    // Si un outil est sélectionné, forcer l'ouverture de l'onglet Texte
+    if (tool) {
+      setIsTextTabActive(true)
+    }
+  }
+
+  const handleActiveTabChange = (tab: 'assets' | 'text' | null, isOpen: boolean) => {
+    setIsTextTabActive(tab === 'text' && isOpen)
+  }
+
+  const handleDragStart = (video: ContentVideo) => {
+    setDraggedVideo(video)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedVideo(null)
+  }
+
+  const handleToggleSidebar = () => {
+    toggleSidebar()
+  }
+
+  const handleSaveText = (textOverlay: any) => {
+    let updatedTexts
+    if (editingTextId) {
+      // Edit existing text
+      updatedTexts = currentTextOverlays.map(text =>
+        text.id === editingTextId ? textOverlay : text
+      )
+    } else {
+      // Add new text
+      updatedTexts = [...currentTextOverlays, textOverlay]
+    }
+    setCurrentTextOverlays(updatedTexts)
+    handleTimelineUpdate(currentAssignments, updatedTexts)
+    setShowTextEditor(false)
+    setEditingTextId(null)
+  }
+
+  const handleVideoSelect = (video: any) => {
+    // Sélectionner une vidéo depuis la sidebar pour l'ajouter à la timeline
+    console.log('🎬 Video selected from sidebar:', video.title)
   }
 
   const handleGenerate = async (assignments: any[], textOverlays: any[]) => {
-    console.log('🚨🚨🚨 HANDLEGENERATE FUNCTION CALLED! 🚨🚨🚨')
-    console.log('🎬 handleGenerate called with:', { assignments, textOverlays })
-    console.log('📍 Text overlays positions:')
-    textOverlays.forEach((text, i) => {
-      console.log(`   Text ${i+1}: "${text.content}" -> x:${text.position.x}, y:${text.position.y} (${text.position.anchor})`)
-    })
+    console.log('🎬 Redirecting to video generation page...')
+
     if (isGenerating) return // Prevent double-clicks
 
     try {
       setIsGenerating(true)
-      setError(null)
-      
-      console.log('🚀 Starting AWS video generation...')
-      
-      // Convert timeline data to AWS format
-      const awsRequest = AWSVideoGenerationService.convertTimelineToAWS(
+
+      // Prepare data for the generation page
+      const videoData = {
         templateSlots,
-        assignments,
-        textOverlays,
-        contentVideos
-      )
-      
-      // Add property and template IDs
-      awsRequest.property_id = selectedProperty
-      awsRequest.source_data.template_id = templateId
-      
-      console.log('📊 AWS Generation Request:', {
-        slot_assignments: awsRequest.source_data.slot_assignments?.length || 0,
-        texts: awsRequest.source_data.text_overlays.length,
-        duration: awsRequest.source_data.total_duration
-      })
-      
-      // Launch AWS MediaConvert video generation
-      const result = await awsVideoService.generateVideo(awsRequest)
-      
-      console.log('✅ AWS job created:', result.job_id)
-      console.log('🎬 Video ID:', result.video_id)
-      
-      // Redirect to video preview page to show progress and final result
-      router.push(`/dashboard/videos/${result.video_id}/preview`)
-      
-    } catch (error: any) {
-      console.error('❌ AWS video generation failed:', error)
-      setError(error.message || 'Erreur lors de la génération de la vidéo avec AWS. Veuillez réessayer.')
-    } finally {
+        currentAssignments: assignments,
+        contentVideos,
+        textOverlays
+      }
+
+      // Store data in sessionStorage (avoid URL length limits)
+      const sessionKey = `video-generation-${Date.now()}`
+      sessionStorage.setItem(sessionKey, JSON.stringify(videoData))
+
+      // Redirect to generation page with just the session key
+      router.push(`/dashboard/video-generation?session=${sessionKey}`)
+
+    } catch (error) {
+      console.error('Error preparing video generation:', error)
       setIsGenerating(false)
     }
   }
@@ -349,17 +554,12 @@ export default function ComposePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <VideoGenerationNavbar 
+      <VideoGenerationHeader
         currentStep={3}
         propertyId={selectedProperty}
         templateId={templateId}
         showGenerationButtons={true}
-        onRandomTemplate={() => {
-          // Add text functionality
-          if ((window as any).videoTimelineAddText) {
-            (window as any).videoTimelineAddText()
-          }
-        }}
+        onRandomTemplate={handleAddText}
         onGenerateTemplate={() => {
           // Create video functionality - call handleGenerate with current assignments and text overlays
           console.log('🔘 Create Video button clicked - calling handleGenerate with current state')
@@ -368,6 +568,13 @@ export default function ComposePage() {
           handleGenerate(currentAssignments, currentTextOverlays)
         }}
         isGenerating={isGenerating}
+        onToggleSidebar={handleToggleSidebar}
+        showSidebarToggle={true}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
+        onPreview={() => setShowPreview(true)}
       />
       
       {/* Error display */}
@@ -416,18 +623,95 @@ export default function ComposePage() {
           </div>
         </div>
       )}
-      
-      <VideoTimelineEditor
-        templateTitle={template.title}
-        templateSlots={templateSlots}
-        contentVideos={contentVideos}
-        onGenerate={handleGenerate}
-        propertyId={selectedProperty}
-        templateId={templateId}
-        onAddText={() => {}}
-        onGenerateVideo={() => handleGenerate(currentAssignments, currentTextOverlays)}
-        onTimelineUpdate={handleTimelineUpdate}
+
+      {/* Main editing area with sidebar + timeline */}
+      <div className="flex h-[calc(100vh-120px)]">
+        {/* Assets/Text Sidebar (new vertical sidebar) */}
+        <VideoAssetsSidebar
+          contentVideos={contentVideos}
+          textOverlays={currentTextOverlays}
+          onAddText={handleAddText}
+          onEditText={handleEditText}
+          onDeleteText={handleDeleteText}
+          onVideoSelect={handleVideoSelect}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          draggedVideo={draggedVideo}
+          activeTool={activeTool}
+          onToolChange={handleToolChange}
+          selectedTextId={selectedTextId}
+          onUpdateTextOverlay={handleUpdateTextOverlay}
+          onActiveTabChange={handleActiveTabChange}
+          isTextTabActive={isTextTabActive}
+        />
+
+        {/* Timeline Editor - Main Content */}
+        <div className="flex-1">
+          <VideoTimelineEditor
+            templateTitle={template.title}
+            templateSlots={templateSlots}
+            contentVideos={contentVideos}
+            onGenerate={handleGenerate}
+            propertyId={selectedProperty}
+            templateId={templateId}
+            onAddText={handleAddText}
+            onGenerateVideo={() => handleGenerate(currentAssignments, currentTextOverlays)}
+            onTimelineUpdate={handleTimelineUpdate}
+            draggedVideo={draggedVideo}
+            textOverlays={currentTextOverlays}
+            onUpdateTextOverlay={handleUpdateTextOverlay}
+            onDeleteTextOverlay={handleDeleteText}
+            selectedTextId={selectedTextId}
+            onTextSelect={handleTextSelect}
+            activeTool={activeTool}
+            onToolChange={handleToolChange}
+            isTextTabActive={isTextTabActive}
+          />
+        </div>
+      </div>
+
+      {/* Text Overlay Editor Modal */}
+      <TextOverlayEditor
+        isOpen={showTextEditor}
+        onClose={() => {
+          setShowTextEditor(false)
+          setEditingTextId(null)
+        }}
+        onSave={handleSaveText}
+        editingText={editingTextId ? currentTextOverlays.find(text => text.id === editingTextId) : null}
+        totalDuration={templateSlots.reduce((sum, slot) => sum + slot.duration, 0)}
       />
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center p-8">
+            {/* Close button */}
+            <Button
+              onClick={() => setShowPreview(false)}
+              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white border-white/20 z-10"
+              size="sm"
+              variant="outline"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+
+            {/* Simple Video Preview - Just the vertical video player */}
+            <div className="relative">
+              {/* Video Container - Mobile phone aspect ratio */}
+              <div className="w-[300px] h-[533px] bg-black rounded-xl overflow-hidden shadow-2xl">
+                <PreviewVideoPlayer
+                  templateSlots={templateSlots}
+                  currentAssignments={currentAssignments}
+                  contentVideos={contentVideos}
+                  textOverlays={currentTextOverlays}
+                  showDownloadButton={true}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

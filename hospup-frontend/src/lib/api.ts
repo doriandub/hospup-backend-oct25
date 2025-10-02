@@ -152,7 +152,7 @@ class ApiClient {
 
   // Generated Videos API (for AI-generated video results)
   async getGeneratedVideos(propertyId?: number) {
-    let endpoint = '/api/v1/generated-videos/'
+    let endpoint = '/api/v1/videos/'
     if (propertyId) {
       endpoint += `?property_id=${propertyId}`
     }
@@ -160,11 +160,18 @@ class ApiClient {
   }
 
   async getGeneratedVideo(videoId: string): Promise<any> {
-    return this.request<any>(`/api/v1/generated-videos/${videoId}`, { method: 'GET' })
+    return this.request<any>(`/api/v1/videos/${videoId}`, { method: 'GET' })
   }
 
   async deleteGeneratedVideo(videoId: string) {
-    return this.request(`/api/v1/generated-videos/${videoId}`, { method: 'DELETE' })
+    return this.request(`/api/v1/videos/${videoId}`, { method: 'DELETE' })
+  }
+
+  async createGeneratedVideo(videoData: any) {
+    return this.request('/api/v1/videos/', {
+      method: 'POST',
+      body: JSON.stringify(videoData)
+    })
   }
 
   // Quota methods
