@@ -73,3 +73,58 @@ STORAGE_PUBLIC_BASE=https://hospup-test-uploads.s3-eu-west-1.amazonaws.com
 ## 🚨 Priority: HIGH
 
 This is **blocking all upload functionality** and must be configured before the Assets system can be used.
+
+---
+
+## 🌐 S3 CORS Configuration
+
+### Problem
+Images/videos from S3 bucket may be blocked by CORS policy when accessed from the frontend:
+```
+Access to file at 'https://hospup-files.s3.eu-west-1.amazonaws.com/...'
+from origin 'https://your-frontend.vercel.app' has been blocked by CORS policy
+```
+
+### Solution
+Configure CORS policy on your S3 bucket:
+
+```json
+[
+    {
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["GET", "HEAD", "PUT", "POST"],
+        "AllowedOrigins": [
+            "https://*.vercel.app",
+            "http://localhost:3000",
+            "http://localhost:3001"
+        ],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3000
+    }
+]
+```
+
+### How to Apply CORS Configuration
+
+1. Go to **AWS S3 Console**
+2. Select your bucket (e.g., `hospup-files`)
+3. Go to **Permissions** tab
+4. Scroll down to **Cross-origin resource sharing (CORS)**
+5. Click **Edit**
+6. Paste the JSON configuration above
+7. Click **Save changes**
+
+### Testing CORS
+
+After applying, test by:
+1. Opening your frontend in browser
+2. Uploading a video/image
+3. Check browser console for CORS errors
+4. Verify files load correctly
+
+### Alternative: CloudFront CDN
+
+For better performance and CORS handling, consider using CloudFront:
+- Create CloudFront distribution pointing to S3 bucket
+- Use CloudFront URL in `STORAGE_PUBLIC_BASE`
+- CloudFront handles CORS automatically
