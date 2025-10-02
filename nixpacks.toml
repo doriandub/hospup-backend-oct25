@@ -5,7 +5,7 @@
 nixPkgs = ["python39", "gcc"]
 
 [phases.install]
-cmds = ["cd hospup-backend && pip install -r requirements.txt"]
+cmds = ["cd hospup-backend && python3 -m pip install --upgrade pip", "cd hospup-backend && python3 -m pip install -r requirements.txt"]
 
 [start]
-cmd = "cd hospup-backend && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+cmd = "cd hospup-backend && python3 -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
