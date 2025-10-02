@@ -52,13 +52,14 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Configuration - Restored to working version like before migration  
+# CORS Configuration - Allow all origins for development
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https://.*\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+",
+    allow_origins=["*"],  # Temporary: allow all origins for debugging
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include API routes
