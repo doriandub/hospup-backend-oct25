@@ -45,6 +45,13 @@ class Settings(BaseSettings):
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_POOL_RECYCLE: int = 3600
 
+    # Database connection credentials (used when DATABASE_URL contains pooler)
+    DB_USERNAME: str = ""
+    DB_PASSWORD: str = ""
+    DB_HOSTNAME: str = ""
+    DB_PORT: int = 6543
+    DB_NAME: str = "postgres"
+
     # === CACHE (REDIS) ===
     REDIS_URL: str
     REDIS_MAX_CONNECTIONS: int = 50

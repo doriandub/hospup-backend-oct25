@@ -16,11 +16,13 @@ if "pooler.supabase.com" in raw_db_url or True:  # Force Supabase pooler path
     # Direct Supabase pooler configuration
     # Remove pgbouncer param that causes SQLAlchemy issues
     clean_url = raw_db_url.split('?')[0] if '?' in raw_db_url else raw_db_url
-    username = "postgres.vvyhkjwymytnowsiwajm"
-    password = ".mvR66vs7YGQXJ%23"  # URL encoded # as %23
-    hostname = "aws-1-eu-west-1.pooler.supabase.com"
-    port = 6543  # Transaction pooler port - better for concurrent connections
-    database = "postgres"
+
+    # SECURITY: Use environment variables for credentials
+    username = settings.DB_USERNAME
+    password = settings.DB_PASSWORD
+    hostname = settings.DB_HOSTNAME
+    port = settings.DB_PORT or 6543  # Transaction pooler port
+    database = settings.DB_NAME or "postgres"
 
     # Construct clean SQLAlchemy URL
     sqlalchemy_url = f"postgresql+asyncpg://{username}:{password}@{hostname}:{port}/{database}"
