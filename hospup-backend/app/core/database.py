@@ -17,17 +17,17 @@ if "pooler.supabase.com" in raw_db_url or True:  # Force Supabase pooler path
     # Remove pgbouncer param that causes SQLAlchemy issues
     clean_url = raw_db_url.split('?')[0] if '?' in raw_db_url else raw_db_url
 
-    # SECURITY: Use environment variables for credentials
+    # CLOUD: Use environment variables for credentials (with working defaults)
     username = settings.DB_USERNAME
     password = settings.DB_PASSWORD
     hostname = settings.DB_HOSTNAME
-    port = settings.DB_PORT or 6543  # Transaction pooler port
+    port = settings.DB_PORT or 5432  # Session pooler - works better
     database = settings.DB_NAME or "postgres"
 
     # Construct clean SQLAlchemy URL
     sqlalchemy_url = f"postgresql+asyncpg://{username}:{password}@{hostname}:{port}/{database}"
 
-    logger.info("Supabase transaction pooler connection configured", hostname=hostname, port=port)
+    logger.info("Supabase pooler connection configured", hostname=hostname, port=port)
 else:
     # Standard URL transformation (fallback)
     sqlalchemy_url = raw_db_url.replace("postgresql://", "postgresql+asyncpg://")
@@ -37,12 +37,11 @@ else:
 engine = create_async_engine(
     sqlalchemy_url,
     echo=False,
-    pool_size=2,  # Conservative pool size for Supabase transaction mode
-    max_overflow=3,  # Conservative overflow
+    pool_size=1,  # Minimal pool size - what worked before
+    max_overflow=1,  # Minimal overflow
     pool_pre_ping=True,
     pool_recycle=180,  # 3 minutes - faster recycling
-    pool_timeout=30,  # Increased timeout for better reliability
-    pool_reset_on_return='rollback',  # Always rollback to clean state
+    pool_timeout=10,  # Shorter timeout to fail fast
     connect_args={
         "command_timeout": 30,  # Shorter command timeout
         "prepared_statement_cache_size": 0,  # Disable problematic prepared statements
@@ -63,11 +62,11 @@ else:
 sync_engine = create_engine(
     sync_sqlalchemy_url,
     echo=False,
-    pool_size=2,  # Conservative pool size for Supabase transaction mode
-    max_overflow=3,  # Conservative overflow
+    pool_size=1,  # Minimal pool size - what worked before
+    max_overflow=1,  # Minimal overflow
     pool_pre_ping=True,
     pool_recycle=180,  # 3 minutes - faster recycling
-    pool_timeout=30  # Increased timeout for better reliability
+    pool_timeout=10  # Shorter timeout to fail fast
 )
 
 # Create session factories
