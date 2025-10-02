@@ -5,8 +5,8 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Copy backend files
-COPY hospup-backend/requirements.txt .
-COPY hospup-backend/ .
+COPY requirements.txt .
+COPY . .
 
 # Install system dependencies for compilation + video processing
 RUN apt-get update && apt-get install -y \

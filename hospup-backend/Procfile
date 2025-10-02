@@ -1,3 +1,0 @@
-# Railway deployment processes
-web: ./start.sh
-worker: celery -A tasks.worker worker --concurrency=2 --loglevel=info

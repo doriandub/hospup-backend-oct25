@@ -1,3 +1,0 @@
-{
-  "body": "{\"user_id\": \"3\", \"property_id\": \"2\", \"video_id\": \"test-analysis\", \"job_id\": \"analysis-123\", \"segments\": [{\"id\": \"segment_1\", \"video_url\": \"https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/test.mp4\", \"duration\": 3.0, \"start_time\": 0, \"end_time\": 3.0}], \"custom_script\": {\"clips\": [{\"duration\": 10.5, \"video_url\": \"https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/test.mp4\"}]}, \"text_overlays\": [], \"webhook_url\": \"https://test.com\"}"
-}
