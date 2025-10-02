@@ -15,14 +15,24 @@ class ApiClient {
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
-    
+
     // Get token from localStorage - primary method for cloud deployment
     const storedToken = this.getStoredToken()
-    
+
+    // 🔍 DEBUG: Log request details for Safari troubleshooting
+    console.log('🔍 API Request Debug:', {
+      url,
+      endpoint,
+      method: options.method || 'GET',
+      hasToken: !!storedToken,
+      tokenPreview: storedToken ? `${storedToken.substring(0, 15)}...` : 'none',
+      timestamp: new Date().toISOString()
+    })
+
     const config: RequestInit = {
       headers: {
         // Don't set Content-Type for FormData - let browser handle it
@@ -37,15 +47,30 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config)
-      
+
+      console.log('✅ Fetch succeeded:', {
+        status: response.status,
+        statusText: response.statusText,
+        url,
+        endpoint
+      })
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        
+
+        console.error('❌ HTTP Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          url,
+          endpoint
+        })
+
         // Handle detailed error messages properly
         let errorMessage = `HTTP error! status: ${response.status}`
         if (errorData.detail) {
           if (Array.isArray(errorData.detail)) {
-            errorMessage = errorData.detail.map((err: any) => 
+            errorMessage = errorData.detail.map((err: any) =>
               typeof err === 'object' ? JSON.stringify(err) : err
             ).join(', ')
           } else {
@@ -54,12 +79,20 @@ class ApiClient {
         } else if (errorData.message) {
           errorMessage = errorData.message
         }
-        
+
         throw new Error(errorMessage)
       }
 
       return await response.json()
     } catch (error) {
+      console.error('❌ Fetch Failed:', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        url,
+        endpoint,
+        hasToken: !!storedToken,
+        timestamp: new Date().toISOString()
+      })
       throw error
     }
   }

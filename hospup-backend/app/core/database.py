@@ -51,8 +51,6 @@ engine = create_async_engine(
             "application_name": "hospup_cloud_backend",
             "jit": "off",  # Disable JIT for faster connection
         },
-        # Fix DuplicatePreparedStatementError by disabling prepared statements
-        "prepared_statement_cache_size": 0,
     },
 )
 
