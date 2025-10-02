@@ -1,0 +1,11 @@
+# Nixpacks configuration for monorepo
+# Tells Railway to build from hospup-backend subdirectory
+
+[phases.setup]
+nixPkgs = ["python39", "gcc"]
+
+[phases.install]
+cmds = ["cd hospup-backend && pip install -r requirements.txt"]
+
+[start]
+cmd = "cd hospup-backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"

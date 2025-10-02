@@ -1,12 +1,89 @@
 """
-S3 Configuration Diagnostic Endpoint
+Configuration Diagnostic Endpoints
 """
 from fastapi import APIRouter, HTTPException
 from app.core.config import settings
 import structlog
+import os
 
 logger = structlog.get_logger(__name__)
 router = APIRouter()
+
+@router.get("/db-config")
+async def check_database_configuration():
+    """Check if database configuration is properly set up"""
+
+    config_status = {
+        "database_configuration": {
+            "status": "healthy",
+            "issues": []
+        }
+    }
+
+    # Check database environment variables
+    db_vars = {
+        "DATABASE_URL": os.getenv('DATABASE_URL', None),
+        "DB_USERNAME": os.getenv('DB_USERNAME', None),
+        "DB_PASSWORD": os.getenv('DB_PASSWORD', None),
+        "DB_HOSTNAME": os.getenv('DB_HOSTNAME', None),
+        "DB_PORT": os.getenv('DB_PORT', None),
+        "DB_NAME": os.getenv('DB_NAME', None)
+    }
+
+    missing_vars = []
+    configured_vars = {}
+
+    for var_name, var_value in db_vars.items():
+        if not var_value:
+            missing_vars.append(var_name)
+        else:
+            # Mask sensitive values
+            if var_name in ["DB_PASSWORD", "DATABASE_URL"]:
+                if len(var_value) > 10:
+                    configured_vars[var_name] = f"{var_value[:3]}...{var_value[-3:]}"
+                else:
+                    configured_vars[var_name] = "***"
+            else:
+                configured_vars[var_name] = var_value
+
+    # Check if we're using DATABASE_URL or individual credentials
+    if db_vars["DATABASE_URL"]:
+        config_status["database_configuration"]["mode"] = "DATABASE_URL"
+        config_status["database_configuration"]["note"] = "Using full DATABASE_URL connection string"
+    elif all([db_vars["DB_USERNAME"], db_vars["DB_PASSWORD"], db_vars["DB_HOSTNAME"]]):
+        config_status["database_configuration"]["mode"] = "individual_credentials"
+        config_status["database_configuration"]["note"] = "Using individual DB credentials (DB_USERNAME, DB_PASSWORD, DB_HOSTNAME)"
+    else:
+        config_status["database_configuration"]["status"] = "missing_variables"
+        config_status["database_configuration"]["issues"] = missing_vars or ["No complete database configuration found"]
+
+    config_status["database_configuration"]["configured_variables"] = configured_vars
+    config_status["database_configuration"]["missing_variables"] = missing_vars
+
+    # Add setup instructions if needed
+    if missing_vars and not db_vars["DATABASE_URL"]:
+        config_status["instructions"] = {
+            "platform": "Railway",
+            "required_variables_option_1": {
+                "DATABASE_URL": "Full PostgreSQL connection string (postgresql+asyncpg://user:pass@host:port/dbname)"
+            },
+            "required_variables_option_2": {
+                "DB_USERNAME": "Database username",
+                "DB_PASSWORD": "Database password",
+                "DB_HOSTNAME": "Database hostname",
+                "DB_PORT": "Database port (default: 6543)",
+                "DB_NAME": "Database name (default: postgres)"
+            },
+            "setup_steps": [
+                "1. Login to Railway dashboard",
+                "2. Go to your hospup-backend project",
+                "3. Click on 'Variables' tab",
+                "4. Add EITHER DATABASE_URL OR individual DB credentials",
+                "5. Redeploy the service"
+            ]
+        }
+
+    return config_status
 
 @router.get("/s3-config")
 async def check_s3_configuration():
