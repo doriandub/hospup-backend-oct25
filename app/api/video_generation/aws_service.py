@@ -272,12 +272,27 @@ async def invoke_mediaconvert_job(
 async def get_mediaconvert_job_status(job_id: str) -> Dict:
     """Get MediaConvert job status from AWS + database"""
     try:
+        from app.core.config import settings
+
         logger.info(f"📊 Checking MediaConvert status for job: {job_id}")
+
+        # Use endpoint from settings or environment
+        mediaconvert_endpoint = getattr(settings, 'AWS_MEDIACONVERT_ENDPOINT', None) or \
+                               getattr(settings, 'MEDIACONVERT_ENDPOINT', None) or \
+                               'https://h3ow7kdla.mediaconvert.eu-west-1.amazonaws.com'
+
+        logger.info(f"🔧 Using MediaConvert endpoint: {mediaconvert_endpoint}")
+
+        # Check AWS credentials availability
+        import os
+        has_access_key = bool(os.environ.get('AWS_ACCESS_KEY_ID') or os.environ.get('S3_ACCESS_KEY_ID'))
+        has_secret_key = bool(os.environ.get('AWS_SECRET_ACCESS_KEY') or os.environ.get('S3_SECRET_ACCESS_KEY'))
+        logger.info(f"🔑 AWS credentials available: access_key={has_access_key}, secret_key={has_secret_key}")
 
         mediaconvert = boto3.client(
             'mediaconvert',
             region_name='eu-west-1',
-            endpoint_url='https://h3ow7kdla.mediaconvert.eu-west-1.amazonaws.com'
+            endpoint_url=mediaconvert_endpoint
         )
 
         # Get job status from MediaConvert
