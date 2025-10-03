@@ -129,6 +129,110 @@ async def smart_match_videos_to_slots(
         raise HTTPException(status_code=500, detail=f"Smart matching failed: {str(e)}")
 
 
+@router.post("/smart-match-ai", response_model=SmartMatchResponse)
+async def smart_match_videos_ai(
+    request: SmartMatchRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """AI-powered (OpenAI) smart matching - slower but more intelligent"""
+    try:
+        logger.info(f"🤖 AI matching request for property: {request.property_id}, template: {request.template_id}")
+
+        # Get property details
+        try:
+            property_id = int(request.property_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid property_id format")
+
+        result = await db.execute(select(Property).filter(
+            Property.id == property_id,
+            Property.user_id == current_user.id
+        ))
+        property = result.scalar_one_or_none()
+
+        if not property:
+            raise HTTPException(status_code=404, detail="Property not found")
+
+        # Get template details
+        result = await db.execute(select(Template).filter(
+            Template.id == request.template_id,
+            Template.is_active == True
+        ))
+        template = result.scalar_one_or_none()
+
+        if not template:
+            raise HTTPException(status_code=404, detail="Template not found")
+
+        # Get available assets for this property
+        result = await db.execute(select(Asset).filter(
+            Asset.property_id == property_id,
+            Asset.user_id == current_user.id,
+            Asset.status.in_(['uploaded', 'ready', 'completed'])
+        ))
+        assets = result.scalars().all()
+
+        if not assets:
+            raise HTTPException(status_code=404, detail="No videos found for this property")
+
+        logger.info(f"📚 Found {len(assets)} assets for property {property.name}")
+
+        # Parse template script to get slots
+        template_slots = parse_template_slots(template.script)
+
+        if not template_slots:
+            raise HTTPException(status_code=404, detail="No slots found in template")
+
+        logger.info(f"🎯 Found {len(template_slots)} slots in template")
+
+        # Use OpenAI for matching (will be slower but more intelligent)
+        from .matching_service import perform_openai_matching
+        assignments = perform_openai_matching(
+            assets=assets,
+            template_slots=template_slots,
+            property=property,
+            template=template
+        )
+
+        # Fallback to enhanced keyword if OpenAI fails
+        if not assignments or len(assignments) < len(template_slots):
+            logger.warning("⚠️ OpenAI matching incomplete, using enhanced keyword matching as fallback")
+            from .matching_service import perform_enhanced_keyword_matching
+            assignments = perform_enhanced_keyword_matching(
+                assets=assets,
+                template_slots=template_slots,
+                property=property,
+                template=template
+            )
+
+        # Calculate matching statistics
+        assigned_count = len([a for a in assignments if a.videoId])
+        total_confidence = sum(a.confidence for a in assignments if a.confidence)
+        avg_confidence = total_confidence / len(assignments) if assignments else 0
+
+        matching_scores = {
+            "average_score": round(avg_confidence, 3),
+            "assigned_slots": assigned_count,
+            "total_slots": len(template_slots),
+            "assignment_rate": round((assigned_count / len(template_slots)) * 100, 1) if template_slots else 0
+        }
+
+        logger.info(f"✅ AI matching completed: {assigned_count}/{len(template_slots)} slots assigned, avg confidence: {avg_confidence:.3f}")
+
+        return SmartMatchResponse(
+            slot_assignments=assignments,
+            matching_scores=matching_scores,
+            total_assets=len(assets),
+            total_slots=len(template_slots)
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error in AI matching: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI matching failed: {str(e)}")
+
+
 @router.post("/generate-from-viral-template", response_model=VideoGenerationResponse)
 async def generate_video_from_viral_template(
     request: VideoGenerationRequest,

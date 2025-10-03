@@ -13,13 +13,12 @@ import json
 from datetime import datetime
 import structlog
 from app.infrastructure.storage.s3_service import S3StorageService
-import time
 
 logger = structlog.get_logger(__name__)
 
 
 def update_task_progress(stage: str, progress: int, video_id: str):
-    """Update Celery task progress"""
+    """Helper to safely update task progress"""
     try:
         current_task.update_state(
             state="PROGRESS",
@@ -32,6 +31,7 @@ def update_task_progress(stage: str, progress: int, video_id: str):
     except:
         # Not running in Celery, skip progress updates
         pass
+
 
 
 
@@ -112,46 +112,42 @@ def process_uploaded_video(
     s3_key: str
 ) -> Dict[str, Any]:
     """
-    ULTRA-OPTIMIZED: Process uploaded video with AI analysis + thumbnail ONLY
-
-    Pipeline:
+    Process uploaded video:
     1. Download from S3
-    2. Extract duration with FFprobe
-    3. AI analysis (OpenAI Vision) + get frames
-    4. Use first frame as thumbnail (no separate FFmpeg)
-    5. Update DB
-
-    NO MORE:
-    - FFmpeg conversion (MediaConvert handles it during final video generation)
-    - Separate thumbnail generation (reuse OpenAI frames)
-
-    Result: 60% faster (3-5 min → 1-2 min per video)
+    2. Extract metadata
+    3. Convert to standard format if needed (1080x1920, 30fps, H.264, AAC)
+    4. Generate AI content description
+    5. Generate thumbnail
+    6. Upload processed video back to S3
+    7. Update video record
     """
-    from app.core.database import SessionLocal
-
-    db = SessionLocal()
-    s3_service = S3StorageService()
-
+    db = None
+    temp_dir = None
+    
     try:
+        # Get database session (sync for Celery)
+        from app.core.database import SessionLocal
+        db = SessionLocal()
+        
         # Get video record
         video = db.query(Asset).filter(Asset.id == video_id).first()
         if not video:
-            raise Exception(f"Video not found: {video_id}")
-
-        logger.info(f"🎬 Processing video: {video.title} (ID: {video_id})")
-
-        # Mark as processing
-        video.status = "processing"
-        db.commit()
-
-        # Update progress
+            raise ValueError(f"Video {video_id} not found")
+        
+        # Update task progress
         update_task_progress("downloading", 10, video_id)
-
-        # Step 1: Download video from S3
-        temp_dir = tempfile.mkdtemp()
+        
+        logger.info(f"🎬 Processing uploaded video: {video.title}")
+        logger.info(f"📁 S3 Key: {s3_key}")
+        
+        # Create temporary directory for processing
+        temp_dir = tempfile.mkdtemp(prefix=f"video_process_{video_id}_")
         original_path = os.path.join(temp_dir, f"original_{video_id}.mp4")
-
-        logger.info(f"⬇️ Downloading video from S3: {s3_key}")
+        converted_path = os.path.join(temp_dir, f"converted_{video_id}.mp4")
+        
+        # Step 1: Download original video from S3
+        logger.info("📥 Downloading original video from S3...")
+        s3_service = S3StorageService()
 
         try:
             file_content = s3_service.download_file_sync(s3_key)
@@ -159,12 +155,12 @@ def process_uploaded_video(
                 f.write(file_content)
         except Exception as e:
             raise Exception(f"Failed to download video from S3: {e}")
-
+        
         if not os.path.exists(original_path):
             raise Exception(f"Downloaded file not found: {original_path}")
-
+            
         logger.info(f"✅ Video downloaded: {os.path.getsize(original_path):,} bytes")
-
+        
         # Update progress
         update_task_progress("metadata", 30, video_id)
 
@@ -189,7 +185,7 @@ def process_uploaded_video(
         # Update progress
         update_task_progress("thumbnail", 70, video_id)
 
-        # Step 4: Use first frame as thumbnail (no need for separate FFmpeg)
+        # Step 3: Use first frame as thumbnail (no need for separate FFmpeg)
         logger.info("📸 Generating thumbnail from extracted frame...")
         thumbnail_url = None
         if extracted_frames and len(extracted_frames) > 0:
@@ -197,11 +193,11 @@ def process_uploaded_video(
         else:
             logger.warning("⚠️ No frames extracted, falling back to FFmpeg thumbnail")
             thumbnail_url = generate_video_thumbnail(original_path, video_id, temp_dir)
-
+        
         # Update progress
         update_task_progress("finalizing", 90, video_id)
 
-        # Step 5: Update video record
+        # Step 4: Update video record
         logger.info("💾 Updating video record...")
         # File URL already set during upload - keep it
 
@@ -212,13 +208,13 @@ def process_uploaded_video(
         # Enhanced description with AI analysis
         if ai_description:
             video.description = ai_description
-
+            
         if thumbnail_url:
             video.thumbnail_url = thumbnail_url
             logger.info(f"✅ Thumbnail generated: {thumbnail_url}")
         else:
             logger.warning("⚠️ Failed to generate thumbnail")
-
+        
         # Set video status based on AI analysis success
         if ai_description and ai_description.strip() and not ai_description.startswith("Video uploaded successfully"):
             video.status = "ready"  # Ready to use in video generation
@@ -226,27 +222,25 @@ def process_uploaded_video(
         else:
             video.status = "pending_retry"  # Will be retried by cleanup job
             logger.warning(f"⚠️ Video processing incomplete: AI description missing, marked for retry")
-
+        
         db.commit()
-
+        
         logger.info(f"✅ Video processing completed for {video_id}")
-
+        
         # Final progress update
         try:
             current_task.update_state(
                 state="SUCCESS",
                 meta={
-                    "stage": "complete",
+                    "stage": "completed",
                     "progress": 100,
-                    "video_id": video_id,
-                    "has_thumbnail": bool(thumbnail_url),
-                    "has_description": bool(ai_description)
+                    "video_id": video_id
                 }
             )
         except:
             # Not in Celery, skip
             pass
-
+        
         return {
             "video_id": video_id,
             "status": "ready",
@@ -254,42 +248,39 @@ def process_uploaded_video(
             "has_description": bool(ai_description),
             "s3_key": s3_key
         }
-
+        
     except Exception as e:
         logger.error(f"❌ Video processing error: {str(e)}")
-
+        
         # Update video status to failed
         try:
             if db and 'video' in locals():
-                video.status = "error"
+                video.status = "failed"
+                video.description = f"Processing failed: {str(e)}"
                 db.commit()
         except:
             pass
-
-        # Update Celery task state
+        
         try:
             current_task.update_state(
                 state="FAILURE",
-                meta={
-                    "error": str(e),
-                    "video_id": video_id
-                }
+                meta={"error": str(e), "video_id": video_id}
             )
         except:
+            # Not in Celery, skip
             pass
-
         raise
-
+        
     finally:
-        # Clean up temporary files
-        if 'temp_dir' in locals():
+        # Cleanup temporary files
+        if temp_dir and os.path.exists(temp_dir):
             try:
                 import shutil
                 shutil.rmtree(temp_dir)
                 logger.info("🧹 Cleaned up temporary files")
             except Exception as e:
                 logger.warning(f"⚠️ Cleanup failed: {e}")
-
+        
         if db:
             db.close()
 
@@ -447,6 +438,7 @@ def generate_ai_description(video_path: str, video_title: str, property_id: int,
 
             # Wait before retrying (except on last attempt)
             if attempt < max_retries:
+                import time
                 logger.info(f"💤 Sleeping {retry_delay:.1f}s...")
                 time.sleep(retry_delay)
 
@@ -463,60 +455,79 @@ def generate_video_thumbnail(video_path: str, video_id: str, temp_dir: str) -> s
     """Generate thumbnail for video and upload to S3"""
     try:
         thumbnail_path = os.path.join(temp_dir, f"thumb_{video_id}.jpg")
-
+        
         # Get video duration to calculate appropriate seek time
         duration_cmd = [
             "ffprobe", "-v", "quiet", "-print_format", "json",
-            "-show_format", video_path
+            "-show_streams", "-show_format", video_path
         ]
-
+        
         try:
-            result = subprocess.run(duration_cmd, capture_output=True, text=True, timeout=10)
-            if result.returncode == 0:
-                metadata = json.loads(result.stdout)
-                duration = float(metadata.get("format", {}).get("duration", 10))
-                seek_time = min(duration * 0.25, 5)  # 25% into video or 5s, whichever is smaller
+            duration_result = subprocess.run(duration_cmd, capture_output=True, text=True, timeout=10)
+            duration_info = json.loads(duration_result.stdout)
+            
+            # Try to get duration from format first, then from video stream
+            duration = None
+            if "format" in duration_info and "duration" in duration_info["format"]:
+                duration = float(duration_info["format"]["duration"])
+            elif "streams" in duration_info:
+                for stream in duration_info["streams"]:
+                    if stream.get("codec_type") == "video" and "duration" in stream:
+                        duration = float(stream["duration"])
+                        break
+            
+            if duration and duration > 0:
+                # Use 25% into the video, but ensure it's within bounds
+                # For very short videos, use 10% and ensure minimum 0.1s
+                seek_percentage = 0.1 if duration < 2 else 0.25
+                seek_time = max(0.1, min(seek_percentage * duration, duration - 0.1))
+                logger.info(f"📐 Video duration: {duration:.2f}s, seek time: {seek_time:.2f}s")
             else:
-                seek_time = 1
-        except:
-            seek_time = 1
-
-        # Generate thumbnail at seek_time
-        cmd = [
-            "ffmpeg", "-ss", str(seek_time),
+                seek_time = 0.5
+                logger.warning("⚠️ Could not detect video duration, using 0.5s")
+            
+        except (subprocess.TimeoutExpired, json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
+            # Fallback to 0.5 seconds if duration detection fails
+            seek_time = 0.5
+            logger.warning(f"⚠️ Duration detection failed: {e}, using 0.5s")
+        
+        # Generate thumbnail using FFmpeg - maintain aspect ratio for vertical videos
+        ffmpeg_cmd = [
+            "ffmpeg", "-y",
             "-i", video_path,
+            "-ss", str(seek_time),  # Dynamic seek time based on duration
             "-vframes", "1",
-            "-vf", "scale=400:-1",
-            "-y",
+            "-vf", "scale=400:-1",  # Maintain aspect ratio, 400px width, auto height
+            "-pix_fmt", "yuvj420p",  # Force compatible pixel format for JPEG
+            "-q:v", "2",  # High quality
             thumbnail_path
         ]
-
-        result = subprocess.run(cmd, capture_output=True, timeout=30)
-
+        
+        result = subprocess.run(ffmpeg_cmd, capture_output=True, text=True, timeout=30)
+        
         if result.returncode != 0 or not os.path.exists(thumbnail_path):
-            logger.error(f"❌ FFmpeg thumbnail generation failed: {result.stderr}")
+            logger.warning(f"⚠️ FFmpeg thumbnail generation failed: {result.stderr}")
             return None
-
-        logger.info(f"✅ Thumbnail generated: {os.path.getsize(thumbnail_path):,} bytes")
-
-        # Upload to S3
+        
+        # Upload thumbnail to S3
         s3_service = S3StorageService()
-        thumbnail_s3_key = f"thumbnails/{video_id}.jpg"
+        thumbnail_s3_key = f"thumbnails/{video_id}/thumb.jpg"
 
         with open(thumbnail_path, 'rb') as f:
             thumbnail_content = f.read()
 
-        s3_service.upload_file_sync(
+        thumbnail_url = s3_service.upload_file_sync(
             key=thumbnail_s3_key,
             content=thumbnail_content,
             content_type='image/jpeg'
         )
-
-        thumbnail_url = f"https://s3.{settings.S3_REGION}.amazonaws.com/{settings.S3_BUCKET}/{thumbnail_s3_key}"
-        logger.info(f"✅ Thumbnail uploaded to S3: {thumbnail_url}")
-
+        logger.info(f"✅ Thumbnail uploaded: {thumbnail_url}")
+        
         return thumbnail_url
-
+        
+    except subprocess.TimeoutExpired:
+        logger.warning("⚠️ Thumbnail generation timed out")
+        return None
     except Exception as e:
-        logger.error(f"❌ Failed to generate thumbnail: {e}")
+        logger.error(f"❌ Thumbnail generation failed: {e}")
         return None
