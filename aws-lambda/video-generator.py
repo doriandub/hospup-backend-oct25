@@ -72,8 +72,11 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         S3_BUCKET = os.environ.get('S3_BUCKET', 'hospup-files')
         print(f"📦 Using S3 bucket: {S3_BUCKET}")
 
-        # Create MediaConvert client
-        mediaconvert = boto3.client('mediaconvert', region_name='eu-west-1')
+        # Create MediaConvert client with endpoint from environment
+        mediaconvert_endpoint = os.environ.get('MEDIACONVERT_ENDPOINT', 'https://mediaconvert.eu-west-1.amazonaws.com')
+        print(f"🔧 Using MediaConvert endpoint: {mediaconvert_endpoint}")
+
+        mediaconvert = boto3.client('mediaconvert', region_name='eu-west-1', endpoint_url=mediaconvert_endpoint)
         s3 = boto3.client('s3', region_name='eu-west-1')
 
         # Generate TTML subtitle file if text overlays exist
@@ -197,7 +200,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                         "ShadowYOffset": 2,
                         "OutlineColor": "BLACK",
                         "OutlineSize": 2,
-                        "Alignment": "CENTER"
+                        "Alignment": "CENTERED"
                     }
                 }
             }]
