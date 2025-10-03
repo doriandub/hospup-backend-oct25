@@ -256,33 +256,8 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 
         mediaconvert_job_id = response['Job']['Id']
         print(f"✅ MediaConvert job submitted: {mediaconvert_job_id}")
-
-        # Immediately call webhook with predicted output URL
-        # MediaConvert job will complete asynchronously, but we can predict the output URL
-        predicted_output_url = f"https://s3.eu-west-1.amazonaws.com/{S3_BUCKET}/generated-videos/{job_id}.mp4"
-
-        if webhook_url:
-            try:
-                callback_data = {
-                    'job_id': str(job_id),
-                    'mediaconvert_job_id': mediaconvert_job_id,
-                    'video_id': str(video_id),
-                    'status': 'COMPLETE',
-                    'output_url': predicted_output_url,
-                    'file_url': predicted_output_url,  # Both formats for compatibility
-                    'processing_time': datetime.utcnow().isoformat()
-                }
-
-                print(f"🔄 Calling webhook immediately with predicted URL: {predicted_output_url}")
-                # Convert to JSON and send webhook
-                import json
-                json_data = json.dumps(callback_data).encode('utf-8')
-                req = urllib.request.Request(webhook_url, data=json_data, headers={'Content-Type': 'application/json'})
-                response_webhook = urllib.request.urlopen(req, timeout=30)
-                print(f"✅ Webhook response: {response_webhook.getcode()}")
-
-            except Exception as webhook_error:
-                print(f"⚠️ Webhook call failed but MediaConvert job submitted: {webhook_error}")
+        print(f"ℹ️ MediaConvert will call webhook when job completes via EventBridge")
+        print(f"ℹ️ Expected output: s3://{S3_BUCKET}/generated-videos/{job_id}.mp4")
 
         return {
             'statusCode': 200,
@@ -291,8 +266,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 'video_id': video_id,
                 'job_id': job_id,
                 'mediaconvert_job_id': mediaconvert_job_id,
-                'predicted_output_url': predicted_output_url,
-                'message': 'MediaConvert job submitted successfully with immediate webhook'
+                'message': 'MediaConvert job submitted - EventBridge will trigger webhook on completion'
             })
         }
 
@@ -327,7 +301,9 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 def generate_ttml_from_overlays(text_overlays):
     """Convert text overlays to TTML format for MediaConvert subtitle burn-in"""
     ttml_header = '''<?xml version="1.0" encoding="UTF-8"?>
-<tt xmlns="http://www.w3.org/ns/ttml" xml:lang="en">
+<tt xmlns="http://www.w3.org/ns/ttml"
+    xmlns:tts="http://www.w3.org/ns/ttml#styling"
+    xml:lang="en">
   <head>
     <styling>
       <style xml:id="style1" tts:fontFamily="Arial" tts:fontSize="32px" tts:color="white"
