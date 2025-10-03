@@ -500,54 +500,82 @@ async def test_complete_lambda_payload():
             region_name=aws_region
         )
 
-        # Create realistic payload matching local system
+        # Real custom script from production compose interface
         custom_script = {
             "clips": [
                 {
                     "order": 1,
-                    "duration": 5,
-                    "description": "Hotel exterior view",
-                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-1.mp4",
-                    "video_id": "test-video-1",
+                    "duration": 2.67,
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/03c08f37-48ca-435d-8386-b4387c1e5ce6.MOV",
+                    "video_id": "03c08f37-48ca-435d-8386-b4387c1e5ce6",
                     "start_time": 0,
-                    "end_time": 5
+                    "end_time": 2.67
                 },
                 {
                     "order": 2,
-                    "duration": 4,
-                    "description": "Room showcase",
-                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-2.mp4",
-                    "video_id": "test-video-2",
-                    "start_time": 5,
-                    "end_time": 9
+                    "duration": 1.2,
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/632bd401-f3ad-47c1-a989-2072dcf9b63f.MOV",
+                    "video_id": "632bd401-f3ad-47c1-a989-2072dcf9b63f",
+                    "start_time": 2.67,
+                    "end_time": 3.87
                 },
                 {
                     "order": 3,
-                    "duration": 3,
-                    "description": "Pool area",
-                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-3.mp4",
-                    "video_id": "test-video-3",
-                    "start_time": 9,
-                    "end_time": 12
+                    "duration": 1.3,
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/ea129303-0e67-46a2-9b09-e73ea5e8064c.mp4",
+                    "video_id": "ea129303-0e67-46a2-9b09-e73ea5e8064c",
+                    "start_time": 3.87,
+                    "end_time": 5.17
+                },
+                {
+                    "order": 4,
+                    "duration": 1.3,
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/9564f7d3-31cd-4891-9f5e-beb91ba52656.MOV",
+                    "video_id": "9564f7d3-31cd-4891-9f5e-beb91ba52656",
+                    "start_time": 5.17,
+                    "end_time": 6.47
+                },
+                {
+                    "order": 5,
+                    "duration": 1.37,
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/466d0778-861f-435f-b1ed-e3314de50680.MP4",
+                    "video_id": "466d0778-861f-435f-b1ed-e3314de50680",
+                    "start_time": 6.47,
+                    "end_time": 7.84
+                },
+                {
+                    "order": 6,
+                    "duration": 1.13,
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/5ff8bb09-2ff5-4cc4-83e7-c3fd93f9f6e4.MOV",
+                    "video_id": "5ff8bb09-2ff5-4cc4-83e7-c3fd93f9f6e4",
+                    "start_time": 7.84,
+                    "end_time": 8.97
+                },
+                {
+                    "order": 7,
+                    "duration": 0.93,
+                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/videos/3/2/8f080426-8662-4558-93eb-d6b37b921b86.mov",
+                    "video_id": "8f080426-8662-4558-93eb-d6b37b921b86",
+                    "start_time": 8.97,
+                    "end_time": 9.9
                 }
             ],
             "texts": [
                 {
-                    "content": "Luxury Hotel",
+                    "content": "Nouveau texte",
                     "start_time": 0,
-                    "end_time": 3,
-                    "position": {"x": 50, "y": 20, "anchor": "top"},
-                    "style": {"color": "#ffffff", "font_size": 32, "font_weight": "bold"}
-                },
-                {
-                    "content": "Book Now!",
-                    "start_time": 9,
-                    "end_time": 12,
-                    "position": {"x": 50, "y": 80, "anchor": "bottom"},
-                    "style": {"color": "#FFD700", "font_size": 24, "font_weight": "bold"}
+                    "end_time": 5.18,
+                    "position": {
+                        "x": 540,
+                        "y": 960
+                    },
+                    "style": {
+                        "color": "#ffffff",
+                        "font_size": 24
+                    }
                 }
             ],
-            "total_duration": 12
+            "total_duration": 9.9
         }
 
         # Complete payload exactly like in the backend
@@ -556,35 +584,10 @@ async def test_complete_lambda_payload():
             "video_id": "test-video-complete-123",
             "job_id": "test-job-complete-456",
             "template_id": "test-template",
-            "segments": [
-                {
-                    "id": "segment_1",
-                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-1.mp4",
-                    "start_time": 0,
-                    "end_time": 5,
-                    "duration": 5,
-                    "order": 1
-                },
-                {
-                    "id": "segment_2",
-                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-2.mp4",
-                    "start_time": 0,
-                    "end_time": 4,
-                    "duration": 4,
-                    "order": 2
-                },
-                {
-                    "id": "segment_3",
-                    "video_url": "https://s3.eu-west-1.amazonaws.com/hospup-files/test-video-3.mp4",
-                    "start_time": 0,
-                    "end_time": 3,
-                    "duration": 3,
-                    "order": 3
-                }
-            ],
+            "segments": custom_script["clips"],  # Use clips from custom_script
             "text_overlays": custom_script["texts"],
             "custom_script": custom_script,
-            "total_duration": 12,
+            "total_duration": custom_script["total_duration"],
             "webhook_url": "https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
         }
 
