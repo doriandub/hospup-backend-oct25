@@ -97,6 +97,11 @@ class Settings(BaseSettings):
     AWS_LAMBDA_FUNCTION_NAME: str = "hospup-video-generator"
     AWS_LAMBDA_TIMEOUT: int = 900  # 15 minutes
 
+    # === AWS MEDIACONVERT ===
+    AWS_MEDIACONVERT_ENDPOINT: Optional[str] = None
+    MEDIACONVERT_ENDPOINT: Optional[str] = None
+    MEDIA_CONVERT_ROLE_ARN: Optional[str] = None
+
     # === RATE LIMITING ===
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_DEFAULT: int = 1000  # per hour
