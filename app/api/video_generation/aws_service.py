@@ -275,13 +275,13 @@ async def get_mediaconvert_job_status(job_id: str) -> Dict:
     MediaConvert jobs are tracked via EventBridge webhook, not direct polling
     """
     try:
-        from app.core.database import get_db_context
+        from app.core.database import AsyncSessionLocal
         from app.models.video import Video
         from sqlalchemy import select, or_
 
         logger.info(f"📊 Checking video status from database for job: {job_id}")
 
-        async with get_db_context() as db:
+        async with AsyncSessionLocal() as db:
             # Find video by job_id in description or by video_id
             result = await db.execute(
                 select(Video).where(
