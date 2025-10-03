@@ -1,6 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session, declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base
 from .config import settings
 import structlog
 
@@ -34,11 +33,11 @@ else:
     logger.info("Standard database connection configured")
 
 # Create async engine optimized for Supabase cloud limits
-# FIX: Reduce pool to prevent connection exhaustion
+# 🎯 OPTIMIZED: Only async pool - 2 connections total (was 4 with sync+async)
 engine = create_async_engine(
     sqlalchemy_url,
     echo=False,
-    pool_size=2,  # Reduced from 5 to 2 for Supabase Session Mode limits
+    pool_size=2,  # Only async pool - no more dual sync+async pools
     max_overflow=0,  # No overflow - strict limit
     pool_pre_ping=True,
     pool_recycle=300,  # 5 minutes - recycle connections regularly
@@ -54,37 +53,15 @@ engine = create_async_engine(
     },
 )
 
-# Create sync engine for template operations
-if "pooler.supabase.com" in raw_db_url or True:
-    sync_sqlalchemy_url = f"postgresql+psycopg2://{username}:{password}@{hostname}:{port}/{database}"
-else:
-    sync_sqlalchemy_url = sqlalchemy_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
-
-sync_engine = create_engine(
-    sync_sqlalchemy_url,
-    echo=False,
-    pool_size=2,  # Match async engine - total 4 connections max
-    max_overflow=0,  # No overflow - strict limit
-    pool_pre_ping=True,
-    pool_recycle=300,  # 5 minutes - match async engine
-    pool_timeout=5  # Fail fast if no connection available
-)
-
-# Create session factories
+# Create async session factory
 AsyncSessionLocal = sessionmaker(
     engine,
     class_=AsyncSession,
     expire_on_commit=False
 )
 
-SessionLocal = sessionmaker(
-    sync_engine,
-    class_=Session,
-    expire_on_commit=False
-)
-
 async def get_db() -> AsyncSession:
-    """Dependency to get database session"""
+    """Dependency to get async database session"""
     async with AsyncSessionLocal() as session:
         try:
             yield session
@@ -94,15 +71,3 @@ async def get_db() -> AsyncSession:
             raise
         finally:
             await session.close()
-
-def get_sync_db() -> Session:
-    """Dependency to get sync database session"""
-    with SessionLocal() as session:
-        try:
-            yield session
-            session.commit()
-        except Exception:
-            session.rollback()
-            raise
-        finally:
-            session.close()

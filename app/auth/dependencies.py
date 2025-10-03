@@ -1,21 +1,16 @@
 from typing import Optional
 from fastapi import Cookie, HTTPException, status, Depends, Header
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.exc import TimeoutError as SQLTimeoutError, DisconnectionError
 import asyncio
 import structlog
 
-from ..core.database import get_db, get_sync_db
+from ..core.database import get_db
 from ..models.user import User
 from .security import verify_access_token
 
 logger = structlog.get_logger(__name__)
-
-# HTTPBearer security scheme for API endpoints
-security = HTTPBearer()
 
 async def get_current_user(
     access_token: Optional[str] = Cookie(None, alias="access_token"),
@@ -112,46 +107,6 @@ async def get_current_user(
     
     return user
 
-def get_current_user_sync(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_sync_db)
-) -> User:
-    """Synchronous version of get_current_user using HTTPBearer"""
-    try:
-        logger.info(f"🔐 Authenticating user with HTTPBearer token")
-        
-        # Verify token
-        payload = verify_access_token(credentials.credentials)
-        user_id = payload.get("sub")
-        
-        if user_id is None:
-            logger.warning("Token validation failed: no user ID in token")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials"
-            )
-        
-        # Get user from database (synchronous)
-        user = db.query(User).filter(User.id == int(user_id)).first()
-        
-        if user is None:
-            logger.warning(f"User not found in database: {user_id}")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found"
-            )
-        
-        logger.info(f"✅ Authentication successful: {user.email}")
-        return user
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"❌ Authentication error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication"
-        )
 
 async def get_current_user_optional(
     access_token: Optional[str] = Cookie(None, alias="access_token"),
