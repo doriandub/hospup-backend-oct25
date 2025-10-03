@@ -52,10 +52,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Configuration - Allow all origins for development
+# CORS Configuration - Allow specific origins with credentials
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Temporary: allow all origins for debugging
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://hospup-frontend-2-kappa.vercel.app",
+        "https://hospup.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
