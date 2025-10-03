@@ -61,6 +61,8 @@ class VideoStatusResponse(BaseModel):
     status: str
     progress: int
     outputUrl: Optional[str] = None
+    video_id: Optional[str] = None
+    file_url: Optional[str] = None
     createdAt: Optional[str] = None
     completedAt: Optional[str] = None
     errorMessage: Optional[str] = None

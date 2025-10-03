@@ -270,7 +270,7 @@ async def invoke_mediaconvert_job(
 
 
 async def get_mediaconvert_job_status(job_id: str) -> Dict:
-    """Get MediaConvert job status from AWS"""
+    """Get MediaConvert job status from AWS + database"""
     try:
         logger.info(f"📊 Checking MediaConvert status for job: {job_id}")
 
@@ -301,11 +301,42 @@ async def get_mediaconvert_job_status(job_id: str) -> Dict:
 
         logger.info(f"✅ MediaConvert job {job_id}: {mc_status} ({progress}%)")
 
+        # Try to get video record from database for complete status
+        video_id = None
+        file_url = None
+
+        if mc_status == 'COMPLETE':
+            try:
+                from app.core.database import get_db_context
+                from app.models.video import Video
+                from sqlalchemy import select, or_
+
+                async with get_db_context() as db:
+                    # Find video by job_id in description or by video_id
+                    result = await db.execute(
+                        select(Video).where(
+                            or_(
+                                Video.description.contains(job_id),
+                                Video.id == job_id
+                            )
+                        ).limit(1)
+                    )
+                    video = result.scalar_one_or_none()
+
+                    if video:
+                        video_id = video.id
+                        file_url = video.file_url
+                        logger.info(f"✅ Found video {video_id} in database with file_url: {file_url}")
+            except Exception as db_error:
+                logger.warning(f"⚠️ Could not fetch video from database: {db_error}")
+
         return {
             "jobId": job_id,
             "status": mc_status,
             "progress": progress,
             "outputUrl": output_url,
+            "video_id": video_id,
+            "file_url": file_url,
             "createdAt": job.get('CreatedAt', '').isoformat() if job.get('CreatedAt') else None,
             "completedAt": job.get('FinishTime', '').isoformat() if job.get('FinishTime') else None,
             "errorMessage": job.get('ErrorMessage') if mc_status == 'ERROR' else None
