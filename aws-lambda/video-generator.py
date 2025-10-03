@@ -230,7 +230,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 "OutputGroupSettings": {
                     "Type": "FILE_GROUP_SETTINGS",
                     "FileGroupSettings": {
-                        "Destination": f"s3://{S3_BUCKET}/generated-videos/"
+                        "Destination": f"s3://{S3_BUCKET}/generated-videos/{job_id}"
                     }
                 },
                 "Outputs": outputs
@@ -258,6 +258,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         print(f"✅ MediaConvert job submitted: {mediaconvert_job_id}")
         print(f"ℹ️ MediaConvert will call webhook when job completes via EventBridge")
         print(f"ℹ️ Expected output: s3://{S3_BUCKET}/generated-videos/{job_id}.mp4")
+        print(f"ℹ️ Job ID for tracking: {job_id}")
 
         return {
             'statusCode': 200,

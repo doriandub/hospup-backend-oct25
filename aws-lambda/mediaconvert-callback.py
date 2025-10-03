@@ -100,41 +100,38 @@ def extract_output_urls(job: Dict[str, Any], filename_job_id: str, user_id: str,
     Extraire les URLs des fichiers de sortie du job MediaConvert
     """
     urls = {}
-    
+
     try:
         # Parcourir les groupes de sortie
         for output_group in job.get('OutputGroupDetails', []):
             output_details = output_group.get('OutputDetails', [])
-            
+
             for output in output_details:
-                # URL de la vidéo principale
-                if 'VideoDetails' in output:
-                    video_details = output['VideoDetails']
-                    if 'OutputFilePaths' in video_details and video_details['OutputFilePaths']:
-                        s3_path = video_details['OutputFilePaths'][0]
+                # outputFilePaths is directly in the output object
+                output_file_paths = output.get('outputFilePaths', [])
+
+                if output_file_paths:
+                    # Filter for .mp4 file (not loudness.csv)
+                    video_files = [p for p in output_file_paths if p.endswith('.mp4')]
+
+                    if video_files:
+                        s3_path = video_files[0]
                         urls['output_url'] = convert_s3_to_https_url(s3_path)
-                        print(f"📹 Video output: {urls['output_url']}")
-                
-                # URL du thumbnail (si configuré)
-                if 'ImageDetails' in output:
-                    image_details = output['ImageDetails']
-                    if 'OutputFilePaths' in image_details and image_details['OutputFilePaths']:
-                        s3_path = image_details['OutputFilePaths'][0]
-                        urls['thumbnail_url'] = convert_s3_to_https_url(s3_path)
-                        print(f"🖼️ Thumbnail output: {urls['thumbnail_url']}")
-        
-        # Si pas d'URLs trouvées, construire manuellement avec le format job_id
-        if not urls.get('output_url') and filename_job_id:
-            # Construction par défaut basée sur la structure S3 attendue - utilise job_id comme filename
-            # Note: NameModifier est maintenant vide, donc pas de suffix
-            expected_key = f"videos/{user_id}/{property_id}/{filename_job_id}.mp4"
-            urls['output_url'] = f"https://s3.eu-west-1.amazonaws.com/{S3_BUCKET}/{expected_key}"
-            print(f"📹 Constructed fallback video URL with job_id: {urls['output_url']}")
+                        urls['file_url'] = convert_s3_to_https_url(s3_path)
+                        print(f"✅ Found video output from job: {s3_path}")
+                        print(f"📹 Video URL: {urls['output_url']}")
+
+        # If no URLs found, this is an issue
+        if not urls.get('output_url'):
+            print(f"❌ No video files found in job outputs")
+            print(f"📊 Available output details: {json.dumps(job.get('OutputGroupDetails', []), indent=2)}")
 
         return urls
-        
+
     except Exception as e:
         print(f"❌ Error extracting output URLs: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {}
 
 def convert_s3_to_https_url(s3_path: str) -> str:
