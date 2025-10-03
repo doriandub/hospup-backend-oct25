@@ -270,122 +270,59 @@ async def invoke_mediaconvert_job(
 
 
 async def get_mediaconvert_job_status(job_id: str) -> Dict:
-    """Get MediaConvert job status from AWS + database"""
+    """
+    Get video status from database only
+    MediaConvert jobs are tracked via EventBridge webhook, not direct polling
+    """
     try:
-        from app.core.config import settings
+        from app.core.database import get_db_context
+        from app.models.video import Video
+        from sqlalchemy import select, or_
 
-        logger.info(f"📊 Checking MediaConvert status for job: {job_id}")
+        logger.info(f"📊 Checking video status from database for job: {job_id}")
 
-        # Use endpoint from settings or environment
-        mediaconvert_endpoint = getattr(settings, 'AWS_MEDIACONVERT_ENDPOINT', None) or \
-                               getattr(settings, 'MEDIACONVERT_ENDPOINT', None) or \
-                               'https://h3ow7kdla.mediaconvert.eu-west-1.amazonaws.com'
-
-        logger.info(f"🔧 Using MediaConvert endpoint: {mediaconvert_endpoint}")
-
-        # Check AWS credentials availability
-        import os
-        has_access_key = bool(os.environ.get('AWS_ACCESS_KEY_ID') or os.environ.get('S3_ACCESS_KEY_ID'))
-        has_secret_key = bool(os.environ.get('AWS_SECRET_ACCESS_KEY') or os.environ.get('S3_SECRET_ACCESS_KEY'))
-        logger.info(f"🔑 AWS credentials available: access_key={has_access_key}, secret_key={has_secret_key}")
-
-        mediaconvert = boto3.client(
-            'mediaconvert',
-            region_name='eu-west-1',
-            endpoint_url=mediaconvert_endpoint
-        )
-
-        # Get job status from MediaConvert
-        response = mediaconvert.get_job(Id=job_id)
-        job = response['Job']
-
-        mc_status = job['Status']
-        progress = job.get('JobPercentComplete', 0)
-
-        # Extract output file URL if completed
-        output_url = None
-        if mc_status == 'COMPLETE' and 'OutputGroupDetails' in job:
-            for output_group in job['OutputGroupDetails']:
-                if 'OutputDetails' in output_group:
-                    for output in output_group['OutputDetails']:
-                        if 'OutputFilePaths' in output:
-                            output_url = output['OutputFilePaths'][0]
-                            break
-                    if output_url:
-                        break
-
-        logger.info(f"✅ MediaConvert job {job_id}: {mc_status} ({progress}%)")
-
-        # Try to get video record from database for complete status
-        video_id = None
-        file_url = None
-
-        if mc_status == 'COMPLETE':
-            try:
-                from app.core.database import get_db_context
-                from app.models.video import Video
-                from sqlalchemy import select, or_
-
-                async with get_db_context() as db:
-                    # Find video by job_id in description or by video_id
-                    result = await db.execute(
-                        select(Video).where(
-                            or_(
-                                Video.description.contains(job_id),
-                                Video.id == job_id
-                            )
-                        ).limit(1)
+        async with get_db_context() as db:
+            # Find video by job_id in description or by video_id
+            result = await db.execute(
+                select(Video).where(
+                    or_(
+                        Video.description.contains(job_id),
+                        Video.id == job_id
                     )
-                    video = result.scalar_one_or_none()
+                ).limit(1)
+            )
+            video = result.scalar_one_or_none()
 
-                    if video:
-                        video_id = video.id
-                        file_url = video.file_url
-                        logger.info(f"✅ Found video {video_id} in database with file_url: {file_url}")
-            except Exception as db_error:
-                logger.warning(f"⚠️ Could not fetch video from database: {db_error}")
+            if video:
+                logger.info(f"✅ Found video {video.id} in database: status={video.status}")
+                return {
+                    "jobId": job_id,
+                    "status": video.status.upper() if video.status else "PROCESSING",
+                    "progress": 100 if video.status == "completed" else 50,
+                    "video_id": str(video.id),
+                    "file_url": video.file_url,
+                    "outputUrl": video.file_url,
+                    "createdAt": video.created_at.isoformat() if video.created_at else None,
+                    "completedAt": video.updated_at.isoformat() if video.status == "completed" and video.updated_at else None,
+                    "errorMessage": None if video.status != "failed" else "Video generation failed"
+                }
+            else:
+                logger.warning(f"⚠️ Video not found in database for job {job_id}")
+                return {
+                    "jobId": job_id,
+                    "status": "PROCESSING",
+                    "progress": 25,
+                    "video_id": None,
+                    "file_url": None,
+                    "outputUrl": None,
+                    "errorMessage": None
+                }
 
+    except Exception as e:
+        logger.error(f"❌ Error checking video status: {str(e)}")
         return {
             "jobId": job_id,
-            "status": mc_status,
-            "progress": progress,
-            "outputUrl": output_url,
-            "video_id": video_id,
-            "file_url": file_url,
-            "createdAt": job.get('CreatedAt', '').isoformat() if job.get('CreatedAt') else None,
-            "completedAt": job.get('FinishTime', '').isoformat() if job.get('FinishTime') else None,
-            "errorMessage": job.get('ErrorMessage') if mc_status == 'ERROR' else None
+            "status": "PROCESSING",
+            "progress": 0,
+            "errorMessage": f"Status check failed: {str(e)}"
         }
-
-    except ClientError as aws_error:
-        error_code = aws_error.response['Error']['Code']
-        if error_code == 'NotFound':
-            logger.warning(f"⚠️ MediaConvert job {job_id} not found, returning mock status")
-            # Return mock status for testing
-            return {
-                "jobId": job_id,
-                "status": "COMPLETE",
-                "progress": 100,
-                "outputUrl": f"https://s3.eu-west-1.amazonaws.com/hospup-files/generated-videos/{job_id}.mp4",
-                "createdAt": "2025-10-02T10:52:00Z",
-                "completedAt": "2025-10-02T10:53:00Z",
-                "errorMessage": None
-            }
-        else:
-            raise aws_error
-    except Exception as aws_connection_error:
-        # Handle AWS connection issues gracefully
-        logger.error(f"❌ AWS Exception: {type(aws_connection_error).__name__}: {str(aws_connection_error)}")
-        if "Could not connect" in str(aws_connection_error) or "credentials" in str(aws_connection_error).lower():
-            logger.warning(f"⚠️ AWS connection issue, returning mock status for job {job_id}")
-            return {
-                "jobId": job_id,
-                "status": "COMPLETE",
-                "progress": 100,
-                "outputUrl": f"https://s3.eu-west-1.amazonaws.com/hospup-files/generated-videos/{job_id}.mp4",
-                "createdAt": "2025-10-02T10:52:00Z",
-                "completedAt": "2025-10-02T10:53:00Z",
-                "errorMessage": None
-            }
-        else:
-            raise aws_connection_error
