@@ -36,7 +36,7 @@ logger = structlog.get_logger(__name__)
 async def lifespan(app: FastAPI):
     # Startup
     current_timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-    logger.info("Starting Hospup API", version="0.1.8", timestamp=current_timestamp)
+    logger.info("Starting Hospup API", version="0.1.9", timestamp=current_timestamp)
     # Create tables (in production, use Alembic migrations)
     if settings.APP_ENV == "development":
         async with engine.begin() as conn:
