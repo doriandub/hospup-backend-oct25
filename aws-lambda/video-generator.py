@@ -252,7 +252,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 
         # Immediately call webhook with predicted output URL
         # MediaConvert job will complete asynchronously, but we can predict the output URL
-        predicted_output_url = f"https://{S3_BUCKET}.s3.eu-west-1.amazonaws.com/generated-videos/{job_id}.mp4"
+        predicted_output_url = f"https://s3.eu-west-1.amazonaws.com/{S3_BUCKET}/generated-videos/{job_id}.mp4"
 
         if webhook_url:
             try:

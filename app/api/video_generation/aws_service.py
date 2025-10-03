@@ -351,7 +351,7 @@ async def get_mediaconvert_job_status(job_id: str) -> Dict:
                 "jobId": job_id,
                 "status": "COMPLETE",
                 "progress": 100,
-                "outputUrl": f"https://hospup-files.s3.eu-west-1.amazonaws.com/generated-videos/{job_id}.mp4",
+                "outputUrl": f"https://s3.eu-west-1.amazonaws.com/hospup-files/generated-videos/{job_id}.mp4",
                 "createdAt": "2025-10-02T10:52:00Z",
                 "completedAt": "2025-10-02T10:53:00Z",
                 "errorMessage": None
@@ -366,7 +366,7 @@ async def get_mediaconvert_job_status(job_id: str) -> Dict:
                 "jobId": job_id,
                 "status": "COMPLETE",
                 "progress": 100,
-                "outputUrl": f"https://hospup-files.s3.eu-west-1.amazonaws.com/generated-videos/{job_id}.mp4",
+                "outputUrl": f"https://s3.eu-west-1.amazonaws.com/hospup-files/generated-videos/{job_id}.mp4",
                 "createdAt": "2025-10-02T10:52:00Z",
                 "completedAt": "2025-10-02T10:53:00Z",
                 "errorMessage": None
