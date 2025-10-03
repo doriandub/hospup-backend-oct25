@@ -132,7 +132,11 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 continue  # Skip non-S3 URLs for MediaConvert
 
             inputs.append({
-                "AudioSelectors": {},
+                "AudioSelectors": {
+                    "Audio Selector 1": {
+                        "DefaultSelection": "DEFAULT"
+                    }
+                },
                 "VideoSelector": {},
                 "TimecodeSource": "ZEROBASED",
                 "FileInput": video_url
