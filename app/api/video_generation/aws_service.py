@@ -375,6 +375,7 @@ async def get_mediaconvert_job_status(job_id: str) -> Dict:
             raise aws_error
     except Exception as aws_connection_error:
         # Handle AWS connection issues gracefully
+        logger.error(f"❌ AWS Exception: {type(aws_connection_error).__name__}: {str(aws_connection_error)}")
         if "Could not connect" in str(aws_connection_error) or "credentials" in str(aws_connection_error).lower():
             logger.warning(f"⚠️ AWS connection issue, returning mock status for job {job_id}")
             return {
