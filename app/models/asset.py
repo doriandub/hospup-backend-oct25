@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, Text, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from . import Base
@@ -15,8 +15,8 @@ class Asset(Base):
     file_url = Column(String, nullable=False)  # Original uploaded file
     thumbnail_url = Column(String)  # Generated thumbnail
     
-    # Metadata  
-    duration = Column(Integer)  # Duration in seconds
+    # Metadata
+    duration = Column(Float)  # Duration in seconds with decimals (e.g., 174.23)
     file_size = Column(Integer)  # File size in bytes
     
     # Processing status
