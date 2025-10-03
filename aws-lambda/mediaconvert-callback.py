@@ -38,14 +38,9 @@ def lambda_handler(event, context):
             return create_error_response("No job ID in event")
         
         print(f"📊 Processing job {job_id} with status {status}")
-        
-        # Récupérer les détails complets du job depuis MediaConvert
-        mediaconvert = boto3.client('mediaconvert', region_name='eu-west-1')
-        job_response = mediaconvert.get_job(Id=job_id)
-        job = job_response['Job']
-        
-        # Extraire les métadonnées utilisateur du job
-        user_metadata = job.get('UserMetadata', {})
+
+        # Extraire les métadonnées utilisateur de l'événement EventBridge
+        user_metadata = detail.get('userMetadata', {})
         user_id = user_metadata.get('user_id')
         video_id = user_metadata.get('video_id')
         property_id = user_metadata.get('property_id')
@@ -62,15 +57,15 @@ def lambda_handler(event, context):
             "progress": progress,
             "processing_time": datetime.utcnow().isoformat()
         }
-        
-        # Si le job est terminé avec succès, extraire les URLs
-        if status == 'COMPLETE' and 'OutputGroupDetails' in job:
-            output_urls = extract_output_urls(job, job_id_metadata or job_id, user_id, property_id, video_id)
+
+        # Si le job est terminé avec succès, extraire les URLs directement de l'événement EventBridge
+        if status == 'COMPLETE' and 'outputGroupDetails' in detail:
+            output_urls = extract_output_urls_from_event(detail, job_id_metadata or job_id, user_id, property_id, video_id)
             callback_data.update(output_urls)
             print(f"✅ Job completed successfully with outputs: {output_urls}")
-            
+
         elif status == 'ERROR':
-            error_message = job.get('ErrorMessage', 'Unknown MediaConvert error')
+            error_message = detail.get('errorMessage', 'Unknown MediaConvert error')
             callback_data['error_message'] = error_message
             print(f"❌ Job failed: {error_message}")
         
@@ -95,19 +90,19 @@ def lambda_handler(event, context):
         print(f"❌ Error processing MediaConvert callback: {str(e)}")
         return create_error_response(f"Callback processing failed: {str(e)}")
 
-def extract_output_urls(job: Dict[str, Any], filename_job_id: str, user_id: str, property_id: str, video_id: str) -> Dict[str, str]:
+def extract_output_urls_from_event(event_detail: Dict[str, Any], filename_job_id: str, user_id: str, property_id: str, video_id: str) -> Dict[str, str]:
     """
-    Extraire les URLs des fichiers de sortie du job MediaConvert
+    Extraire les URLs des fichiers de sortie de l'événement EventBridge MediaConvert
     """
     urls = {}
 
     try:
-        # Parcourir les groupes de sortie
-        for output_group in job.get('OutputGroupDetails', []):
-            output_details = output_group.get('OutputDetails', [])
+        # Parcourir outputGroupDetails directement de l'événement EventBridge
+        for output_group in event_detail.get('outputGroupDetails', []):
+            output_details = output_group.get('outputDetails', [])
 
             for output in output_details:
-                # outputFilePaths is directly in the output object
+                # outputFilePaths est directement dans l'output de l'événement EventBridge
                 output_file_paths = output.get('outputFilePaths', [])
 
                 if output_file_paths:
@@ -118,18 +113,18 @@ def extract_output_urls(job: Dict[str, Any], filename_job_id: str, user_id: str,
                         s3_path = video_files[0]
                         urls['output_url'] = convert_s3_to_https_url(s3_path)
                         urls['file_url'] = convert_s3_to_https_url(s3_path)
-                        print(f"✅ Found video output from job: {s3_path}")
+                        print(f"✅ Found video output from EventBridge: {s3_path}")
                         print(f"📹 Video URL: {urls['output_url']}")
 
-        # If no URLs found, this is an issue
+        # If no URLs found, log the issue
         if not urls.get('output_url'):
-            print(f"❌ No video files found in job outputs")
-            print(f"📊 Available output details: {json.dumps(job.get('OutputGroupDetails', []), indent=2)}")
+            print(f"❌ No video files found in EventBridge outputGroupDetails")
+            print(f"📊 Available event detail: {json.dumps(event_detail.get('outputGroupDetails', []), indent=2)}")
 
         return urls
 
     except Exception as e:
-        print(f"❌ Error extracting output URLs: {str(e)}")
+        print(f"❌ Error extracting output URLs from event: {str(e)}")
         import traceback
         traceback.print_exc()
         return {}
