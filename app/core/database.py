@@ -34,21 +34,22 @@ else:
     logger.info("Standard database connection configured")
 
 # Create async engine optimized for Supabase cloud limits
+# FIX: Reduce pool to prevent connection exhaustion
 engine = create_async_engine(
     sqlalchemy_url,
     echo=False,
-    pool_size=1,  # Minimal pool size - what worked before
-    max_overflow=1,  # Minimal overflow
+    pool_size=2,  # Reduced from 5 to 2 for Supabase Session Mode limits
+    max_overflow=0,  # No overflow - strict limit
     pool_pre_ping=True,
-    pool_recycle=180,  # 3 minutes - faster recycling
-    pool_timeout=10,  # Shorter timeout to fail fast
+    pool_recycle=300,  # 5 minutes - recycle connections regularly
+    pool_timeout=5,  # Fail fast if no connection available
     connect_args={
-        "command_timeout": 30,  # Shorter command timeout
-        "prepared_statement_cache_size": 0,  # Disable problematic prepared statements
-        "statement_cache_size": 0,  # Disable statement cache
+        "command_timeout": 30,
+        "prepared_statement_cache_size": 0,
+        "statement_cache_size": 0,
         "server_settings": {
             "application_name": "hospup_cloud_backend",
-            "jit": "off",  # Disable JIT for faster connection
+            "jit": "off",
         },
     },
 )
@@ -62,11 +63,11 @@ else:
 sync_engine = create_engine(
     sync_sqlalchemy_url,
     echo=False,
-    pool_size=1,  # Minimal pool size - what worked before
-    max_overflow=1,  # Minimal overflow
+    pool_size=2,  # Match async engine - total 4 connections max
+    max_overflow=0,  # No overflow - strict limit
     pool_pre_ping=True,
-    pool_recycle=180,  # 3 minutes - faster recycling
-    pool_timeout=10  # Shorter timeout to fail fast
+    pool_recycle=300,  # 5 minutes - match async engine
+    pool_timeout=5  # Fail fast if no connection available
 )
 
 # Create session factories
