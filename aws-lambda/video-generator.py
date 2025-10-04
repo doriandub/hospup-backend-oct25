@@ -144,8 +144,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 },
                 "VideoSelector": {
                     "ColorSpace": "FOLLOW",
-                    "Rotate": "AUTO",
-                    "PadVideo": "BLACK"
+                    "Rotate": "AUTO"
                 },
                 "FilterEnable": "AUTO",
                 "TimecodeSource": "ZEROBASED",
@@ -190,6 +189,12 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 "TimecodeInsertion": "DISABLED",
                 "AntiAlias": "ENABLED",
                 "Sharpness": 50,
+                "VideoPreprocessors": {
+                    "ImagePadder": {
+                        "PadBehavior": "PAD",
+                        "PadColor": "Black"
+                    }
+                },
                 "RespondToAfd": "NONE",
                 "AfdSignaling": "NONE",
                 "DropFrameTimecode": "DISABLED",
