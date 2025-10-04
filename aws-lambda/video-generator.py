@@ -259,8 +259,26 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             # Get position from first text overlay (for now, all text uses same position)
             first_overlay = text_overlays[0]
             position = first_overlay.get('position', {})
-            x_pos = position.get('x', 540)  # Default center X
-            y_pos = position.get('y', 960)  # Default center Y
+
+            # Position can be either percentage (0-100) or pixels (>100)
+            # If x/y are small (0-100), treat as percentage and convert to pixels
+            x_percent = position.get('x', 50)  # Default center X (50%)
+            y_percent = position.get('y', 50)  # Default center Y (50%)
+
+            # Convert percentage to pixels for 1080x1920 video
+            VIDEO_WIDTH = 1080
+            VIDEO_HEIGHT = 1920
+
+            # If values are 0-100, treat as percentage, otherwise as pixels
+            if x_percent <= 100:
+                x_pos = int((x_percent / 100) * VIDEO_WIDTH)
+            else:
+                x_pos = int(x_percent)
+
+            if y_percent <= 100:
+                y_pos = int((y_percent / 100) * VIDEO_HEIGHT)
+            else:
+                y_pos = int(y_percent)
 
             # Get style from overlay
             style = first_overlay.get('style', {})
@@ -278,19 +296,19 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
                         "FontOpacity": 255,
-                        "ShadowColor": "BLACK",
-                        "ShadowOpacity": 200,
-                        "ShadowXOffset": 2,
-                        "ShadowYOffset": 2,
-                        "OutlineColor": "BLACK",
-                        "OutlineSize": 2,
+                        "ShadowColor": "NONE",
+                        "ShadowOpacity": 0,
+                        "ShadowXOffset": 0,
+                        "ShadowYOffset": 0,
+                        "OutlineColor": "NONE",
+                        "OutlineSize": 0,
                         "XPosition": x_pos,
                         "YPosition": y_pos,
                         "Alignment": "CENTERED"
                     }
                 }
             }]
-            print(f"✅ Text position set to: X={x_pos}px, Y={y_pos}px, FontSize={font_size}px")
+            print(f"✅ Text position set to: X={x_percent}% ({x_pos}px), Y={y_percent}% ({y_pos}px), FontSize={font_size}px")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
