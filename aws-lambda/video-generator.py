@@ -147,7 +147,6 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                     "Rotate": "AUTO",
                     "PadVideo": "BLACK"
                 },
-                "ImageInserter": {},
                 "FilterEnable": "AUTO",
                 "TimecodeSource": "ZEROBASED",
                 "FileInput": video_url
