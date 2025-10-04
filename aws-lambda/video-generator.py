@@ -142,7 +142,13 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                         "DefaultSelection": "DEFAULT"
                     }
                 },
-                "VideoSelector": {},
+                "VideoSelector": {
+                    "ColorSpace": "FOLLOW",
+                    "Rotate": "AUTO",
+                    "PadVideo": "BLACK"
+                },
+                "ImageInserter": {},
+                "FilterEnable": "AUTO",
                 "TimecodeSource": "ZEROBASED",
                 "FileInput": video_url
             }
@@ -185,6 +191,9 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 "TimecodeInsertion": "DISABLED",
                 "AntiAlias": "ENABLED",
                 "Sharpness": 50,
+                "RespondToAfd": "NONE",
+                "AfdSignaling": "NONE",
+                "DropFrameTimecode": "DISABLED",
                 "CodecSettings": {
                     "Codec": "H_264",
                     "H264Settings": {
