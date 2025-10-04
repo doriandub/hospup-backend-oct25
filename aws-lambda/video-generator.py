@@ -260,14 +260,15 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             first_overlay = text_overlays[0]
             position = first_overlay.get('position', {})
 
-            # Positions are directly in pixels from frontend
-            x_pos = int(position.get('x', 540))  # Default center X in pixels
-            y_pos = int(position.get('y', 960))  # Default center Y in pixels
-
             # Get style from overlay
             style = first_overlay.get('style', {})
             font_size = style.get('font_size', 24)
             font_color = style.get('color', '#ffffff').upper().replace('#', '')
+
+            # Positions in pixels from frontend (top-left corner of text)
+            # Frontend and MediaConvert both use top-left as reference point
+            x_pos = int(position.get('x', 400))  # Default X position in pixels
+            y_pos = int(position.get('y', 900))  # Default Y position in pixels
 
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
@@ -281,13 +282,13 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                         "BackgroundOpacity": 0,
                         "FontOpacity": 255,
                         "OutlineSize": 0,
-                        "XPosition": x_pos,
-                        "YPosition": y_pos,
-                        "Alignment": "CENTERED"
+                        "XPosition": x_pos,  # Top-left X position
+                        "YPosition": y_pos   # Top-left Y position
+                        # No Alignment parameter - uses default left alignment
                     }
                 }
             }]
-            print(f"✅ Text position set to: X={x_pos}px, Y={y_pos}px, FontSize={font_size}px")
+            print(f"✅ Text position set to top-left: X={x_pos}px, Y={y_pos}px, FontSize={font_size}px")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
