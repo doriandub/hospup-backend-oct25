@@ -112,6 +112,10 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         for i, source in enumerate(video_sources):
             # Handle both clip format and segment format
             video_url = source.get('video_url', '') or source.get('url', '')
+            start_time = float(source.get('start_time', 0))
+            end_time = float(source.get('end_time', 0))
+            duration = float(source.get('duration', 0))
+
             if not video_url:
                 print(f"⚠️ No video_url in source {i+1}")
                 continue
@@ -131,7 +135,8 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 print(f"⚠️ Skipping non-S3 URL: {video_url}")
                 continue  # Skip non-S3 URLs for MediaConvert
 
-            inputs.append({
+            # Create input with clipping to use only the specified duration
+            input_config = {
                 "AudioSelectors": {
                     "Audio Selector 1": {
                         "DefaultSelection": "DEFAULT"
@@ -140,7 +145,22 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                 "VideoSelector": {},
                 "TimecodeSource": "ZEROBASED",
                 "FileInput": video_url
-            })
+            }
+
+            # Add InputClippings to trim video to exact duration
+            if duration > 0:
+                # MediaConvert InputClippings uses StartTimecode and EndTimecode
+                # Format: HH:MM:SS:FF (hours:minutes:seconds:frames at 30fps)
+                start_tc = seconds_to_timecode(0)  # Always start from beginning of clip
+                end_tc = seconds_to_timecode(duration)  # Trim to specified duration
+
+                input_config["InputClippings"] = [{
+                    "StartTimecode": start_tc,
+                    "EndTimecode": end_tc
+                }]
+                print(f"✂️ Clipping input {i+1}: 0s → {duration}s ({start_tc} → {end_tc})")
+
+            inputs.append(input_config)
             print(f"✅ Added MediaConvert input {i+1}: {video_url}")
 
         if not inputs:
@@ -149,17 +169,59 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         # Output settings for vertical videos (1080x1920)
         output_key = f"generated-videos/{job_id}.mp4"
         outputs = [{
-            "Preset": "System-Generic_Hd_Mp4_Avc_Aac_16x9_1920x1080p_24Hz_6Mbps",
             "Extension": "mp4",
+            "ContainerSettings": {
+                "Container": "MP4",
+                "Mp4Settings": {
+                    "CslgAtom": "INCLUDE",
+                    "FreeSpaceBox": "EXCLUDE",
+                    "MoovPlacement": "PROGRESSIVE_DOWNLOAD"
+                }
+            },
             "VideoDescription": {
                 "Width": 1080,
                 "Height": 1920,
-                "VideoPreprocessors": {
-                    "ColorCorrector": {
-                        "Brightness": 50,
-                        "Contrast": 100,
-                        "Hue": 0,
-                        "Saturation": 100
+                "ScalingBehavior": "DEFAULT",
+                "TimecodeInsertion": "DISABLED",
+                "AntiAlias": "ENABLED",
+                "Sharpness": 50,
+                "CodecSettings": {
+                    "Codec": "H_264",
+                    "H264Settings": {
+                        "InterlaceMode": "PROGRESSIVE",
+                        "NumberReferenceFrames": 3,
+                        "Syntax": "DEFAULT",
+                        "Softness": 0,
+                        "GopClosedCadence": 1,
+                        "GopSize": 90,
+                        "Slices": 1,
+                        "GopBReference": "DISABLED",
+                        "SlowPal": "DISABLED",
+                        "SpatialAdaptiveQuantization": "ENABLED",
+                        "TemporalAdaptiveQuantization": "ENABLED",
+                        "FlickerAdaptiveQuantization": "DISABLED",
+                        "EntropyEncoding": "CABAC",
+                        "Bitrate": 5000000,
+                        "FramerateControl": "SPECIFIED",
+                        "RateControlMode": "CBR",
+                        "CodecProfile": "MAIN",
+                        "Telecine": "NONE",
+                        "MinIInterval": 0,
+                        "AdaptiveQuantization": "HIGH",
+                        "CodecLevel": "AUTO",
+                        "FieldEncoding": "PAFF",
+                        "SceneChangeDetect": "ENABLED",
+                        "QualityTuningLevel": "SINGLE_PASS",
+                        "FramerateConversionAlgorithm": "DUPLICATE_DROP",
+                        "UnregisteredSeiTimecode": "DISABLED",
+                        "GopSizeUnits": "FRAMES",
+                        "ParControl": "SPECIFIED",
+                        "NumberBFramesBetweenReferenceFrames": 2,
+                        "RepeatPps": "DISABLED",
+                        "FramerateNumerator": 30,
+                        "FramerateDenominator": 1,
+                        "ParNumerator": 1,
+                        "ParDenominator": 1
                     }
                 }
             },
@@ -186,14 +248,25 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         }]
 
         # Add subtitle burn-in if TTML exists
-        if subtitle_s3_key:
+        if subtitle_s3_key and text_overlays:
+            # Get position from first text overlay (for now, all text uses same position)
+            first_overlay = text_overlays[0]
+            position = first_overlay.get('position', {})
+            x_pos = position.get('x', 540)  # Default center X
+            y_pos = position.get('y', 960)  # Default center Y
+
+            # Get style from overlay
+            style = first_overlay.get('style', {})
+            font_size = style.get('font_size', 24)
+            font_color = style.get('color', '#ffffff').upper().replace('#', '')
+
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
                 "DestinationSettings": {
                     "DestinationType": "BURN_IN",
                     "BurninDestinationSettings": {
                         "TeletextSpacing": "PROPORTIONAL",
-                        "FontSize": 32,  # Larger font for mobile viewing
+                        "FontSize": font_size,
                         "FontColor": "WHITE",
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
@@ -204,10 +277,13 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                         "ShadowYOffset": 2,
                         "OutlineColor": "BLACK",
                         "OutlineSize": 2,
+                        "XPosition": x_pos,
+                        "YPosition": y_pos,
                         "Alignment": "CENTERED"
                     }
                 }
             }]
+            print(f"✅ Text position set to: X={x_pos}px, Y={y_pos}px, FontSize={font_size}px")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
@@ -344,6 +420,15 @@ def seconds_to_ttml_time(seconds):
     minutes = int((seconds % 3600) // 60)
     secs = seconds % 60
     return f"{hours:02d}:{minutes:02d}:{secs:06.3f}"
+
+
+def seconds_to_timecode(seconds):
+    """Convert seconds to MediaConvert timecode format HH:MM:SS:FF (30fps)"""
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    secs = int(seconds % 60)
+    frames = int((seconds % 1) * 30)  # 30 fps
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}:{frames:02d}"
 
 
 def create_error_response(status_code: int, message: str) -> Dict[str, Any]:
