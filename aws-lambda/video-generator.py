@@ -185,16 +185,10 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             "VideoDescription": {
                 "Width": 1080,
                 "Height": 1920,
-                "ScalingBehavior": "DEFAULT",
+                "ScalingBehavior": "FIT",
                 "TimecodeInsertion": "DISABLED",
                 "AntiAlias": "ENABLED",
                 "Sharpness": 50,
-                "VideoPreprocessors": {
-                    "ImagePadder": {
-                        "PadBehavior": "PAD",
-                        "PadColor": "Black"
-                    }
-                },
                 "RespondToAfd": "NONE",
                 "AfdSignaling": "NONE",
                 "DropFrameTimecode": "DISABLED",
