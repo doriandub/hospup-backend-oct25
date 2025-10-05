@@ -265,10 +265,11 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             font_size = style.get('font_size', 24)
             font_color = style.get('color', '#ffffff').upper().replace('#', '')
 
-            # Positions in pixels from frontend (top-left corner of text)
-            # Frontend and MediaConvert both use top-left as reference point
-            x_pos = int(position.get('x', 400))  # Default X position in pixels
-            y_pos = int(position.get('y', 900))  # Default Y position in pixels
+            # Positions in pixels from frontend (center of text)
+            # Frontend uses transform: translate(-50%, -50%) to center text on position
+            # MediaConvert uses Alignment: CENTERED to center text on XPosition/YPosition
+            x_pos = int(position.get('x', 540))  # Default center X (1080/2)
+            y_pos = int(position.get('y', 960))  # Default center Y (1920/2)
 
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
@@ -282,13 +283,13 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                         "BackgroundOpacity": 0,
                         "FontOpacity": 255,
                         "OutlineSize": 0,
-                        "XPosition": x_pos,  # Top-left X position
-                        "YPosition": y_pos   # Top-left Y position
-                        # No Alignment parameter - uses default left alignment
+                        "XPosition": x_pos,      # Center X position
+                        "YPosition": y_pos,      # Center Y position
+                        "Alignment": "CENTERED"  # Center text on XPosition (same as preview)
                     }
                 }
             }]
-            print(f"✅ Text position set to top-left: X={x_pos}px, Y={y_pos}px, FontSize={font_size}px")
+            print(f"✅ Text position set to CENTER: X={x_pos}px, Y={y_pos}px, FontSize={font_size}px")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
