@@ -387,24 +387,18 @@ def generate_ttml_from_overlays(text_overlays):
         x_percent = (x_pos / 1080) * 100
         y_percent = (y_pos / 1920) * 100
 
-        # PADDING-BASED POSITIONING: Use full-width regions with asymmetric padding
-        # to push text to specific X coordinate while maintaining centered alignment
-        region_width = 100  # Full width to allow flexible positioning
-        region_height = 15  # Enough height for text
+        # Simple approach: Position region directly at target coordinates
+        # Use small region and let text overflow naturally
+        region_width = 50  # Moderate width
+        region_height = 10  # Enough for one line
 
-        # Region always starts at 0%, Y position centered on target
-        region_x = 0
+        # Center region on target position (like frontend transform: translate(-50%, -50%))
+        region_x = max(0, min(100 - region_width, x_percent - region_width/2))
         region_y = max(0, min(100 - region_height, y_percent - region_height/2))
 
-        # Calculate padding to position text at x_percent
-        # Left padding pushes text right, right padding pushes text left
-        left_padding = x_percent
-        right_padding = 100 - x_percent
-
         region = f'''      <region xml:id="region{i+1}"
-              tts:origin="{region_x}% {region_y:.2f}%"
+              tts:origin="{region_x:.2f}% {region_y:.2f}%"
               tts:extent="{region_width}% {region_height}%"
-              tts:padding="0% {right_padding:.2f}% 0% {left_padding:.2f}%"
               tts:displayAlign="center"
               tts:textAlign="center"/>'''
         regions.append(region)
