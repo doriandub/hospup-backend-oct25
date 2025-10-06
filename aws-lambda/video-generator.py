@@ -366,8 +366,10 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 def generate_ttml_from_overlays(text_overlays):
     """Convert text overlays to TTML format for MediaConvert subtitle burn-in with individual positioning"""
 
-    # Create styles for each text overlay with individual positions
+    # Create styles and regions for each text overlay with individual positions
     styles = []
+    regions = []
+
     for i, overlay in enumerate(text_overlays):
         position = overlay.get('position', {})
         style_data = overlay.get('style', {})
@@ -381,29 +383,50 @@ def generate_ttml_from_overlays(text_overlays):
         font_size = style_data.get('font_size', 80)
 
         # Convert position from pixels (1080x1920 video) to percentage
-        # TTML origin is top-left corner, but we want CENTER positioning
-        # So we convert center position to top-left origin with offset
-        x_percent = (x_pos / 1080) * 100  # Center X position as percentage
-        y_percent = (y_pos / 1920) * 100  # Center Y position as percentage
+        # Position is CENTER of text, need to estimate text width/height for region
+        # We'll create a small region centered on the position
+        x_percent = (x_pos / 1080) * 100
+        y_percent = (y_pos / 1920) * 100
+
+        # Create region with origin at text center (approximation)
+        # Region needs origin (top-left) so we offset by approximate text size
+        # For centered text, we use a region that spans most of the line
+        region_width = 80  # percentage - wide enough for text
+        region_height = 10  # percentage - tall enough for one line
+
+        # Center the region on the position
+        region_x = max(0, min(100 - region_width, x_percent - region_width/2))
+        region_y = max(0, min(100 - region_height, y_percent - region_height/2))
+
+        region = f'''      <region xml:id="region{i+1}"
+              tts:origin="{region_x:.2f}% {region_y:.2f}%"
+              tts:extent="{region_width}% {region_height}%"
+              tts:displayAlign="center"
+              tts:textAlign="center"/>'''
+        regions.append(region)
 
         style = f'''      <style xml:id="style{i+1}"
              tts:fontFamily="Arial"
              tts:fontSize="{font_size}px"
              tts:color="{color}"
              tts:textAlign="center"
-             tts:origin="{x_percent:.2f}% {y_percent:.2f}%"
-             tts:displayAlign="center"
              tts:textShadow="2px 2px 2px black"/>'''
         styles.append(style)
 
     ttml_header = f'''<?xml version="1.0" encoding="UTF-8"?>
 <tt xmlns="http://www.w3.org/ns/ttml"
     xmlns:tts="http://www.w3.org/ns/ttml#styling"
-    xml:lang="en">
+    xmlns:ttp="http://www.w3.org/ns/ttml#parameter"
+    xml:lang="en"
+    ttp:frameRate="30"
+    ttp:frameRateMultiplier="1 1">
   <head>
     <styling>
 {chr(10).join(styles)}
     </styling>
+    <layout>
+{chr(10).join(regions)}
+    </layout>
   </head>
   <body>
     <div>'''
@@ -426,7 +449,7 @@ def generate_ttml_from_overlays(text_overlays):
         start_ttml = seconds_to_ttml_time(start_time)
         end_ttml = seconds_to_ttml_time(end_time)
 
-        subtitle = f'      <p xml:id="subtitle{i+1}" begin="{start_ttml}" end="{end_ttml}" style="style{i+1}">{content}</p>'
+        subtitle = f'      <p xml:id="subtitle{i+1}" begin="{start_ttml}" end="{end_ttml}" style="style{i+1}" region="region{i+1}">{content}</p>'
         subtitles.append(subtitle)
 
     return ttml_header + '\n'.join(subtitles) + ttml_footer
