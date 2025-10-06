@@ -387,28 +387,34 @@ def generate_ttml_from_overlays(text_overlays):
         x_percent = (x_pos / 1080) * 100
         y_percent = (y_pos / 1920) * 100
 
-        # Use narrow regions to prevent overlap and allow distinct horizontal positions
-        # Width of 1% means region starts at exact position, text expands to the right
-        region_width = 1  # Minimal width - text will expand as needed
-        region_height = 10  # Enough height for one line
+        # PADDING-BASED POSITIONING: Use full-width regions with asymmetric padding
+        # to push text to specific X coordinate while maintaining centered alignment
+        region_width = 100  # Full width to allow flexible positioning
+        region_height = 15  # Enough height for text
 
-        # Position region origin at the intended position
-        region_x = max(0, min(100 - region_width, x_percent))
+        # Region always starts at 0%, Y position centered on target
+        region_x = 0
         region_y = max(0, min(100 - region_height, y_percent - region_height/2))
 
+        # Calculate padding to position text at x_percent
+        # Left padding pushes text right, right padding pushes text left
+        left_padding = x_percent
+        right_padding = 100 - x_percent
+
         region = f'''      <region xml:id="region{i+1}"
-              tts:origin="{region_x:.2f}% {region_y:.2f}%"
+              tts:origin="{region_x}% {region_y:.2f}%"
               tts:extent="{region_width}% {region_height}%"
+              tts:padding="0% {right_padding:.2f}% 0% {left_padding:.2f}%"
               tts:displayAlign="center"
-              tts:textAlign="left"/>'''
+              tts:textAlign="center"/>'''
         regions.append(region)
 
         style = f'''      <style xml:id="style{i+1}"
              tts:fontFamily="Arial"
              tts:fontSize="{font_size}px"
              tts:color="{color}"
-             tts:textAlign="left"
-             tts:textShadow="2px 2px 2px black"/>'''
+             tts:textAlign="center"
+             tts:textShadow="2px 2px 4px black"/>'''
         styles.append(style)
 
     ttml_header = f'''<?xml version="1.0" encoding="UTF-8"?>
