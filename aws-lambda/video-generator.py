@@ -383,20 +383,24 @@ def generate_ttml_from_overlays(text_overlays):
         color = style_data.get('color', '#ffffff')
         font_size = style_data.get('font_size', 80)
 
-        # PIXEL-BASED POSITIONING: No conversion needed!
-        # Position region directly in pixels
-        region_width_px = 540  # Half video width in pixels
-        region_height_px = 200  # Enough for text
+        # SIMPLE: Text is CENTERED on position (like CSS translate(-50%, -50%))
+        # Use LARGE region width (1000px ~93%) to avoid line breaks
+        # Text centered in this large region = minimal wrapping
 
-        # Center region on target position (like frontend transform: translate(-50%, -50%))
+        region_width_px = 1000  # Very wide to prevent wrapping
+        region_height_px = 250  # Tall for multi-line
+
+        # Center region on X,Y position
         region_x_px = max(0, min(1080 - region_width_px, x_pos - region_width_px/2))
         region_y_px = max(0, min(1920 - region_height_px, y_pos - region_height_px/2))
 
         region = f'''      <region xml:id="region{i+1}"
               tts:origin="{int(region_x_px)}px {int(region_y_px)}px"
-              tts:extent="{region_width_px}px {region_height_px}px"
+              tts:extent="{int(region_width_px)}px {region_height_px}px"
               tts:displayAlign="center"
-              tts:textAlign="center"/>'''
+              tts:textAlign="center"
+              tts:overflow="visible"
+              tts:wrapOption="noWrap"/>'''
         regions.append(region)
 
         style = f'''      <style xml:id="style{i+1}"
