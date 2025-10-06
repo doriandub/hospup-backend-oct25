@@ -257,13 +257,13 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         # Add subtitle burn-in if TTML exists
         if subtitle_s3_key and text_overlays:
             # Each text has its own position defined in TTML via tts:origin
-            # Use LEFT alignment to prevent MediaConvert from centering all text
+            # StylePassthrough=ENABLED tells MediaConvert to use TTML positioning instead of default positioning
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
                 "DestinationSettings": {
                     "DestinationType": "BURN_IN",
                     "BurninDestinationSettings": {
-                        "Alignment": "LEFT",  # Force left alignment - TTML regions control exact positioning
+                        "StylePassthrough": "ENABLED",  # CRITICAL: Enables TTML region positioning (tts:origin)
                         "TeletextSpacing": "PROPORTIONAL",
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
@@ -272,7 +272,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                     }
                 }
             }]
-            print(f"✅ Text overlays configured - {len(text_overlays)} texts with individual LEFT-aligned positions in TTML")
+            print(f"✅ Text overlays configured - {len(text_overlays)} texts with StylePassthrough enabled for TTML positioning")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
