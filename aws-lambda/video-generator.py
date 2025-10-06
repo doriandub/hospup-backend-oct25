@@ -383,22 +383,18 @@ def generate_ttml_from_overlays(text_overlays):
         color = style_data.get('color', '#ffffff')
         font_size = style_data.get('font_size', 80)
 
-        # Convert position from pixels (1080x1920 video) to percentage
-        x_percent = (x_pos / 1080) * 100
-        y_percent = (y_pos / 1920) * 100
-
-        # Simple approach: Position region directly at target coordinates
-        # Use small region and let text overflow naturally
-        region_width = 50  # Moderate width
-        region_height = 10  # Enough for one line
+        # PIXEL-BASED POSITIONING: No conversion needed!
+        # Position region directly in pixels
+        region_width_px = 540  # Half video width in pixels
+        region_height_px = 200  # Enough for text
 
         # Center region on target position (like frontend transform: translate(-50%, -50%))
-        region_x = max(0, min(100 - region_width, x_percent - region_width/2))
-        region_y = max(0, min(100 - region_height, y_percent - region_height/2))
+        region_x_px = max(0, min(1080 - region_width_px, x_pos - region_width_px/2))
+        region_y_px = max(0, min(1920 - region_height_px, y_pos - region_height_px/2))
 
         region = f'''      <region xml:id="region{i+1}"
-              tts:origin="{region_x:.2f}% {region_y:.2f}%"
-              tts:extent="{region_width}% {region_height}%"
+              tts:origin="{int(region_x_px)}px {int(region_y_px)}px"
+              tts:extent="{region_width_px}px {region_height_px}px"
               tts:displayAlign="center"
               tts:textAlign="center"/>'''
         regions.append(region)
@@ -411,13 +407,18 @@ def generate_ttml_from_overlays(text_overlays):
              tts:textShadow="2px 2px 4px black"/>'''
         styles.append(style)
 
+    # Define video dimensions for pixel-based positioning
+    video_width = 1080
+    video_height = 1920
+
     ttml_header = f'''<?xml version="1.0" encoding="UTF-8"?>
 <tt xmlns="http://www.w3.org/ns/ttml"
     xmlns:tts="http://www.w3.org/ns/ttml#styling"
     xmlns:ttp="http://www.w3.org/ns/ttml#parameter"
     xml:lang="en"
     ttp:frameRate="30"
-    ttp:frameRateMultiplier="1 1">
+    ttp:frameRateMultiplier="1 1"
+    tts:extent="{video_width}px {video_height}px">
   <head>
     <styling>
 {chr(10).join(styles)}
