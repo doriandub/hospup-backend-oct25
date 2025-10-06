@@ -256,40 +256,22 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 
         # Add subtitle burn-in if TTML exists
         if subtitle_s3_key and text_overlays:
-            # Get position from first text overlay (for now, all text uses same position)
-            first_overlay = text_overlays[0]
-            position = first_overlay.get('position', {})
-
-            # Get style from overlay
-            style = first_overlay.get('style', {})
-            font_size = style.get('font_size', 24)
-            font_color = style.get('color', '#ffffff').upper().replace('#', '')
-
-            # Positions in pixels from frontend (center of text)
-            # Frontend uses transform: translate(-50%, -50%) to center text on position
-            # MediaConvert uses Alignment: CENTERED to center text on XPosition/YPosition
-            x_pos = int(position.get('x', 540))  # Default center X (1080/2)
-            y_pos = int(position.get('y', 960))  # Default center Y (1920/2)
-
+            # Each text has its own position defined in TTML via tts:origin
+            # No need for global positioning here - TTML handles it all
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
                 "DestinationSettings": {
                     "DestinationType": "BURN_IN",
                     "BurninDestinationSettings": {
                         "TeletextSpacing": "PROPORTIONAL",
-                        "FontSize": font_size,
-                        "FontColor": "WHITE",
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
                         "FontOpacity": 255,
-                        "OutlineSize": 0,
-                        "XPosition": x_pos,      # Center X position
-                        "YPosition": y_pos,      # Center Y position
-                        "Alignment": "CENTERED"  # Center text on XPosition (same as preview)
+                        "OutlineSize": 0
                     }
                 }
             }]
-            print(f"✅ Text position set to CENTER: X={x_pos}px, Y={y_pos}px, FontSize={font_size}px")
+            print(f"✅ Text overlays configured - {len(text_overlays)} texts with individual positions defined in TTML")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
@@ -382,15 +364,45 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 
 
 def generate_ttml_from_overlays(text_overlays):
-    """Convert text overlays to TTML format for MediaConvert subtitle burn-in"""
-    ttml_header = '''<?xml version="1.0" encoding="UTF-8"?>
+    """Convert text overlays to TTML format for MediaConvert subtitle burn-in with individual positioning"""
+
+    # Create styles for each text overlay with individual positions
+    styles = []
+    for i, overlay in enumerate(text_overlays):
+        position = overlay.get('position', {})
+        style_data = overlay.get('style', {})
+
+        # Get position (CENTER reference - same as frontend)
+        x_pos = position.get('x', 540)  # Default center X
+        y_pos = position.get('y', 960)  # Default center Y
+
+        # Get style
+        color = style_data.get('color', '#ffffff')
+        font_size = style_data.get('font_size', 80)
+
+        # Convert position from pixels (1080x1920 video) to percentage
+        # TTML origin is top-left corner, but we want CENTER positioning
+        # So we convert center position to top-left origin with offset
+        x_percent = (x_pos / 1080) * 100  # Center X position as percentage
+        y_percent = (y_pos / 1920) * 100  # Center Y position as percentage
+
+        style = f'''      <style xml:id="style{i+1}"
+             tts:fontFamily="Arial"
+             tts:fontSize="{font_size}px"
+             tts:color="{color}"
+             tts:textAlign="center"
+             tts:origin="{x_percent:.2f}% {y_percent:.2f}%"
+             tts:displayAlign="center"
+             tts:textShadow="2px 2px 2px black"/>'''
+        styles.append(style)
+
+    ttml_header = f'''<?xml version="1.0" encoding="UTF-8"?>
 <tt xmlns="http://www.w3.org/ns/ttml"
     xmlns:tts="http://www.w3.org/ns/ttml#styling"
     xml:lang="en">
   <head>
     <styling>
-      <style xml:id="style1" tts:fontFamily="Arial" tts:fontSize="32px" tts:color="white"
-             tts:textAlign="center" tts:textShadow="2px 2px 2px black"/>
+{chr(10).join(styles)}
     </styling>
   </head>
   <body>
@@ -414,7 +426,7 @@ def generate_ttml_from_overlays(text_overlays):
         start_ttml = seconds_to_ttml_time(start_time)
         end_ttml = seconds_to_ttml_time(end_time)
 
-        subtitle = f'      <p xml:id="subtitle{i+1}" begin="{start_ttml}" end="{end_ttml}" style="style1">{content}</p>'
+        subtitle = f'      <p xml:id="subtitle{i+1}" begin="{start_ttml}" end="{end_ttml}" style="style{i+1}">{content}</p>'
         subtitles.append(subtitle)
 
     return ttml_header + '\n'.join(subtitles) + ttml_footer
