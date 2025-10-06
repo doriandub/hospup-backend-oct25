@@ -257,12 +257,13 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         # Add subtitle burn-in if TTML exists
         if subtitle_s3_key and text_overlays:
             # Each text has its own position defined in TTML via tts:origin
-            # No need for global positioning here - TTML handles it all
+            # Use LEFT alignment to prevent MediaConvert from centering all text
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
                 "DestinationSettings": {
                     "DestinationType": "BURN_IN",
                     "BurninDestinationSettings": {
+                        "Alignment": "LEFT",  # Force left alignment - TTML regions control exact positioning
                         "TeletextSpacing": "PROPORTIONAL",
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
@@ -271,7 +272,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                     }
                 }
             }]
-            print(f"✅ Text overlays configured - {len(text_overlays)} texts with individual positions defined in TTML")
+            print(f"✅ Text overlays configured - {len(text_overlays)} texts with individual LEFT-aligned positions in TTML")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
@@ -383,33 +384,30 @@ def generate_ttml_from_overlays(text_overlays):
         font_size = style_data.get('font_size', 80)
 
         # Convert position from pixels (1080x1920 video) to percentage
-        # Position is CENTER of text, need to estimate text width/height for region
-        # We'll create a small region centered on the position
         x_percent = (x_pos / 1080) * 100
         y_percent = (y_pos / 1920) * 100
 
-        # Create region with origin at text center (approximation)
-        # Region needs origin (top-left) so we offset by approximate text size
-        # For centered text, we use a region that spans most of the line
-        region_width = 80  # percentage - wide enough for text
-        region_height = 10  # percentage - tall enough for one line
+        # Use narrow regions to prevent overlap and allow distinct horizontal positions
+        # Width of 1% means region starts at exact position, text expands to the right
+        region_width = 1  # Minimal width - text will expand as needed
+        region_height = 10  # Enough height for one line
 
-        # Center the region on the position
-        region_x = max(0, min(100 - region_width, x_percent - region_width/2))
+        # Position region origin at the intended position
+        region_x = max(0, min(100 - region_width, x_percent))
         region_y = max(0, min(100 - region_height, y_percent - region_height/2))
 
         region = f'''      <region xml:id="region{i+1}"
               tts:origin="{region_x:.2f}% {region_y:.2f}%"
               tts:extent="{region_width}% {region_height}%"
               tts:displayAlign="center"
-              tts:textAlign="center"/>'''
+              tts:textAlign="left"/>'''
         regions.append(region)
 
         style = f'''      <style xml:id="style{i+1}"
              tts:fontFamily="Arial"
              tts:fontSize="{font_size}px"
              tts:color="{color}"
-             tts:textAlign="center"
+             tts:textAlign="left"
              tts:textShadow="2px 2px 2px black"/>'''
         styles.append(style)
 
