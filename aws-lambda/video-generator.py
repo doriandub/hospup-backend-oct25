@@ -259,16 +259,18 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         # Add subtitle burn-in if TTML exists
         if subtitle_s3_key and text_overlays:
             # Each text has its own position defined in TTML via tts:origin
-            # StylePassthrough=ENABLED tells MediaConvert to use TTML positioning instead of default positioning
+            # StylePassthrough=ENABLED tells MediaConvert to use TTML positioning AND styling (including fonts)
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
                 "DestinationSettings": {
                     "DestinationType": "BURN_IN",
                     "BurninDestinationSettings": {
-                        "StylePassthrough": "ENABLED",  # CRITICAL: Enables TTML region positioning (tts:origin)
+                        "StylePassthrough": "ENABLED",  # CRITICAL: Enables TTML positioning (tts:origin) AND font styling (tts:fontFamily)
                         "TeletextSpacing": "PROPORTIONAL",
                         "FontScript": "AUTOMATIC",
-                        "FontFamily": dominant_font_family if dominant_font_family else "ARIAL",  # Set base font
+                        # NOTE: Do NOT set FontFamily here - it's not a valid parameter
+                        # TTML handles fonts via tts:fontFamily="serif/sansSerif/monospace"
+                        # StylePassthrough=ENABLED makes MediaConvert respect TTML font choices
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
                         "FontOpacity": 255,
@@ -276,7 +278,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                     }
                 }
             }]
-            print(f"✅ Text overlays configured - {len(text_overlays)} texts with StylePassthrough enabled for TTML positioning")
+            print(f"✅ Text overlays configured - {len(text_overlays)} texts with StylePassthrough=ENABLED (TTML controls fonts: {dominant_font_family or 'serif'})")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
