@@ -82,10 +82,10 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 
         # Generate TTML subtitle file if text overlays exist
         subtitle_s3_key = None
-        dominant_font_family = None
+        dominant_font_info = None
         if text_overlays:
             print(f"📝 Generating TTML subtitles for {len(text_overlays)} text overlays")
-            ttml_content, dominant_font_family = generate_ttml_from_overlays(text_overlays)
+            ttml_content, dominant_font_info = generate_ttml_from_overlays(text_overlays)
             subtitle_s3_key = f"subtitles/{job_id}/subtitles.ttml"
 
             # Upload TTML to S3
@@ -257,20 +257,47 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         }]
 
         # Add subtitle burn-in if TTML exists
-        if subtitle_s3_key and text_overlays:
-            # Each text has its own position defined in TTML via tts:origin
-            # StylePassthrough=ENABLED tells MediaConvert to use TTML positioning AND styling (including fonts)
+        if subtitle_s3_key and text_overlays and dominant_font_info:
+            # Build font file paths based on weight and style
+            font_base = dominant_font_info['s3_base']
+            weight = dominant_font_info['weight']
+            style = dominant_font_info['style']
+
+            # Determine which font variant files to use
+            # Regular = normal weight + normal style
+            # Bold = bold weight + normal style
+            # Italic = normal weight + italic style
+            # BoldItalic = bold weight + italic style
+            font_regular = f"{font_base}-Regular.ttf"
+            font_bold = f"{font_base}-Bold.ttf"
+            font_italic = f"{font_base}-Italic.ttf"
+            font_bold_italic = f"{font_base}-BoldItalic.ttf"
+
+            # For Pacifico (only has Regular)
+            if 'Pacifico' in font_base:
+                font_bold = font_regular
+                font_italic = font_regular
+                font_bold_italic = font_regular
+
+            print(f"🔤 Using custom fonts from S3:")
+            print(f"   Regular: {font_regular}")
+            print(f"   Bold: {font_bold}")
+            print(f"   Italic: {font_italic}")
+            print(f"   BoldItalic: {font_bold_italic}")
+
             outputs[0]["CaptionDescriptions"] = [{
                 "CaptionSelectorName": "Caption Selector 1",
                 "DestinationSettings": {
                     "DestinationType": "BURN_IN",
                     "BurninDestinationSettings": {
-                        "StylePassthrough": "ENABLED",  # CRITICAL: Enables TTML positioning (tts:origin) AND font styling (tts:fontFamily)
+                        "StylePassthrough": "ENABLED",  # CRITICAL: Enables TTML positioning (tts:origin)
                         "TeletextSpacing": "PROPORTIONAL",
                         "FontScript": "AUTOMATIC",
-                        # NOTE: Do NOT set FontFamily here - it's not a valid parameter
-                        # TTML handles fonts via tts:fontFamily="serif/sansSerif/monospace"
-                        # StylePassthrough=ENABLED makes MediaConvert respect TTML font choices
+                        # Custom font files from S3
+                        "FontFileRegular": font_regular,
+                        "FontFileBold": font_bold,
+                        "FontFileItalic": font_italic,
+                        "FontFileBoldItalic": font_bold_italic,
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
                         "FontOpacity": 255,
@@ -278,7 +305,7 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                     }
                 }
             }]
-            print(f"✅ Text overlays configured - {len(text_overlays)} texts with StylePassthrough=ENABLED (TTML controls fonts: {dominant_font_family or 'serif'})")
+            print(f"✅ Text overlays configured - {len(text_overlays)} texts with custom font: {dominant_font_info['font_name']}")
 
             # Add caption selector to first input
             inputs[0]["CaptionSelectors"] = {
@@ -370,52 +397,70 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         }
 
 
-def map_font_to_mediaconvert_ttml(font_family):
-    """Map web fonts to MediaConvert TTML generic font families"""
-    # MediaConvert TTML supports: default, monospace, sansSerif, serif,
-    # monospaceSansSerif, monospaceSerif, proportionalSansSerif, proportionalSerif
+def map_font_to_s3_files(font_family):
+    """Map web font names to S3 font file paths
 
+    Returns: tuple (font_name, s3_base_path) where font_name is for logging
+    and s3_base_path is the S3 path without variant suffix
+    """
+    S3_BUCKET = os.environ.get('S3_BUCKET', 'hospup-files')
     font_lower = font_family.lower()
 
-    # Monospace fonts
-    if any(m in font_lower for m in ['courier', 'mono', 'consolas', 'menlo', 'monaco']):
-        return 'monospace'
-
-    # Sans-serif fonts (check BEFORE serif to avoid matching "sans-serif" as "serif")
-    if 'sans-serif' in font_lower or any(s in font_lower for s in ['arial', 'helvetica', 'roboto', 'verdana']):
-        return 'sansSerif'
+    # Sans-serif fonts
+    if 'roboto' in font_lower and 'mono' not in font_lower:
+        return ('Roboto', f's3://{S3_BUCKET}/fonts/Roboto')
+    elif 'open sans' in font_lower or 'opensans' in font_lower:
+        return ('Open Sans', f's3://{S3_BUCKET}/fonts/OpenSans')
+    elif 'montserrat' in font_lower:
+        return ('Montserrat', f's3://{S3_BUCKET}/fonts/Montserrat')
+    elif 'lato' in font_lower:
+        return ('Lato', f's3://{S3_BUCKET}/fonts/Lato')
 
     # Serif fonts
-    if any(s in font_lower for s in ['times', 'georgia', 'garamond', 'palatino', 'baskerville', 'serif']):
-        return 'serif'
+    elif 'playfair' in font_lower:
+        return ('Playfair Display', f's3://{S3_BUCKET}/fonts/PlayfairDisplay')
+    elif 'merriweather' in font_lower:
+        return ('Merriweather', f's3://{S3_BUCKET}/fonts/Merriweather')
+    elif 'lora' in font_lower:
+        return ('Lora', f's3://{S3_BUCKET}/fonts/Lora')
+    elif 'times' in font_lower or 'georgia' in font_lower or 'serif' in font_lower:
+        # Default serif → Merriweather (elegant serif like Times)
+        return ('Merriweather', f's3://{S3_BUCKET}/fonts/Merriweather')
 
-    # Default to sans-serif for all other fonts
-    return 'sansSerif'
+    # Monospace fonts
+    elif 'roboto mono' in font_lower or 'robotomono' in font_lower:
+        return ('Roboto Mono', f's3://{S3_BUCKET}/fonts/RobotoMono')
+    elif 'source code' in font_lower or 'sourcecodepro' in font_lower:
+        return ('Source Code Pro', f's3://{S3_BUCKET}/fonts/SourceCodePro')
+    elif 'courier' in font_lower or 'mono' in font_lower:
+        return ('Roboto Mono', f's3://{S3_BUCKET}/fonts/RobotoMono')
 
+    # Display/Fun fonts
+    elif 'pacifico' in font_lower:
+        return ('Pacifico', f's3://{S3_BUCKET}/fonts/Pacifico')
 
-def map_font_to_mediaconvert_burnin(font_family_ttml):
-    """Map TTML font family to MediaConvert BurninDestinationSettings FontFamily"""
-    # MediaConvert BurninDestinationSettings supports: ARIAL, COURIER, TIMES_NEW_ROMAN
-
-    if font_family_ttml == 'monospace':
-        return 'COURIER'
-    elif font_family_ttml == 'serif':
-        return 'TIMES_NEW_ROMAN'
-    else:  # sansSerif or default
-        return 'ARIAL'
+    # Default: Roboto (clean sans-serif)
+    else:
+        return ('Roboto', f's3://{S3_BUCKET}/fonts/Roboto')
 
 
 def generate_ttml_from_overlays(text_overlays):
     """Convert text overlays to TTML format for MediaConvert subtitle burn-in with individual positioning
 
     Returns:
-        tuple: (ttml_content, dominant_font_burnin) where dominant_font_burnin is 'ARIAL', 'COURIER', or 'TIMES_NEW_ROMAN'
+        tuple: (ttml_content, font_files_dict) where font_files_dict contains:
+        {
+            'font_name': str,  # Display name
+            's3_base': str,    # S3 base path for font files
+            'weight': str,     # 'normal' or 'bold'
+            'style': str       # 'normal' or 'italic'
+        }
     """
 
     # Create styles and regions for each text overlay with individual positions
     styles = []
     regions = []
-    font_families_ttml = []  # Track all fonts to find dominant
+    font_info_list = []  # Track all fonts with weights/styles
 
     for i, overlay in enumerate(text_overlays):
         content = overlay.get('content', '')
@@ -429,15 +474,20 @@ def generate_ttml_from_overlays(text_overlays):
         # Get style (including font family, weight, style)
         color = style_data.get('color', '#ffffff')
         font_size = style_data.get('font_size', 80)
-        font_family_original = style_data.get('fontFamily', 'Arial')
+        font_family_original = style_data.get('fontFamily', 'Arial, sans-serif')
         font_weight = style_data.get('fontWeight', 'normal')
         font_style = style_data.get('fontStyle', 'normal')
 
-        # Map to MediaConvert TTML supported font
-        font_family_ttml = map_font_to_mediaconvert_ttml(font_family_original)
-        font_families_ttml.append(font_family_ttml)
+        # Map to S3 font files
+        font_name, s3_base = map_font_to_s3_files(font_family_original)
+        font_info_list.append({
+            'font_name': font_name,
+            's3_base': s3_base,
+            'weight': font_weight,
+            'style': font_style
+        })
 
-        print(f"📝 Text {i+1}: '{content}' - Original: {font_family_original} → TTML: {font_family_ttml}, Weight: {font_weight}, Style: {font_style}")
+        print(f"📝 Text {i+1}: '{content}' - Original: {font_family_original} → S3 Font: {font_name}, Weight: {font_weight}, Style: {font_style}")
 
         # Use VERY WIDE region (2000px) to ensure NO wrapping even for long text
         # Region is wider than video (1080px) so text will never wrap
@@ -457,7 +507,6 @@ def generate_ttml_from_overlays(text_overlays):
         regions.append(region)
 
         style = f'''      <style xml:id="style{i+1}"
-             tts:fontFamily="{font_family_ttml}"
              tts:fontSize="{font_size}px"
              tts:fontWeight="{font_weight}"
              tts:fontStyle="{font_style}"
@@ -510,19 +559,27 @@ def generate_ttml_from_overlays(text_overlays):
         subtitle = f'      <p xml:id="subtitle{i+1}" begin="{start_ttml}" end="{end_ttml}" style="style{i+1}" region="region{i+1}">{content}</p>'
         subtitles.append(subtitle)
 
-    # Find dominant font family (most common)
-    dominant_font_ttml = 'sansSerif'  # Default
-    if font_families_ttml:
-        from collections import Counter
-        font_counter = Counter(font_families_ttml)
-        dominant_font_ttml = font_counter.most_common(1)[0][0]
+    # Find dominant font (most common)
+    from collections import Counter
+    font_names = [f['font_name'] for f in font_info_list]
+    dominant_font_info = font_info_list[0] if font_info_list else {
+        'font_name': 'Roboto',
+        's3_base': 's3://hospup-files/fonts/Roboto',
+        'weight': 'normal',
+        'style': 'normal'
+    }
 
-    # Convert to MediaConvert burn-in font family
-    dominant_font_burnin = map_font_to_mediaconvert_burnin(dominant_font_ttml)
-    print(f"🎨 Dominant font: {dominant_font_ttml} → BurninDestinationSettings FontFamily: {dominant_font_burnin}")
+    if len(font_info_list) > 1:
+        # If multiple fonts, pick the most common
+        font_counter = Counter(font_names)
+        most_common_name = font_counter.most_common(1)[0][0]
+        # Find first occurrence of this font with its weight/style
+        dominant_font_info = next(f for f in font_info_list if f['font_name'] == most_common_name)
+
+    print(f"🎨 Dominant font: {dominant_font_info['font_name']} ({dominant_font_info['weight']}, {dominant_font_info['style']})")
 
     ttml_content = ttml_header + '\n'.join(subtitles) + ttml_footer
-    return (ttml_content, dominant_font_burnin)
+    return (ttml_content, dominant_font_info)
 
 
 def seconds_to_ttml_time(seconds):
