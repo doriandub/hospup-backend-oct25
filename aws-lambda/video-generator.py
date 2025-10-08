@@ -381,11 +381,15 @@ def map_font_to_mediaconvert_ttml(font_family):
     if any(m in font_lower for m in ['courier', 'mono', 'consolas', 'menlo', 'monaco']):
         return 'monospace'
 
+    # Sans-serif fonts (check BEFORE serif to avoid matching "sans-serif" as "serif")
+    if 'sans-serif' in font_lower or any(s in font_lower for s in ['arial', 'helvetica', 'roboto', 'verdana']):
+        return 'sansSerif'
+
     # Serif fonts
     if any(s in font_lower for s in ['times', 'georgia', 'garamond', 'palatino', 'baskerville', 'serif']):
         return 'serif'
 
-    # Default to sans-serif for all other fonts (Arial, Helvetica, Roboto, etc.)
+    # Default to sans-serif for all other fonts
     return 'sansSerif'
 
 
