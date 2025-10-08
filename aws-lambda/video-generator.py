@@ -37,6 +37,7 @@ def lambda_handler(event, context):
         webhook_url = body.get('webhook_url')
 
         print(f"🔍 CUSTOM SCRIPT DEBUG: {json.dumps(custom_script, indent=2)}")
+        print(f"🔍 TEXT OVERLAYS DEBUG: {json.dumps(text_overlays, indent=2)}")
         print(f"🔍 PROCESSING METHOD: MediaConvert with TTML subtitle burn-in")
 
         # Valider les données
@@ -81,9 +82,10 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
 
         # Generate TTML subtitle file if text overlays exist
         subtitle_s3_key = None
+        dominant_font_family = None
         if text_overlays:
             print(f"📝 Generating TTML subtitles for {len(text_overlays)} text overlays")
-            ttml_content = generate_ttml_from_overlays(text_overlays)
+            ttml_content, dominant_font_family = generate_ttml_from_overlays(text_overlays)
             subtitle_s3_key = f"subtitles/{job_id}/subtitles.ttml"
 
             # Upload TTML to S3
@@ -265,6 +267,8 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
                     "BurninDestinationSettings": {
                         "StylePassthrough": "ENABLED",  # CRITICAL: Enables TTML region positioning (tts:origin)
                         "TeletextSpacing": "PROPORTIONAL",
+                        "FontScript": "AUTOMATIC",
+                        "FontFamily": dominant_font_family if dominant_font_family else "ARIAL",  # Set base font
                         "BackgroundColor": "NONE",
                         "BackgroundOpacity": 0,
                         "FontOpacity": 255,
@@ -364,14 +368,51 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         }
 
 
+def map_font_to_mediaconvert_ttml(font_family):
+    """Map web fonts to MediaConvert TTML generic font families"""
+    # MediaConvert TTML supports: default, monospace, sansSerif, serif,
+    # monospaceSansSerif, monospaceSerif, proportionalSansSerif, proportionalSerif
+
+    font_lower = font_family.lower()
+
+    # Monospace fonts
+    if any(m in font_lower for m in ['courier', 'mono', 'consolas', 'menlo', 'monaco']):
+        return 'monospace'
+
+    # Serif fonts
+    if any(s in font_lower for s in ['times', 'georgia', 'garamond', 'palatino', 'baskerville', 'serif']):
+        return 'serif'
+
+    # Default to sans-serif for all other fonts (Arial, Helvetica, Roboto, etc.)
+    return 'sansSerif'
+
+
+def map_font_to_mediaconvert_burnin(font_family_ttml):
+    """Map TTML font family to MediaConvert BurninDestinationSettings FontFamily"""
+    # MediaConvert BurninDestinationSettings supports: ARIAL, COURIER, TIMES_NEW_ROMAN
+
+    if font_family_ttml == 'monospace':
+        return 'COURIER'
+    elif font_family_ttml == 'serif':
+        return 'TIMES_NEW_ROMAN'
+    else:  # sansSerif or default
+        return 'ARIAL'
+
+
 def generate_ttml_from_overlays(text_overlays):
-    """Convert text overlays to TTML format for MediaConvert subtitle burn-in with individual positioning"""
+    """Convert text overlays to TTML format for MediaConvert subtitle burn-in with individual positioning
+
+    Returns:
+        tuple: (ttml_content, dominant_font_burnin) where dominant_font_burnin is 'ARIAL', 'COURIER', or 'TIMES_NEW_ROMAN'
+    """
 
     # Create styles and regions for each text overlay with individual positions
     styles = []
     regions = []
+    font_families_ttml = []  # Track all fonts to find dominant
 
     for i, overlay in enumerate(text_overlays):
+        content = overlay.get('content', '')
         position = overlay.get('position', {})
         style_data = overlay.get('style', {})
 
@@ -379,9 +420,18 @@ def generate_ttml_from_overlays(text_overlays):
         x_pos = position.get('x', 540)  # Default center X
         y_pos = position.get('y', 960)  # Default center Y
 
-        # Get style
+        # Get style (including font family, weight, style)
         color = style_data.get('color', '#ffffff')
         font_size = style_data.get('font_size', 80)
+        font_family_original = style_data.get('fontFamily', 'Arial')
+        font_weight = style_data.get('fontWeight', 'normal')
+        font_style = style_data.get('fontStyle', 'normal')
+
+        # Map to MediaConvert TTML supported font
+        font_family_ttml = map_font_to_mediaconvert_ttml(font_family_original)
+        font_families_ttml.append(font_family_ttml)
+
+        print(f"📝 Text {i+1}: '{content}' - Original: {font_family_original} → TTML: {font_family_ttml}, Weight: {font_weight}, Style: {font_style}")
 
         # Use VERY WIDE region (2000px) to ensure NO wrapping even for long text
         # Region is wider than video (1080px) so text will never wrap
@@ -401,8 +451,10 @@ def generate_ttml_from_overlays(text_overlays):
         regions.append(region)
 
         style = f'''      <style xml:id="style{i+1}"
-             tts:fontFamily="Arial"
+             tts:fontFamily="{font_family_ttml}"
              tts:fontSize="{font_size}px"
+             tts:fontWeight="{font_weight}"
+             tts:fontStyle="{font_style}"
              tts:color="{color}"
              tts:textAlign="center"
              tts:textShadow="2px 2px 4px black"/>'''
@@ -452,7 +504,19 @@ def generate_ttml_from_overlays(text_overlays):
         subtitle = f'      <p xml:id="subtitle{i+1}" begin="{start_ttml}" end="{end_ttml}" style="style{i+1}" region="region{i+1}">{content}</p>'
         subtitles.append(subtitle)
 
-    return ttml_header + '\n'.join(subtitles) + ttml_footer
+    # Find dominant font family (most common)
+    dominant_font_ttml = 'sansSerif'  # Default
+    if font_families_ttml:
+        from collections import Counter
+        font_counter = Counter(font_families_ttml)
+        dominant_font_ttml = font_counter.most_common(1)[0][0]
+
+    # Convert to MediaConvert burn-in font family
+    dominant_font_burnin = map_font_to_mediaconvert_burnin(dominant_font_ttml)
+    print(f"🎨 Dominant font: {dominant_font_ttml} → BurninDestinationSettings FontFamily: {dominant_font_burnin}")
+
+    ttml_content = ttml_header + '\n'.join(subtitles) + ttml_footer
+    return (ttml_content, dominant_font_burnin)
 
 
 def seconds_to_ttml_time(seconds):

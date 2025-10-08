@@ -51,6 +51,64 @@ class VideoUpdateRequest(BaseModel):
     status: Optional[str] = None
     duration: Optional[int] = None
 
+class VideoCreateRequest(BaseModel):
+    """
+    Schema pour créer une nouvelle vidéo
+    """
+    property_id: int
+    title: str
+    description: Optional[str] = None
+    file_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    video_type: Optional[str] = "generated"  # Default: generated
+    status: Optional[str] = "processing"  # Default: processing (until MediaConvert finishes)
+    duration: Optional[int] = None
+
+@router.post("")
+async def create_video(
+    video_data: VideoCreateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Créer une nouvelle vidéo en base de données
+    Utilisé par le frontend après avoir lancé MediaConvert
+    """
+    try:
+        logger.info(f"📹 Creating new video: {video_data.title}")
+
+        # Créer la vidéo
+        new_video = Video(
+            property_id=video_data.property_id,
+            title=video_data.title,
+            description=video_data.description,
+            file_url=video_data.file_url,
+            thumbnail_url=video_data.thumbnail_url,
+            video_type=video_data.video_type,
+            status=video_data.status,
+            duration=video_data.duration
+        )
+
+        db.add(new_video)
+        await db.commit()
+        await db.refresh(new_video)
+
+        logger.info(f"✅ Video created successfully: {new_video.id}")
+
+        return {
+            "id": str(new_video.id),
+            "status": "success",
+            "message": "Video created successfully"
+        }
+
+    except Exception as e:
+        logger.error(f"❌ Failed to create video: {str(e)}")
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create video: {str(e)}"
+        )
+
 @router.post("/test-callback")
 async def test_callback():
     """Debug endpoint to test if AWS Lambda can reach us"""
