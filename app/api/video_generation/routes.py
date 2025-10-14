@@ -445,9 +445,9 @@ async def generate_video_mediaconvert(
     request: MediaConvertRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    """MediaConvert video generation endpoint - compatible with frontend"""
+    """🚀 ECS Fargate FFmpeg video generation endpoint (zéro cold start)"""
     try:
-        logger.info(f"🎬 Clean MediaConvert generation request received")
+        logger.info(f"🎬 FFmpeg generation request received (ECS Fargate)")
         logger.info(f"📊 Payload: property_id={request.property_id}, video_id={request.video_id}, job_id={request.job_id}")
         logger.info(f"📹 Data: {len(request.segments)} segments, {len(request.text_overlays)} overlays, total_duration={request.total_duration}s")
 
@@ -461,7 +461,7 @@ async def generate_video_mediaconvert(
                 new_video = Video(
                     id=request.video_id,
                     title=f"Generated Video {request.video_id[:8]}",
-                    description=f"MediaConvert job {request.job_id}",
+                    description=f"ECS FFmpeg job {request.job_id}",
                     property_id=int(request.property_id) if request.property_id.isdigit() else None,
                     user_id=user_id,
                     status="processing",
@@ -476,46 +476,39 @@ async def generate_video_mediaconvert(
             logger.error(f"❌ Database error: {str(db_error)}")
             logger.info("📝 Continuing without database record...")
 
-        # Invoke AWS Lambda
-        import boto3
+        # Send to SQS for ECS Fargate processing (zéro cold start)
         import asyncio
+        from .sqs_service import send_video_job_to_sqs
 
-        lambda_payload = {
-            "body": json.dumps({
-                "property_id": request.property_id,
-                "video_id": request.video_id,
-                "job_id": request.job_id,
-                "segments": request.segments,
-                "text_overlays": request.text_overlays,
-                "total_duration": request.total_duration,
-                "custom_script": request.custom_script or {},
-                "webhook_url": request.webhook_url
-            })
-        }
-
-        lambda_client = boto3.client('lambda', region_name='eu-west-1')
-        lambda_response = await asyncio.get_event_loop().run_in_executor(
+        sqs_result = await asyncio.get_event_loop().run_in_executor(
             None,
-            lambda: lambda_client.invoke(
-                FunctionName='hospup-video-generator',
-                InvocationType='Event',
-                Payload=json.dumps(lambda_payload)
+            lambda: send_video_job_to_sqs(
+                property_id=request.property_id,
+                video_id=request.video_id,
+                job_id=request.job_id,
+                segments=request.segments,
+                text_overlays=request.text_overlays,
+                total_duration=request.total_duration,
+                custom_script=request.custom_script or {},
+                webhook_url=request.webhook_url
             )
         )
 
-        logger.info(f"✅ AWS Lambda invoked successfully for job {request.job_id}")
+        logger.info(f"✅ Job sent to SQS successfully for ECS Fargate processing")
+        logger.info(f"   Message ID: {sqs_result.get('message_id')}")
+        logger.info(f"   Queue: {sqs_result.get('queue_url')}")
 
         return MediaConvertJobResponse(
             job_id=request.job_id,
             status="SUBMITTED",
-            message="MediaConvert job created successfully"
+            message="Video generation job queued for ECS Fargate FFmpeg processing (custom fonts)"
         )
 
     except Exception as e:
-        logger.error(f"❌ MediaConvert generation failed: {str(e)}")
+        logger.error(f"❌ Video generation failed: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"MediaConvert generation failed: {str(e)}"
+            detail=f"Video generation failed: {str(e)}"
         )
 
 
