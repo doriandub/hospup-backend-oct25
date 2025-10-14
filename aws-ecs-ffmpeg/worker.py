@@ -62,7 +62,17 @@ def upload_to_s3(local_path: str, s3_url: str):
         raise ValueError(f"Invalid S3 URL: {s3_url}")
 
     logger.info(f"Uploading {local_path} to s3://{bucket}/{key}")
-    s3_client.upload_file(local_path, bucket, key)
+
+    # Upload avec Content-Type pour affichage dans le navigateur
+    s3_client.upload_file(
+        local_path,
+        bucket,
+        key,
+        ExtraArgs={
+            'ContentType': 'video/mp4',
+            'ContentDisposition': 'inline'  # Afficher au lieu de télécharger
+        }
+    )
 
     # Return HTTPS URL
     return f"https://s3.{AWS_REGION}.amazonaws.com/{bucket}/{key}"
@@ -206,6 +216,16 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
     logger.info(f"🎬 Processing job {job_id} (video_id={video_id})")
     logger.info(f"   Segments: {len(segments)}, Text overlays: {len(text_overlays)}")
 
+    # Validate job has segments
+    if not segments or len(segments) == 0:
+        logger.error(f"❌ Job {job_id} has no segments!")
+        return {
+            'status': 'ERROR',
+            'job_id': job_id,
+            'video_id': video_id,
+            'error': 'No video segments provided'
+        }
+
     start_time = time.time()
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -287,17 +307,24 @@ def main():
     while True:
         try:
             # Long polling (20s) - réduit les coûts SQS
-            response = sqs_client.receive_message(
-                QueueUrl=SQS_QUEUE_URL,
-                MaxNumberOfMessages=1,
-                WaitTimeSeconds=20,
-                VisibilityTimeout=900  # 15 min pour traiter le job
-            )
+            logger.info(f"📡 Polling SQS queue: {SQS_QUEUE_URL}")
+            try:
+                response = sqs_client.receive_message(
+                    QueueUrl=SQS_QUEUE_URL,
+                    MaxNumberOfMessages=1,
+                    WaitTimeSeconds=20,
+                    VisibilityTimeout=900  # 15 min pour traiter le job
+                )
+            except Exception as sqs_error:
+                logger.error(f"❌ SQS receive_message ERROR: {type(sqs_error).__name__}: {str(sqs_error)}")
+                time.sleep(5)
+                continue
 
             messages = response.get('Messages', [])
+            logger.info(f"📬 Received {len(messages)} message(s)")
 
             if not messages:
-                logger.debug("No messages, continuing...")
+                logger.info("⏳ No messages, continuing polling...")
                 continue
 
             for message in messages:
