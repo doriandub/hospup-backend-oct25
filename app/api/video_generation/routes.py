@@ -483,6 +483,9 @@ async def generate_video_mediaconvert(
         import asyncio
         from .sqs_service import send_video_job_to_sqs
 
+        print(f"🔄 About to send job to SQS: {request.job_id}")
+        logger.info(f"🔄 About to send job to SQS: {request.job_id}")
+
         sqs_result = await asyncio.get_event_loop().run_in_executor(
             None,
             lambda: send_video_job_to_sqs(

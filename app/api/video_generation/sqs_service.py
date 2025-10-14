@@ -57,6 +57,9 @@ def send_video_job_to_sqs(
             'webhook_url': webhook_url
         }
 
+        print(f"📤 Sending video job to SQS: {job_id}")
+        print(f"   Queue: {SQS_QUEUE_URL}")
+        print(f"   Segments: {len(segments)}, Overlays: {len(text_overlays)}")
         logger.info(f"📤 Sending video job to SQS: {job_id}")
         logger.info(f"   Queue: {SQS_QUEUE_URL}")
         logger.info(f"   Segments: {len(segments)}, Overlays: {len(text_overlays)}")
@@ -78,6 +81,7 @@ def send_video_job_to_sqs(
         )
 
         message_id = response.get('MessageId')
+        print(f"✅ Job sent to SQS successfully: message_id={message_id}")
         logger.info(f"✅ Job sent to SQS successfully: message_id={message_id}")
 
         return {
@@ -88,6 +92,7 @@ def send_video_job_to_sqs(
         }
 
     except Exception as e:
+        print(f"❌ Failed to send job to SQS: {str(e)}")
         logger.error(f"❌ Failed to send job to SQS: {str(e)}")
         raise Exception(f"SQS send failed: {str(e)}")
 
