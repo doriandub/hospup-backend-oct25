@@ -90,9 +90,29 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
     # Build filter_complex
     filters = []
 
-    # 1. Concatenate videos
-    concat_inputs = ''.join([f'[{i}:v][{i}:a]' for i in range(len(input_files))])
-    filters.append(f'{concat_inputs}concat=n={len(input_files)}:v=1:a=1[video][audio]')
+    # 1. Check if videos have audio streams using ffprobe
+    has_audio = []
+    for i, input_file in enumerate(input_files):
+        probe_cmd = ['ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1', input_file]
+        result = subprocess.run(probe_cmd, capture_output=True, text=True)
+        has_audio.append(result.stdout.strip() == 'audio')
+
+    # 2. Concatenate videos (handle missing audio)
+    if any(has_audio):
+        # Generate silent audio for videos without audio
+        for i in range(len(input_files)):
+            if not has_audio[i]:
+                filters.append(f'[{i}:v]anullsrc=channel_layout=stereo:sample_rate=44100[a{i}]')
+
+        # Concat with audio
+        concat_inputs = ''.join([f'[{i}:v][{"a" + str(i) if not has_audio[i] else str(i) + ":a"}]' for i in range(len(input_files))])
+        filters.append(f'{concat_inputs}concat=n={len(input_files)}:v=1:a=1[video][audio]')
+    else:
+        # No audio in any video - video only concat
+        concat_inputs = ''.join([f'[{i}:v]' for i in range(len(input_files))])
+        filters.append(f'{concat_inputs}concat=n={len(input_files)}:v=1:a=0[video]')
+        # Generate silent audio track
+        filters.append(f'anullsrc=channel_layout=stereo:sample_rate=44100[audio]')
 
     # 2. Add text overlays with different fonts
     video_label = 'video'
@@ -108,9 +128,24 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
         # Get font file path
         fontfile = FONT_MAP.get(font_family, FONT_MAP['Roboto'])
 
-        # Convert hex color to FFmpeg format
-        if color.startswith('#'):
+        # Convert color to FFmpeg hex format
+        # Map named colors to hex
+        color_map = {
+            'white': 'FFFFFF',
+            'black': '000000',
+            'red': 'FF0000',
+            'green': '00FF00',
+            'blue': '0000FF',
+            'yellow': 'FFFF00',
+            'cyan': '00FFFF',
+            'magenta': 'FF00FF',
+        }
+
+        if color.lower() in color_map:
+            color = color_map[color.lower()]
+        elif color.startswith('#'):
             color = color[1:]  # Remove #
+        # If already hex (no #), use as-is
 
         # Calculate position (center anchor)
         x = position['x']
