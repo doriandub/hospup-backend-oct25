@@ -486,19 +486,24 @@ async def generate_video_mediaconvert(
         print(f"🔄 About to send job to SQS: {request.job_id}")
         logger.info(f"🔄 About to send job to SQS: {request.job_id}")
 
-        sqs_result = await asyncio.get_event_loop().run_in_executor(
-            None,
-            lambda: send_video_job_to_sqs(
-                property_id=request.property_id,
-                video_id=request.video_id,
-                job_id=request.job_id,
-                segments=request.segments,
-                text_overlays=request.text_overlays,
-                total_duration=request.total_duration,
-                custom_script=request.custom_script or {},
-                webhook_url=request.webhook_url
+        try:
+            sqs_result = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: send_video_job_to_sqs(
+                    property_id=request.property_id,
+                    video_id=request.video_id,
+                    job_id=request.job_id,
+                    segments=request.segments,
+                    text_overlays=request.text_overlays,
+                    total_duration=request.total_duration,
+                    custom_script=request.custom_script or {},
+                    webhook_url=request.webhook_url
+                )
             )
-        )
+        except Exception as sqs_error:
+            print(f"❌ SQS EXCEPTION in run_in_executor: {str(sqs_error)}")
+            logger.error(f"❌ SQS EXCEPTION: {str(sqs_error)}")
+            raise
 
         print(f"✅ Job sent to SQS successfully for ECS Fargate processing")
         print(f"   Message ID: {sqs_result.get('message_id')}")
