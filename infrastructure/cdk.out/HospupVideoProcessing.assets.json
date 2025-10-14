@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "f0acd43a8660e3f19bdabc4420fb65bf4dcb26cafc2f02991b72c56ba858b69f": {
+      "displayName": "HospupVideoProcessing Template",
+      "source": {
+        "path": "HospupVideoProcessing.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "412655955859-eu-west-1-3e9b21e8": {
+          "bucketName": "cdk-hnb659fds-assets-412655955859-eu-west-1",
+          "objectKey": "f0acd43a8660e3f19bdabc4420fb65bf4dcb26cafc2f02991b72c56ba858b69f.json",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::412655955859:role/cdk-hnb659fds-file-publishing-role-412655955859-eu-west-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

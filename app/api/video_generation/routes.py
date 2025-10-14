@@ -447,6 +447,9 @@ async def generate_video_mediaconvert(
 ):
     """🚀 ECS Fargate FFmpeg video generation endpoint (zéro cold start)"""
     try:
+        print(f"🎬 FFmpeg generation request received (ECS Fargate)")
+        print(f"📊 Payload: property_id={request.property_id}, video_id={request.video_id}, job_id={request.job_id}")
+        print(f"📹 Data: {len(request.segments)} segments, {len(request.text_overlays)} overlays, total_duration={request.total_duration}s")
         logger.info(f"🎬 FFmpeg generation request received (ECS Fargate)")
         logger.info(f"📊 Payload: property_id={request.property_id}, video_id={request.video_id}, job_id={request.job_id}")
         logger.info(f"📹 Data: {len(request.segments)} segments, {len(request.text_overlays)} overlays, total_duration={request.total_duration}s")
@@ -494,6 +497,9 @@ async def generate_video_mediaconvert(
             )
         )
 
+        print(f"✅ Job sent to SQS successfully for ECS Fargate processing")
+        print(f"   Message ID: {sqs_result.get('message_id')}")
+        print(f"   Queue: {sqs_result.get('queue_url')}")
         logger.info(f"✅ Job sent to SQS successfully for ECS Fargate processing")
         logger.info(f"   Message ID: {sqs_result.get('message_id')}")
         logger.info(f"   Queue: {sqs_result.get('queue_url')}")
@@ -505,6 +511,7 @@ async def generate_video_mediaconvert(
         )
 
     except Exception as e:
+        print(f"❌ Video generation failed: {str(e)}")
         logger.error(f"❌ Video generation failed: {str(e)}")
         raise HTTPException(
             status_code=500,

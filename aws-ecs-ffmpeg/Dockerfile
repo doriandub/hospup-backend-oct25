@@ -1,0 +1,48 @@
+# Dockerfile pour ECS Fargate FFmpeg Worker (zéro cold start)
+FROM public.ecr.aws/docker/library/python:3.11-slim
+
+# Install FFmpeg + fontconfig
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    fontconfig \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Télécharger polices Google Fonts (complètes, non-subset)
+RUN mkdir -p /usr/share/fonts/truetype/google-fonts
+
+# Roboto
+RUN wget -O /usr/share/fonts/truetype/google-fonts/Roboto-Regular.ttf \
+    https://github.com/google/roboto/raw/main/src/hinted/Roboto-Regular.ttf
+RUN wget -O /usr/share/fonts/truetype/google-fonts/Roboto-Bold.ttf \
+    https://github.com/google/roboto/raw/main/src/hinted/Roboto-Bold.ttf
+
+# Montserrat
+RUN wget -O /usr/share/fonts/truetype/google-fonts/Montserrat-Regular.ttf \
+    https://github.com/JulietaUla/Montserrat/raw/master/fonts/ttf/Montserrat-Regular.ttf
+RUN wget -O /usr/share/fonts/truetype/google-fonts/Montserrat-Bold.ttf \
+    https://github.com/JulietaUla/Montserrat/raw/master/fonts/ttf/Montserrat-Bold.ttf
+
+# Open Sans
+RUN wget -O /usr/share/fonts/truetype/google-fonts/OpenSans-Regular.ttf \
+    https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Regular.ttf
+RUN wget -O /usr/share/fonts/truetype/google-fonts/OpenSans-Bold.ttf \
+    https://github.com/googlefonts/opensans/raw/main/fonts/ttf/OpenSans-Bold.ttf
+
+# Rebuild font cache
+RUN fc-cache -fv
+
+# Install Python dependencies
+RUN pip install --no-cache-dir boto3 requests
+
+# Copy worker script
+WORKDIR /app
+COPY worker.py /app/
+
+# Environment variables
+ENV AWS_DEFAULT_REGION=eu-west-1
+ENV SQS_QUEUE_URL=""
+ENV WEBHOOK_URL=""
+
+# Run worker (consumes SQS messages forever)
+CMD ["python", "-u", "worker.py"]
