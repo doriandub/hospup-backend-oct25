@@ -515,7 +515,7 @@ async def generate_video_mediaconvert(
         return MediaConvertJobResponse(
             job_id=request.job_id,
             status="SUBMITTED",
-            message="Video generation job queued for ECS Fargate FFmpeg processing (custom fonts)"
+            message=f"Video generation job queued for ECS Fargate FFmpeg (SQS msg: {sqs_result.get('message_id', 'NONE')})"
         )
 
     except Exception as e:
