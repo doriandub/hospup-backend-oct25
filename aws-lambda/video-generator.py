@@ -23,7 +23,16 @@ def lambda_handler(event, context):
         print(f"🚀 Starting MediaConvert video generation: {json.dumps(event, indent=2)}")
 
         # Parser les données de la timeline
-        body = json.loads(event.get('body', '{}'))
+        # Handle both SQS events (from event source mapping) and direct API Gateway events
+        if 'Records' in event and len(event['Records']) > 0:
+            # SQS event - body is in Records[0].body
+            print(f"📦 Received SQS event with {len(event['Records'])} record(s)")
+            body = json.loads(event['Records'][0]['body'])
+        else:
+            # Direct API Gateway event - body is in event.body
+            print(f"📡 Received direct API Gateway event")
+            body = json.loads(event.get('body', '{}'))
+
         print(f"🔍 LAMBDA RECEIVED BODY: {json.dumps(body, indent=2)}")
 
         property_id = body.get('property_id')
