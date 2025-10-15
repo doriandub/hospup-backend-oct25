@@ -112,14 +112,14 @@ def process_uploaded_video(
     s3_key: str
 ) -> Dict[str, Any]:
     """
-    Process uploaded video:
-    1. Download original video from S3
-    2. Convert to standard format (1080x1920, 30fps, H.264, AAC)
-    3. Upload converted video to S3 (replaces original - no duplication)
-    4. Extract metadata (duration, etc.)
-    5. Generate AI content description with OpenAI Vision
-    6. Generate thumbnail
-    7. Update video record with status 'ready'
+    Process uploaded asset (NO CONVERSION - MediaConvert handles that):
+    1. Download video from S3 for analysis
+    2. Extract metadata (duration)
+    3. Generate AI content description with OpenAI Vision
+    4. Generate thumbnail
+    5. Update asset record with status 'ready'
+
+    Note: MediaConvert will handle format conversion during video generation
     """
     temp_dir = None
 
@@ -146,8 +146,8 @@ def process_uploaded_video(
         original_path = os.path.join(temp_dir, f"original_{video_id}.mp4")
         converted_path = os.path.join(temp_dir, f"converted_{video_id}.mp4")
         
-        # Step 1: Download original video from S3
-        logger.info("📥 Downloading original video from S3...")
+        # Step 1: Download original video from S3 for analysis only
+        logger.info("📥 Downloading video from S3 for analysis...")
         s3_service = S3StorageService()
 
         try:
@@ -156,54 +156,29 @@ def process_uploaded_video(
                 f.write(file_content)
         except Exception as e:
             raise Exception(f"Failed to download video from S3: {e}")
-        
+
         if not os.path.exists(original_path):
             raise Exception(f"Downloaded file not found: {original_path}")
 
         logger.info(f"✅ Video downloaded: {os.path.getsize(original_path):,} bytes")
+        logger.info("ℹ️  NO CONVERSION - MediaConvert will handle format during generation")
 
         # Update progress
-        update_task_progress("converting", 20, video_id)
+        update_task_progress("metadata", 30, video_id)
 
-        # Step 2: Convert video to standard format (1080x1920, H.264, AAC, 30fps)
-        logger.info("🔄 Converting video to standard format...")
-        conversion_success = convert_video_to_standard_format(original_path, converted_path, video_id)
-
-        if not conversion_success:
-            logger.warning("⚠️ Video conversion failed, using original video")
-            # Use original if conversion fails
-            converted_path = original_path
-            video_path_for_processing = original_path
-        else:
-            # Upload converted video to S3 (replace original)
-            logger.info("📤 Uploading converted video to S3...")
-            with open(converted_path, 'rb') as f:
-                converted_content = f.read()
-
-            s3_service.upload_file_sync(
-                key=s3_key,
-                content=converted_content,
-                content_type='video/mp4'
-            )
-            logger.info(f"✅ Converted video uploaded to S3 (replaced original): {s3_key}")
-            video_path_for_processing = converted_path
-
-        # Update progress
-        update_task_progress("metadata", 35, video_id)
-
-        # Step 3: Extract video duration using FFprobe (from processed video)
+        # Step 2: Extract video duration (no conversion needed)
         logger.info("📊 Extracting video duration...")
-        video_duration = extract_video_duration(video_path_for_processing)
+        video_duration = extract_video_duration(original_path)
         if video_duration:
             logger.info(f"⏱️ Video duration: {video_duration}s ({format_duration(video_duration)})")
 
         # Update progress
         update_task_progress("ai_analysis", 50, video_id)
 
-        # Step 4: AI analysis + get frames for thumbnail (using converted video)
+        # Step 3: AI analysis + get frames for thumbnail (using original video)
         logger.info("🤖 Analyzing video content with OpenAI Vision...")
         ai_description, extracted_frames = openai_vision_service.analyze_video_content(
-            video_path_for_processing,
+            original_path,
             max_frames=2,  # Reduced to 2 frames for 50% better rate limit performance (15 videos parallel vs 10)
             timeout=60,
             return_frames=True
@@ -212,20 +187,20 @@ def process_uploaded_video(
         # Update progress
         update_task_progress("thumbnail", 70, video_id)
 
-        # Step 5: Use first frame as thumbnail (no need for separate FFmpeg)
+        # Step 4: Use first frame as thumbnail (no need for separate FFmpeg)
         logger.info("📸 Generating thumbnail from extracted frame...")
         thumbnail_url = None
         if extracted_frames and len(extracted_frames) > 0:
             thumbnail_url = save_frame_as_thumbnail(extracted_frames[0], video_id, temp_dir)
         else:
             logger.warning("⚠️ No frames extracted, falling back to FFmpeg thumbnail")
-            thumbnail_url = generate_video_thumbnail(video_path_for_processing, video_id, temp_dir)
+            thumbnail_url = generate_video_thumbnail(original_path, video_id, temp_dir)
         
         # Update progress
         update_task_progress("finalizing", 90, video_id)
 
-        # Step 4: Update video record
-        logger.info("💾 Updating video record...")
+        # Step 5: Update asset record
+        logger.info("💾 Updating asset record...")
 
         # Set video duration (with decimals)
         if video_duration:
