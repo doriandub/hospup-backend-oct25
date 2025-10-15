@@ -287,6 +287,11 @@ async def complete_upload(
         )
 
 
+@router.options("/reprocess-video/{video_id}")
+async def options_reprocess_video(video_id: str):
+    """Handle CORS preflight for video reprocessing"""
+    return {"message": "CORS preflight OK"}
+
 @router.post("/reprocess-video/{video_id}")
 async def reprocess_video(
     video_id: str,
@@ -378,6 +383,11 @@ async def reprocess_video(
         logger.error(f"❌ Failed to start reprocessing: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to start reprocessing: {str(e)}")
 
+
+@router.options("/video-status/{video_id}")
+async def options_video_status(video_id: str):
+    """Handle CORS preflight for video status"""
+    return {"message": "CORS preflight OK"}
 
 @router.get("/video-status/{video_id}")
 async def get_video_status(
