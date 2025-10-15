@@ -116,10 +116,123 @@ def normalize_video(input_path: str, output_path: str, target_duration: float = 
     return output_path
 
 
+def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], output_path: str, temp_dir: str) -> List[str]:
+    """
+    🎯 OPTIMIZED: Add text overlays to a pre-assembled MediaConvert video
+    This is MUCH faster than normalizing + concatenating segments
+
+    Args:
+        base_video_url: S3 URL of the MediaConvert output video (already assembled)
+        text_overlays: List of text overlay configs
+        output_path: Local path for final output
+        temp_dir: Temporary directory for downloads
+
+    Returns:
+        FFmpeg command to execute
+    """
+    logger.info("🎯 OPTIMIZED MODE: Adding text overlays to MediaConvert video")
+
+    # Download the pre-assembled MediaConvert video
+    input_video = os.path.join(temp_dir, "mediaconvert_output.mp4")
+    download_from_s3(base_video_url, input_video)
+    logger.info(f"✅ Downloaded MediaConvert video: {base_video_url}")
+
+    # Build FFmpeg command - just overlay text on existing video
+    cmd = ['ffmpeg', '-y', '-i', input_video]
+
+    # Build filter_complex for text overlays
+    filters = []
+    video_label = '0:v'  # Input video stream
+
+    for idx, overlay in enumerate(text_overlays):
+        content = overlay.get('content', '')
+        font_family = overlay.get('style', {}).get('font_family', 'Roboto')
+        font_size = overlay.get('style', {}).get('font_size', 48)
+        color = overlay.get('style', {}).get('color', '#FFFFFF')
+        position = overlay.get('position', {'x': 540, 'y': 960})
+        start_time = overlay.get('start_time', 0)
+        end_time = overlay.get('end_time', 999)
+
+        # Get font file path
+        fontfile = FONT_MAP.get(font_family, FONT_MAP['Roboto'])
+
+        # Convert color to FFmpeg hex format
+        color_map = {
+            'white': 'FFFFFF',
+            'black': '000000',
+            'red': 'FF0000',
+            'green': '00FF00',
+            'blue': '0000FF',
+            'yellow': 'FFFF00',
+            'cyan': '00FFFF',
+            'magenta': 'FF00FF',
+        }
+
+        if color.lower() in color_map:
+            color = color_map[color.lower()]
+        elif color.startswith('#'):
+            color = color[1:]  # Remove #
+
+        # Calculate position (center anchor)
+        x = position['x']
+        y = position['y']
+
+        # Escape text for FFmpeg
+        safe_content = content.replace("'", "\\'").replace(":", "\\:")
+
+        # Build drawtext filter
+        next_label = f'txt{idx}'
+        drawtext_filter = (
+            f"[{video_label}]drawtext="
+            f"fontfile='{fontfile}':"
+            f"text='{safe_content}':"
+            f"fontsize={font_size}:"
+            f"fontcolor=0x{color}:"
+            f"x=(w-text_w)/2:"  # Center horizontally
+            f"y={y}:"
+            f"enable='between(t,{start_time},{end_time})'"
+            f"[{next_label}]"
+        )
+
+        filters.append(drawtext_filter)
+        video_label = next_label
+
+    # Add filter_complex if we have text overlays
+    if filters:
+        filter_complex = ';'.join(filters)
+        cmd.extend(['-filter_complex', filter_complex])
+        cmd.extend(['-map', f'[{video_label}]'])
+    else:
+        # No text overlays - just copy video
+        cmd.extend(['-map', '0:v'])
+
+    # Always copy audio (no re-encoding needed)
+    cmd.extend(['-map', '0:a', '-c:a', 'copy'])
+
+    # Video encoding (only re-encode if text overlays exist)
+    if filters:
+        cmd.extend([
+            '-c:v', 'libx264',
+            '-preset', 'fast',  # Faster preset since we're just overlaying text
+            '-crf', '23',
+            '-pix_fmt', 'yuv420p',
+        ])
+    else:
+        cmd.extend(['-c:v', 'copy'])  # No text = just copy video
+
+    cmd.extend(['-movflags', '+faststart', output_path])
+
+    return cmd
+
+
 def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output_path: str, temp_dir: str) -> List[str]:
     """
-    Construit la commande FFmpeg avec overlays de texte multi-polices
+    ⚠️ LEGACY MODE: Normalizes + concatenates segments + adds text
+    This is SLOW - only use if MediaConvert is not available
+
+    For optimal performance, use add_text_overlays_to_video() with MediaConvert output instead
     """
+    logger.warning("⚠️ LEGACY MODE: Normalizing + concatenating segments (SLOW)")
 
     # Download and normalize all segment videos
     input_files = []
@@ -234,24 +347,40 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
 def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Traite un job de génération vidéo
+
+    Supports 2 modes:
+    1. OPTIMIZED: base_video_url + text_overlays (MediaConvert output + text overlay)
+    2. LEGACY: segments + text_overlays (full pipeline with normalization)
     """
     job_id = job_data.get('job_id', 'unknown')
     video_id = job_data.get('video_id')
     property_id = job_data.get('property_id', '1')
-    segments = job_data.get('segments', [])
+
+    # Check for optimized mode (MediaConvert output)
+    base_video_url = job_data.get('base_video_url') or job_data.get('mediaconvert_output_url')
     text_overlays = job_data.get('text_overlays', [])
 
-    logger.info(f"🎬 Processing job {job_id} (video_id={video_id})")
-    logger.info(f"   Segments: {len(segments)}, Text overlays: {len(text_overlays)}")
+    # Legacy mode data
+    segments = job_data.get('segments', [])
 
-    # Validate job has segments
-    if not segments or len(segments) == 0:
-        logger.error(f"❌ Job {job_id} has no segments!")
+    logger.info(f"🎬 Processing job {job_id} (video_id={video_id})")
+
+    # Determine processing mode
+    if base_video_url:
+        # OPTIMIZED MODE: MediaConvert has already assembled the video
+        logger.info(f"🎯 OPTIMIZED MODE: base_video={base_video_url}, text_overlays={len(text_overlays)}")
+        mode = 'optimized'
+    elif segments and len(segments) > 0:
+        # LEGACY MODE: Need to normalize + concatenate segments
+        logger.warning(f"⚠️ LEGACY MODE: {len(segments)} segments, {len(text_overlays)} text overlays")
+        mode = 'legacy'
+    else:
+        logger.error(f"❌ Job {job_id} has no base_video_url or segments!")
         return {
             'status': 'ERROR',
             'job_id': job_id,
             'video_id': video_id,
-            'error': 'No video segments provided'
+            'error': 'No base_video_url or segments provided'
         }
 
     start_time = time.time()
@@ -261,9 +390,13 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
             # Output file
             output_file = os.path.join(temp_dir, 'output.mp4')
 
-            # Build and run FFmpeg command
-            logger.info("🔧 Building FFmpeg command...")
-            cmd = build_ffmpeg_command(segments, text_overlays, output_file, temp_dir)
+            # Build FFmpeg command based on mode
+            if mode == 'optimized':
+                logger.info("🔧 Building OPTIMIZED FFmpeg command (text overlay only)...")
+                cmd = add_text_overlays_to_video(base_video_url, text_overlays, output_file, temp_dir)
+            else:
+                logger.info("🔧 Building LEGACY FFmpeg command (normalize + concat + text)...")
+                cmd = build_ffmpeg_command(segments, text_overlays, output_file, temp_dir)
 
             logger.info(f"🎥 Running FFmpeg: {' '.join(cmd[:10])}...")
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
@@ -279,7 +412,7 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
             final_url = upload_to_s3(output_file, output_s3_url)
 
             processing_time = time.time() - start_time
-            logger.info(f"✅ Job {job_id} completed in {processing_time:.1f}s")
+            logger.info(f"✅ Job {job_id} completed in {processing_time:.1f}s (mode={mode})")
 
             return {
                 'status': 'COMPLETE',
@@ -287,7 +420,8 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
                 'video_id': video_id,
                 'file_url': final_url,
                 'output_url': final_url,
-                'processing_time': f"{processing_time:.1f}s"
+                'processing_time': f"{processing_time:.1f}s",
+                'mode': mode
             }
 
         except Exception as e:

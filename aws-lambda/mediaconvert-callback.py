@@ -14,9 +14,13 @@ from typing import Dict, Any
 # Configuration
 RAILWAY_CALLBACK_URL = os.environ.get('RAILWAY_CALLBACK_URL', 'https://web-production-b52f.up.railway.app/api/v1/videos/aws-callback')
 S3_BUCKET = os.environ.get('S3_BUCKET_NAME') or os.environ.get('S3_BUCKET', 'hospup-files')
+SQS_QUEUE_URL = os.environ.get('SQS_QUEUE_URL', '')  # ECS FFmpeg queue
 
 # HTTP client pour callback
 http = urllib3.PoolManager()
+
+# SQS client for ECS FFmpeg jobs
+sqs_client = boto3.client('sqs', region_name='eu-west-1')
 
 def lambda_handler(event, context):
     """
@@ -63,6 +67,41 @@ def lambda_handler(event, context):
             output_urls = extract_output_urls_from_event(detail, job_id_metadata or job_id, user_id, property_id, video_id)
             callback_data.update(output_urls)
             print(f"✅ Job completed successfully with outputs: {output_urls}")
+
+            # 🎯 OPTIMIZED WORKFLOW: Check if text overlays need to be added by ECS FFmpeg
+            needs_text_overlay = user_metadata.get('needs_text_overlay') == 'true'
+            text_overlays_s3_key = user_metadata.get('text_overlays_s3_key')
+
+            if needs_text_overlay and text_overlays_s3_key and output_urls.get('output_url'):
+                print(f"🎯 OPTIMIZED MODE: Sending to ECS FFmpeg for text overlay")
+                print(f"   MediaConvert output: {output_urls['output_url']}")
+                print(f"   Text overlays S3: {text_overlays_s3_key}")
+
+                # Send job to ECS FFmpeg via SQS
+                ecs_success = send_to_ecs_ffmpeg(
+                    job_id=job_id_metadata or job_id,
+                    video_id=video_id,
+                    property_id=property_id,
+                    base_video_url=output_urls['output_url'],
+                    text_overlays_s3_key=text_overlays_s3_key
+                )
+
+                if ecs_success:
+                    print(f"✅ ECS FFmpeg job queued successfully")
+                    # Don't send callback to Railway yet - ECS FFmpeg will do that when done
+                    return {
+                        'statusCode': 200,
+                        'body': json.dumps({
+                            'status': 'success',
+                            'job_id': job_id,
+                            'message': 'MediaConvert complete, ECS FFmpeg processing text overlays'
+                        })
+                    }
+                else:
+                    print(f"❌ Failed to queue ECS FFmpeg job")
+                    # Fallback: send callback to Railway anyway
+            else:
+                print(f"ℹ️ No text overlays - MediaConvert output is final video")
 
         elif status == 'ERROR':
             error_message = detail.get('errorMessage', 'Unknown MediaConvert error')
@@ -146,6 +185,53 @@ def convert_s3_to_https_url(s3_path: str) -> str:
         
     # Fallback: construire avec le bucket par défaut
     return f"https://s3.eu-west-1.amazonaws.com/{S3_BUCKET}/{s3_path}"
+
+def send_to_ecs_ffmpeg(job_id: str, video_id: str, property_id: str, base_video_url: str, text_overlays_s3_key: str) -> bool:
+    """
+    Envoyer un job à ECS FFmpeg via SQS pour ajouter les text overlays
+    """
+    try:
+        if not SQS_QUEUE_URL:
+            print(f"❌ SQS_QUEUE_URL not configured - cannot send to ECS FFmpeg")
+            return False
+
+        # Download text_overlays from S3
+        s3_client = boto3.client('s3', region_name='eu-west-1')
+
+        # Parse S3 key from text_overlays_s3_key
+        text_overlays_obj = s3_client.get_object(Bucket=S3_BUCKET, Key=text_overlays_s3_key)
+        text_overlays = json.loads(text_overlays_obj['Body'].read().decode('utf-8'))
+
+        print(f"📥 Downloaded {len(text_overlays)} text overlays from S3: {text_overlays_s3_key}")
+
+        # Prepare SQS message for ECS FFmpeg worker
+        message = {
+            'job_id': job_id,
+            'video_id': video_id,
+            'property_id': property_id,
+            'base_video_url': base_video_url,  # MediaConvert output video
+            'mediaconvert_output_url': base_video_url,  # Alternative name
+            'text_overlays': text_overlays  # Text overlays to add
+        }
+
+        print(f"📤 Sending to SQS: {SQS_QUEUE_URL}")
+        print(f"📦 Message: job_id={job_id}, base_video={base_video_url}, texts={len(text_overlays)}")
+
+        # Send message to SQS
+        response = sqs_client.send_message(
+            QueueUrl=SQS_QUEUE_URL,
+            MessageBody=json.dumps(message)
+        )
+
+        print(f"✅ SQS message sent: MessageId={response.get('MessageId')}")
+        return True
+
+    except Exception as e:
+        print(f"❌ Error sending to ECS FFmpeg: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 
 def send_callback_to_railway(callback_data: Dict[str, Any]) -> bool:
     """

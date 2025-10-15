@@ -89,22 +89,25 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         mediaconvert = boto3.client('mediaconvert', region_name='eu-west-1', endpoint_url=mediaconvert_endpoint)
         s3 = boto3.client('s3', region_name='eu-west-1')
 
-        # Generate TTML subtitle file if text overlays exist
-        subtitle_s3_key = None
-        dominant_font_info = None
-        if text_overlays:
-            print(f"📝 Generating TTML subtitles for {len(text_overlays)} text overlays")
-            ttml_content, dominant_font_info = generate_ttml_from_overlays(text_overlays)
-            subtitle_s3_key = f"subtitles/{job_id}/subtitles.ttml"
+        # 🎯 OPTIMIZED WORKFLOW: Store text_overlays for ECS FFmpeg post-processing
+        # MediaConvert will ONLY assemble video, then ECS FFmpeg adds text overlays
+        text_overlays_s3_key = None
+        if text_overlays and len(text_overlays) > 0:
+            print(f"📝 Storing {len(text_overlays)} text overlays for ECS FFmpeg post-processing")
+            text_overlays_s3_key = f"text-overlays/{job_id}/overlays.json"
 
-            # Upload TTML to S3
+            # Upload text_overlays JSON to S3 for ECS worker
             s3.put_object(
                 Bucket=S3_BUCKET,
-                Key=subtitle_s3_key,
-                Body=ttml_content.encode('utf-8'),
-                ContentType='application/ttml+xml'
+                Key=text_overlays_s3_key,
+                Body=json.dumps(text_overlays).encode('utf-8'),
+                ContentType='application/json'
             )
-            print(f"✅ TTML uploaded to S3: {subtitle_s3_key}")
+            print(f"✅ Text overlays saved to S3: {text_overlays_s3_key}")
+            print(f"ℹ️  MediaConvert will assemble video WITHOUT text (GPU fast)")
+            print(f"ℹ️  ECS FFmpeg will add text overlays after (CPU light)")
+        else:
+            print(f"ℹ️  No text overlays - MediaConvert will produce final video directly")
 
         # Prepare MediaConvert job inputs from custom_script.clips (priority) or segments (fallback)
         inputs = []
@@ -265,69 +268,9 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             }]
         }]
 
-        # Add subtitle burn-in if TTML exists
-        if subtitle_s3_key and text_overlays and dominant_font_info:
-            # Build font file paths based on weight and style
-            font_base = dominant_font_info['s3_base']
-            weight = dominant_font_info['weight']
-            style = dominant_font_info['style']
-
-            # Determine which font variant files to use
-            # Regular = normal weight + normal style
-            # Bold = bold weight + normal style
-            # Italic = normal weight + italic style
-            # BoldItalic = bold weight + italic style
-            font_regular = f"{font_base}-Regular.ttf"
-            font_bold = f"{font_base}-Bold.ttf"
-            font_italic = f"{font_base}-Italic.ttf"
-            font_bold_italic = f"{font_base}-BoldItalic.ttf"
-
-            # For Pacifico (only has Regular)
-            if 'Pacifico' in font_base:
-                font_bold = font_regular
-                font_italic = font_regular
-                font_bold_italic = font_regular
-
-            print(f"🔤 Using custom fonts from S3:")
-            print(f"   Regular: {font_regular}")
-            print(f"   Bold: {font_bold}")
-            print(f"   Italic: {font_italic}")
-            print(f"   BoldItalic: {font_bold_italic}")
-
-            outputs[0]["CaptionDescriptions"] = [{
-                "CaptionSelectorName": "Caption Selector 1",
-                "DestinationSettings": {
-                    "DestinationType": "BURN_IN",
-                    "BurninDestinationSettings": {
-                        "StylePassthrough": "ENABLED",  # CRITICAL: Enables TTML positioning (tts:origin)
-                        "TeletextSpacing": "PROPORTIONAL",
-                        "FontScript": "AUTOMATIC",
-                        # Custom font files from S3
-                        "FontFileRegular": font_regular,
-                        "FontFileBold": font_bold,
-                        "FontFileItalic": font_italic,
-                        "FontFileBoldItalic": font_bold_italic,
-                        "BackgroundColor": "NONE",
-                        "BackgroundOpacity": 0,
-                        "FontOpacity": 255,
-                        "OutlineSize": 0
-                    }
-                }
-            }]
-            print(f"✅ Text overlays configured - {len(text_overlays)} texts with custom font: {dominant_font_info['font_name']}")
-
-            # Add caption selector to first input
-            inputs[0]["CaptionSelectors"] = {
-                "Caption Selector 1": {
-                    "SourceSettings": {
-                        "SourceType": "TTML",
-                        "FileSourceSettings": {
-                            "SourceFile": f"s3://{S3_BUCKET}/{subtitle_s3_key}"
-                        }
-                    }
-                }
-            }
-            print(f"✅ Added TTML subtitle burn-in: {subtitle_s3_key}")
+        # 🎯 NO TEXT BURN-IN - ECS FFmpeg will handle text overlays
+        print(f"ℹ️  MediaConvert job configured WITHOUT text burn-in")
+        print(f"ℹ️  ECS FFmpeg will add text overlays in post-processing for faster performance")
 
         # Create MediaConvert job
         job_settings = {
@@ -351,14 +294,24 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         # Note: MediaConvert role ARN should be provided as environment variable
         mediaconvert_role = os.environ.get('MEDIACONVERT_ROLE_ARN', 'arn:aws:iam::412655955859:role/MediaConvertServiceRole')
 
+        # Prepare UserMetadata with text_overlays S3 location
+        user_metadata = {
+            'video_id': str(video_id),
+            'property_id': str(property_id),
+            'job_id': str(job_id),
+            'webhook_url': webhook_url or ''
+        }
+
+        # Add text_overlays S3 key if exists (for ECS FFmpeg post-processing)
+        if text_overlays_s3_key:
+            user_metadata['text_overlays_s3_key'] = text_overlays_s3_key
+            user_metadata['needs_text_overlay'] = 'true'  # Flag for callback
+            print(f"📝 UserMetadata includes text_overlays reference: {text_overlays_s3_key}")
+
         response = mediaconvert.create_job(
             Role=mediaconvert_role,
             Settings=job_settings,
-            UserMetadata={
-                'video_id': str(video_id),
-                'property_id': str(property_id),
-                'webhook_url': webhook_url or ''
-            }
+            UserMetadata=user_metadata
         )
 
         mediaconvert_job_id = response['Job']['Id']
