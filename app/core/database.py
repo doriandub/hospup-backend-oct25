@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from sqlalchemy import create_engine
 from .config import settings
 import structlog
 
@@ -71,3 +72,33 @@ async def get_db() -> AsyncSession:
             raise
         finally:
             await session.close()
+
+
+# ========================================
+# SYNC ENGINE FOR BACKGROUND TASKS
+# ========================================
+# Create sync engine for video processing tasks (runs in thread pools)
+# Uses psycopg2 instead of asyncpg
+sync_db_url = sqlalchemy_url.replace("postgresql+asyncpg://", "postgresql+psycopg2://")
+
+sync_engine = create_engine(
+    sync_db_url,
+    echo=False,
+    pool_size=1,  # Small pool for background tasks
+    max_overflow=0,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    connect_args={
+        "connect_timeout": 10,
+        "options": "-c application_name=hospup_video_tasks -c jit=off"
+    }
+)
+
+# Sync session factory for background tasks
+SyncSessionLocal = sessionmaker(
+    bind=sync_engine,
+    class_=Session,
+    expire_on_commit=False
+)
+
+logger.info("Sync database engine created for background tasks")
