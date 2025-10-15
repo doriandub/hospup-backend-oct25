@@ -234,34 +234,25 @@ async def complete_upload(
             from tasks.video_processing_tasks import process_uploaded_video
             logger.info("✅ Video processing task imported successfully")
 
-            # Try async processing first, fallback to sync for development
-            try:
-                logger.info("🚀 Attempting async processing with Celery...")
-                # Start processing task
-                task = process_uploaded_video.delay(video_id, request.s3_key)
-                logger.info(f"✅ Video processing task started (async): {task.id}")
-            except Exception as async_error:
-                logger.warning(f"⚠️ Async processing failed: {async_error}")
-                logger.info("🔄 Falling back to synchronous processing...")
+            # ALWAYS use sync processing (Celery worker not running on Railway)
+            logger.info("🔄 Using sync processing (no Celery worker on Railway)...")
 
-                # Run processing synchronously in development
-                import asyncio
-                from concurrent.futures import ThreadPoolExecutor
+            from concurrent.futures import ThreadPoolExecutor
 
-                def run_sync_processing():
-                    try:
-                        logger.info(f"🎬 Starting sync processing for video {video_id}")
-                        result = process_uploaded_video(video_id, request.s3_key)
-                        logger.info(f"✅ Sync processing completed: {result}")
-                    except Exception as sync_error:
-                        logger.error(f"❌ Sync processing failed: {sync_error}")
-                        import traceback
-                        logger.error(f"📋 Full traceback: {traceback.format_exc()}")
+            def run_sync_processing():
+                try:
+                    logger.info(f"🎬 Starting sync processing for video {video_id}")
+                    result = process_uploaded_video(video_id, request.s3_key)
+                    logger.info(f"✅ Sync processing completed: {result}")
+                except Exception as sync_error:
+                    logger.error(f"❌ Sync processing failed: {sync_error}")
+                    import traceback
+                    logger.error(f"📋 Full traceback: {traceback.format_exc()}")
 
-                # Run in background thread to not block the response
-                executor = ThreadPoolExecutor(max_workers=1)
-                future = executor.submit(run_sync_processing)
-                logger.info("🚀 Video processing started (sync) in background thread")
+            # Run in background thread to not block the response
+            executor = ThreadPoolExecutor(max_workers=1)
+            future = executor.submit(run_sync_processing)
+            logger.info("🚀 Video processing started (sync) in background thread")
 
         except ImportError as import_error:
             logger.error(f"❌ Failed to import video processing task: {import_error}")
@@ -336,48 +327,33 @@ async def reprocess_video(
         logger.info("📦 Starting real video processing pipeline...")
         from tasks.video_processing_tasks import process_uploaded_video
 
-        # Try Celery async first
-        try:
-            logger.info("🚀 Attempting Celery async processing...")
-            task = process_uploaded_video.delay(video_id, s3_key)
-            logger.info(f"✅ Processing task started: {task.id}")
+        # ALWAYS use sync processing (Celery worker not running on Railway)
+        logger.info("🔄 Using sync processing (no Celery worker on Railway)...")
 
-            return {
-                "message": "Video reprocessing started (async)",
-                "video_id": video_id,
-                "task_id": str(task.id),
-                "status": "processing"
-            }
+        import asyncio
+        from concurrent.futures import ThreadPoolExecutor
 
-        except Exception as async_error:
-            logger.warning(f"⚠️ Async processing failed: {async_error}")
-            logger.info("🔄 Falling back to sync processing...")
+        def run_sync_processing():
+            try:
+                logger.info(f"🎬 Starting sync processing for video {video_id}")
+                result = process_uploaded_video(video_id, s3_key)
+                logger.info(f"✅ Sync processing completed: {result}")
+                return result
+            except Exception as sync_error:
+                logger.error(f"❌ Sync processing failed: {sync_error}")
+                import traceback
+                logger.error(f"📋 Full traceback: {traceback.format_exc()}")
+                raise sync_error
 
-            # Fallback to sync processing
-            import asyncio
-            from concurrent.futures import ThreadPoolExecutor
+        # Run in background thread
+        executor = ThreadPoolExecutor(max_workers=1)
+        future = executor.submit(run_sync_processing)
 
-            def run_sync_processing():
-                try:
-                    logger.info(f"🎬 Starting sync processing for video {video_id}")
-                    result = process_uploaded_video(video_id, s3_key)
-                    logger.info(f"✅ Sync processing completed: {result}")
-                    return result
-                except Exception as sync_error:
-                    logger.error(f"❌ Sync processing failed: {sync_error}")
-                    import traceback
-                    logger.error(f"📋 Full traceback: {traceback.format_exc()}")
-                    raise sync_error
-
-            # Run in background thread
-            executor = ThreadPoolExecutor(max_workers=1)
-            future = executor.submit(run_sync_processing)
-
-            return {
-                "message": "Video reprocessing started (sync)",
-                "video_id": video_id,
-                "status": "processing"
-            }
+        return {
+            "message": "Video reprocessing started (sync)",
+            "video_id": video_id,
+            "status": "processing"
+        }
 
     except Exception as e:
         logger.error(f"❌ Failed to start reprocessing: {e}")
