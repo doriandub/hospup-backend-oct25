@@ -129,14 +129,21 @@ def process_uploaded_video(
         from sqlalchemy import select
         import asyncio
 
-        # Helper to run async code in sync function
+        # Helper to run async code in sync function (create new event loop for thread)
         def get_video_sync():
             async def _get_video():
                 async with AsyncSessionLocal() as session:
                     stmt = select(Asset).where(Asset.id == video_id)
                     result = await session.execute(stmt)
                     return result.scalar_one_or_none()
-            return asyncio.run(_get_video())
+
+            # Create a new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(_get_video())
+            finally:
+                loop.close()
 
         video = get_video_sync()
         if not video:
@@ -266,7 +273,13 @@ def process_uploaded_video(
 
                         await session.commit()
 
-            return asyncio.run(_update_video())
+            # Create a new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                return loop.run_until_complete(_update_video())
+            finally:
+                loop.close()
 
         update_video_sync()
         
@@ -311,7 +324,13 @@ def process_uploaded_video(
                             video_record.description = f"Processing failed: {str(e)}"
                             await session.commit()
 
-                return asyncio.run(_update_failed())
+                # Create a new event loop for this thread
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    return loop.run_until_complete(_update_failed())
+                finally:
+                    loop.close()
 
             update_failed_status()
         except:
