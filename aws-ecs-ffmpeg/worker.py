@@ -77,18 +77,65 @@ def upload_to_s3(local_path: str, s3_url: str):
     # Return HTTPS URL
     return f"https://s3.{AWS_REGION}.amazonaws.com/{bucket}/{key}"
 
+def normalize_video(input_path: str, output_path: str, target_duration: float = None):
+    """
+    Normalise une vidéo source (n'importe quel format) vers un format standardisé
+    - 1080x1920 (vertical)
+    - H.264
+    - yuv420p
+    - 30fps
+    - AAC audio
+    """
+    logger.info(f"🔄 Normalizing {input_path}...")
+
+    cmd = [
+        'ffmpeg', '-y',
+        '-i', input_path,
+        '-vf', 'scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,fps=30',
+        '-c:v', 'libx264',
+        '-preset', 'fast',
+        '-crf', '23',
+        '-pix_fmt', 'yuv420p',
+        '-c:a', 'aac',
+        '-b:a', '128k',
+        '-ar', '44100'
+    ]
+
+    # If target duration specified, trim video
+    if target_duration:
+        cmd.extend(['-t', str(target_duration)])
+
+    cmd.append(output_path)
+
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    if result.returncode != 0:
+        logger.error(f"❌ Normalization failed: {result.stderr[:500]}")
+        raise Exception(f"Video normalization failed: {result.stderr[:500]}")
+
+    logger.info(f"✅ Normalized to {output_path}")
+    return output_path
+
+
 def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output_path: str, temp_dir: str) -> List[str]:
     """
     Construit la commande FFmpeg avec overlays de texte multi-polices
     """
 
-    # Download all segment videos
+    # Download and normalize all segment videos
     input_files = []
     for i, segment in enumerate(segments):
         video_url = segment.get('video_url') or segment.get('source_url')
-        local_input = os.path.join(temp_dir, f"input_{i}.mp4")
-        download_from_s3(video_url, local_input)
-        input_files.append(local_input)
+        duration = segment.get('duration')
+
+        # Download raw video
+        raw_input = os.path.join(temp_dir, f"raw_{i}")
+        download_from_s3(video_url, raw_input)
+
+        # Normalize to standard format (handles .MOV, .mp4, any codec)
+        normalized_input = os.path.join(temp_dir, f"input_{i}.mp4")
+        normalize_video(raw_input, normalized_input, target_duration=duration)
+
+        input_files.append(normalized_input)
 
     # Build FFmpeg command
     cmd = ['ffmpeg', '-y']
@@ -100,29 +147,10 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
     # Build filter_complex
     filters = []
 
-    # 1. Check if videos have audio streams using ffprobe
-    has_audio = []
-    for i, input_file in enumerate(input_files):
-        probe_cmd = ['ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'default=noprint_wrappers=1:nokey=1', input_file]
-        result = subprocess.run(probe_cmd, capture_output=True, text=True)
-        has_audio.append(result.stdout.strip() == 'audio')
-
-    # 2. Concatenate videos (handle missing audio)
-    if any(has_audio):
-        # Generate silent audio for videos without audio
-        for i in range(len(input_files)):
-            if not has_audio[i]:
-                filters.append(f'[{i}:v]anullsrc=channel_layout=stereo:sample_rate=44100[a{i}]')
-
-        # Concat with audio
-        concat_inputs = ''.join([f'[{i}:v][{"a" + str(i) if not has_audio[i] else str(i) + ":a"}]' for i in range(len(input_files))])
-        filters.append(f'{concat_inputs}concat=n={len(input_files)}:v=1:a=1[video][audio]')
-    else:
-        # No audio in any video - video only concat
-        concat_inputs = ''.join([f'[{i}:v]' for i in range(len(input_files))])
-        filters.append(f'{concat_inputs}concat=n={len(input_files)}:v=1:a=0[video]')
-        # Generate silent audio track
-        filters.append(f'anullsrc=channel_layout=stereo:sample_rate=44100[audio]')
+    # 1. Concatenate normalized videos (all have same format + audio now)
+    # Since all videos are normalized with AAC audio, concat is straightforward
+    concat_inputs = ''.join([f'[{i}:v][{i}:a]' for i in range(len(input_files))])
+    filters.append(f'{concat_inputs}concat=n={len(input_files)}:v=1:a=1[video][audio]')
 
     # 2. Add text overlays with different fonts
     video_label = 'video'
