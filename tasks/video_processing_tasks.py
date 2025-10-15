@@ -121,16 +121,24 @@ def process_uploaded_video(
     6. Generate thumbnail
     7. Update video record with status 'ready'
     """
-    db = None
     temp_dir = None
-    
+
     try:
-        # Get database session (sync for Celery)
-        from app.core.database import SessionLocal
-        db = SessionLocal()
-        
-        # Get video record
-        video = db.query(Asset).filter(Asset.id == video_id).first()
+        # Get database session (async) - need to run async code in sync context
+        from app.core.database import AsyncSessionLocal
+        from sqlalchemy import select
+        import asyncio
+
+        # Helper to run async code in sync function
+        def get_video_sync():
+            async def _get_video():
+                async with AsyncSessionLocal() as session:
+                    stmt = select(Asset).where(Asset.id == video_id)
+                    result = await session.execute(stmt)
+                    return result.scalar_one_or_none()
+            return asyncio.run(_get_video())
+
+        video = get_video_sync()
         if not video:
             raise ValueError(f"Video {video_id} not found")
         
@@ -223,33 +231,44 @@ def process_uploaded_video(
         # Update progress
         update_task_progress("finalizing", 90, video_id)
 
-        # Step 4: Update video record
+        # Step 4: Update video record using async session
         logger.info("💾 Updating video record...")
-        # File URL already set during upload - keep it
 
-        # Set video duration (with decimals)
-        if video_duration:
-            video.duration = round(video_duration, 2)  # Store as float with 2 decimals (e.g., 174.23)
+        def update_video_sync():
+            async def _update_video():
+                async with AsyncSessionLocal() as session:
+                    stmt = select(Asset).where(Asset.id == video_id)
+                    result = await session.execute(stmt)
+                    video_record = result.scalar_one_or_none()
 
-        # Enhanced description with AI analysis
-        if ai_description:
-            video.description = ai_description
-            
-        if thumbnail_url:
-            video.thumbnail_url = thumbnail_url
-            logger.info(f"✅ Thumbnail generated: {thumbnail_url}")
-        else:
-            logger.warning("⚠️ Failed to generate thumbnail")
-        
-        # Set video status based on AI analysis success
-        if ai_description and ai_description.strip() and not ai_description.startswith("Video uploaded successfully"):
-            video.status = "ready"  # Ready to use in video generation
-            logger.info(f"✅ Video processing complete: thumbnail + AI description ready")
-        else:
-            video.status = "pending_retry"  # Will be retried by cleanup job
-            logger.warning(f"⚠️ Video processing incomplete: AI description missing, marked for retry")
-        
-        db.commit()
+                    if video_record:
+                        # Set video duration (with decimals)
+                        if video_duration:
+                            video_record.duration = round(video_duration, 2)
+
+                        # Enhanced description with AI analysis
+                        if ai_description:
+                            video_record.description = ai_description
+
+                        if thumbnail_url:
+                            video_record.thumbnail_url = thumbnail_url
+                            logger.info(f"✅ Thumbnail generated: {thumbnail_url}")
+                        else:
+                            logger.warning("⚠️ Failed to generate thumbnail")
+
+                        # Set video status based on AI analysis success
+                        if ai_description and ai_description.strip() and not ai_description.startswith("Video uploaded successfully"):
+                            video_record.status = "ready"
+                            logger.info(f"✅ Video processing complete: thumbnail + AI description ready")
+                        else:
+                            video_record.status = "pending_retry"
+                            logger.warning(f"⚠️ Video processing incomplete: AI description missing, marked for retry")
+
+                        await session.commit()
+
+            return asyncio.run(_update_video())
+
+        update_video_sync()
         
         logger.info(f"✅ Video processing completed for {video_id}")
         
@@ -277,13 +296,24 @@ def process_uploaded_video(
         
     except Exception as e:
         logger.error(f"❌ Video processing error: {str(e)}")
-        
-        # Update video status to failed
+
+        # Update video status to failed using async session
         try:
-            if db and 'video' in locals():
-                video.status = "failed"
-                video.description = f"Processing failed: {str(e)}"
-                db.commit()
+            def update_failed_status():
+                async def _update_failed():
+                    async with AsyncSessionLocal() as session:
+                        stmt = select(Asset).where(Asset.id == video_id)
+                        result = await session.execute(stmt)
+                        video_record = result.scalar_one_or_none()
+
+                        if video_record:
+                            video_record.status = "failed"
+                            video_record.description = f"Processing failed: {str(e)}"
+                            await session.commit()
+
+                return asyncio.run(_update_failed())
+
+            update_failed_status()
         except:
             pass
         
@@ -306,9 +336,6 @@ def process_uploaded_video(
                 logger.info("🧹 Cleaned up temporary files")
             except Exception as e:
                 logger.warning(f"⚠️ Cleanup failed: {e}")
-        
-        if db:
-            db.close()
 
 
 def convert_video_to_standard_format(input_path: str, output_path: str, video_id: str) -> bool:
