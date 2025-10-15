@@ -445,14 +445,14 @@ async def generate_video_mediaconvert(
     request: MediaConvertRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    """🚀 ECS Fargate FFmpeg video generation endpoint (zéro cold start)"""
+    """🎯 OPTIMIZED: MediaConvert (clips) → ECS FFmpeg (text overlay)"""
     try:
-        print(f"🎬 FFmpeg generation request received (ECS Fargate)")
+        print(f"🎯 OPTIMIZED video generation: MediaConvert → ECS FFmpeg")
         print(f"📊 Payload: property_id={request.property_id}, video_id={request.video_id}, job_id={request.job_id}")
-        print(f"📹 Data: {len(request.segments)} segments, {len(request.text_overlays)} overlays, total_duration={request.total_duration}s")
-        logger.info(f"🎬 FFmpeg generation request received (ECS Fargate)")
+        print(f"📹 Data: {len(request.segments)} segments (→ MediaConvert), {len(request.text_overlays)} overlays (→ ECS FFmpeg)")
+        logger.info(f"🎯 OPTIMIZED workflow starting")
         logger.info(f"📊 Payload: property_id={request.property_id}, video_id={request.video_id}, job_id={request.job_id}")
-        logger.info(f"📹 Data: {len(request.segments)} segments, {len(request.text_overlays)} overlays, total_duration={request.total_duration}s")
+        logger.info(f"📹 Segments: {len(request.segments)}, Text overlays: {len(request.text_overlays)}")
 
         # Create video record in database
         try:
@@ -464,7 +464,7 @@ async def generate_video_mediaconvert(
                 new_video = Video(
                     id=request.video_id,
                     title=f"Generated Video {request.video_id[:8]}",
-                    description=f"ECS FFmpeg job {request.job_id}",
+                    description=f"Optimized: MediaConvert + ECS job {request.job_id}",
                     property_id=int(request.property_id) if request.property_id.isdigit() else None,
                     user_id=user_id,
                     status="processing",
@@ -472,50 +472,49 @@ async def generate_video_mediaconvert(
                 )
                 db.add(new_video)
                 await db.commit()
-                logger.info(f"✅ Video record created in database: {request.video_id} for user {user_id}")
+                logger.info(f"✅ Video record created: {request.video_id}")
             else:
-                logger.warning("⚠️ No users found in database, skipping video record creation")
+                logger.warning("⚠️ No users found, skipping video record")
         except Exception as db_error:
             logger.error(f"❌ Database error: {str(db_error)}")
-            logger.info("📝 Continuing without database record...")
 
-        # Send to SQS for ECS Fargate processing (zéro cold start)
-        import asyncio
-        from .sqs_service import send_video_job_to_sqs
+        # 🎯 OPTIMIZED WORKFLOW: Invoke MediaConvert Lambda
+        import boto3
+        import json as json_lib
 
-        print(f"🔄 About to send job to SQS: {request.job_id}")
-        logger.info(f"🔄 About to send job to SQS: {request.job_id}")
+        lambda_client = boto3.client('lambda', region_name='eu-west-1')
 
-        try:
-            sqs_result = await asyncio.get_event_loop().run_in_executor(
-                None,
-                lambda: send_video_job_to_sqs(
-                    property_id=request.property_id,
-                    video_id=request.video_id,
-                    job_id=request.job_id,
-                    segments=request.segments,
-                    text_overlays=request.text_overlays,
-                    total_duration=request.total_duration,
-                    custom_script=request.custom_script or {},
-                    webhook_url=request.webhook_url
-                )
-            )
-        except Exception as sqs_error:
-            print(f"❌ SQS EXCEPTION in run_in_executor: {str(sqs_error)}")
-            logger.error(f"❌ SQS EXCEPTION: {str(sqs_error)}")
-            raise
+        # Prepare payload for MediaConvert Lambda
+        mediaconvert_payload = {
+            "property_id": request.property_id,
+            "video_id": request.video_id,
+            "job_id": request.job_id,
+            "segments": request.segments,
+            "text_overlays": request.text_overlays,
+            "custom_script": request.custom_script or {},
+            "total_duration": request.total_duration,
+            "webhook_url": request.webhook_url or f"https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
+        }
 
-        print(f"✅ Job sent to SQS successfully for ECS Fargate processing")
-        print(f"   Message ID: {sqs_result.get('message_id')}")
-        print(f"   Queue: {sqs_result.get('queue_url')}")
-        logger.info(f"✅ Job sent to SQS successfully for ECS Fargate processing")
-        logger.info(f"   Message ID: {sqs_result.get('message_id')}")
-        logger.info(f"   Queue: {sqs_result.get('queue_url')}")
+        logger.info(f"🚀 Invoking MediaConvert Lambda: hospup-video-generator")
+        print(f"🚀 Invoking MediaConvert Lambda with {len(request.segments)} clips")
+
+        response = lambda_client.invoke(
+            FunctionName='hospup-video-generator',
+            InvocationType='Event',  # Async invocation
+            Payload=json_lib.dumps(mediaconvert_payload)
+        )
+
+        logger.info(f"✅ MediaConvert Lambda invoked (StatusCode: {response['StatusCode']})")
+        print(f"✅ MediaConvert Lambda invoked successfully")
+        print(f"   → MediaConvert will assemble clips (GPU, 3-10s)")
+        print(f"   → Then ECS FFmpeg will add text overlays (CPU, 5-15s)")
+        print(f"   → Total expected: 8-25s")
 
         return MediaConvertJobResponse(
             job_id=request.job_id,
             status="SUBMITTED",
-            message=f"Video generation job queued for ECS Fargate FFmpeg (SQS msg: {sqs_result.get('message_id', 'NONE')})"
+            message=f"OPTIMIZED: MediaConvert assembling clips → ECS FFmpeg will add texts"
         )
 
     except Exception as e:
