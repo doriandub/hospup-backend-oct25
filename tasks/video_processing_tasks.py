@@ -113,13 +113,13 @@ def process_uploaded_video(
 ) -> Dict[str, Any]:
     """
     Process uploaded video:
-    1. Download from S3
-    2. Extract metadata
-    3. Convert to standard format if needed (1080x1920, 30fps, H.264, AAC)
-    4. Generate AI content description
-    5. Generate thumbnail
-    6. Upload processed video back to S3
-    7. Update video record
+    1. Download original video from S3
+    2. Convert to standard format (1080x1920, 30fps, H.264, AAC)
+    3. Upload converted video to S3 (replaces original - no duplication)
+    4. Extract metadata (duration, etc.)
+    5. Generate AI content description with OpenAI Vision
+    6. Generate thumbnail
+    7. Update video record with status 'ready'
     """
     db = None
     temp_dir = None
@@ -158,25 +158,51 @@ def process_uploaded_video(
         
         if not os.path.exists(original_path):
             raise Exception(f"Downloaded file not found: {original_path}")
-            
-        logger.info(f"✅ Video downloaded: {os.path.getsize(original_path):,} bytes")
-        
-        # Update progress
-        update_task_progress("metadata", 30, video_id)
 
-        # Step 2: Extract video duration using FFprobe
+        logger.info(f"✅ Video downloaded: {os.path.getsize(original_path):,} bytes")
+
+        # Update progress
+        update_task_progress("converting", 20, video_id)
+
+        # Step 2: Convert video to standard format (1080x1920, H.264, AAC, 30fps)
+        logger.info("🔄 Converting video to standard format...")
+        conversion_success = convert_video_to_standard_format(original_path, converted_path, video_id)
+
+        if not conversion_success:
+            logger.warning("⚠️ Video conversion failed, using original video")
+            # Use original if conversion fails
+            converted_path = original_path
+            video_path_for_processing = original_path
+        else:
+            # Upload converted video to S3 (replace original)
+            logger.info("📤 Uploading converted video to S3...")
+            with open(converted_path, 'rb') as f:
+                converted_content = f.read()
+
+            s3_service.upload_file_sync(
+                key=s3_key,
+                content=converted_content,
+                content_type='video/mp4'
+            )
+            logger.info(f"✅ Converted video uploaded to S3 (replaced original): {s3_key}")
+            video_path_for_processing = converted_path
+
+        # Update progress
+        update_task_progress("metadata", 35, video_id)
+
+        # Step 3: Extract video duration using FFprobe (from processed video)
         logger.info("📊 Extracting video duration...")
-        video_duration = extract_video_duration(original_path)
+        video_duration = extract_video_duration(video_path_for_processing)
         if video_duration:
             logger.info(f"⏱️ Video duration: {video_duration}s ({format_duration(video_duration)})")
 
         # Update progress
         update_task_progress("ai_analysis", 50, video_id)
 
-        # Step 3: AI analysis + get frames for thumbnail
+        # Step 4: AI analysis + get frames for thumbnail (using converted video)
         logger.info("🤖 Analyzing video content with OpenAI Vision...")
         ai_description, extracted_frames = openai_vision_service.analyze_video_content(
-            original_path,
+            video_path_for_processing,
             max_frames=2,  # Reduced to 2 frames for 50% better rate limit performance (15 videos parallel vs 10)
             timeout=60,
             return_frames=True
@@ -185,14 +211,14 @@ def process_uploaded_video(
         # Update progress
         update_task_progress("thumbnail", 70, video_id)
 
-        # Step 3: Use first frame as thumbnail (no need for separate FFmpeg)
+        # Step 5: Use first frame as thumbnail (no need for separate FFmpeg)
         logger.info("📸 Generating thumbnail from extracted frame...")
         thumbnail_url = None
         if extracted_frames and len(extracted_frames) > 0:
             thumbnail_url = save_frame_as_thumbnail(extracted_frames[0], video_id, temp_dir)
         else:
             logger.warning("⚠️ No frames extracted, falling back to FFmpeg thumbnail")
-            thumbnail_url = generate_video_thumbnail(original_path, video_id, temp_dir)
+            thumbnail_url = generate_video_thumbnail(video_path_for_processing, video_id, temp_dir)
         
         # Update progress
         update_task_progress("finalizing", 90, video_id)
@@ -283,6 +309,78 @@ def process_uploaded_video(
         
         if db:
             db.close()
+
+
+def convert_video_to_standard_format(input_path: str, output_path: str, video_id: str) -> bool:
+    """
+    Convert video to standard format for MediaConvert compatibility:
+    - Resolution: 1080x1920 (vertical, 9:16 aspect ratio)
+    - Video codec: H.264 (libx264)
+    - Audio codec: AAC
+    - Frame rate: 30fps
+    - Pixel format: yuv420p
+
+    Returns True if successful, False otherwise
+    """
+    try:
+        logger.info(f"🎬 Converting video to standard format (1080x1920, H.264, AAC, 30fps)...")
+
+        # FFmpeg command for standardized conversion
+        ffmpeg_cmd = [
+            "ffmpeg", "-y",  # Overwrite output
+            "-i", input_path,
+
+            # Video settings
+            "-vf", "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",  # Scale to 1080x1920, pad if needed, 30fps
+            "-c:v", "libx264",  # H.264 codec
+            "-preset", "medium",  # Balance between speed and compression
+            "-crf", "23",  # Constant Rate Factor (18-28 is good, 23 is default)
+            "-pix_fmt", "yuv420p",  # Standard pixel format for compatibility
+            "-movflags", "+faststart",  # Enable streaming
+
+            # Audio settings
+            "-c:a", "aac",  # AAC audio codec
+            "-b:a", "128k",  # Audio bitrate
+            "-ar", "48000",  # Sample rate 48kHz
+
+            # Output
+            output_path
+        ]
+
+        # Run conversion with timeout (max 10 minutes for long videos)
+        logger.info(f"⚙️ Running FFmpeg conversion...")
+        result = subprocess.run(
+            ffmpeg_cmd,
+            capture_output=True,
+            text=True,
+            timeout=600  # 10 minutes max
+        )
+
+        if result.returncode != 0:
+            logger.error(f"❌ FFmpeg conversion failed: {result.stderr}")
+            return False
+
+        if not os.path.exists(output_path):
+            logger.error(f"❌ Converted file not created: {output_path}")
+            return False
+
+        original_size = os.path.getsize(input_path)
+        converted_size = os.path.getsize(output_path)
+        compression_ratio = (1 - converted_size / original_size) * 100
+
+        logger.info(f"✅ Video converted successfully")
+        logger.info(f"📊 Original: {original_size:,} bytes → Converted: {converted_size:,} bytes ({compression_ratio:.1f}% compression)")
+
+        return True
+
+    except subprocess.TimeoutExpired:
+        logger.error(f"❌ Video conversion timed out (>10 minutes)")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Video conversion error: {e}")
+        import traceback
+        logger.error(f"📋 Traceback: {traceback.format_exc()}")
+        return False
 
 
 def extract_video_duration(video_path: str) -> float:
