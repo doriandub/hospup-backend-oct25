@@ -12,6 +12,7 @@ from .admin import router as admin_router
 from .diagnostic import router as diagnostic_router
 from .viral_matching import router as viral_matching_router
 from .video_generation import router as video_generation_router
+from .ai import router as ai_router
 
 api_router = APIRouter()
 api_router.include_router(health_router, tags=["health"])
@@ -26,5 +27,6 @@ api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 api_router.include_router(diagnostic_router, prefix="/diagnostic", tags=["diagnostic"])
 api_router.include_router(viral_matching_router, prefix="/viral-matching", tags=["viral-matching"])
 api_router.include_router(video_generation_router, prefix="/video-generation", tags=["video-generation"])
+api_router.include_router(ai_router, prefix="/ai", tags=["ai"])
 
 __all__ = ["api_router"]
