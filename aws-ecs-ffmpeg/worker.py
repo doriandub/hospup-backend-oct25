@@ -264,6 +264,21 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
         # Escape text for FFmpeg
         safe_content = content.replace("'", "\\'").replace(":", "\\:")
 
+        # Parse textShadow if present (CSS format: "1px 1px 2px rgba(0,0,0,0.5)")
+        text_shadow = style.get('textShadow', 'none')
+        shadow_params = ""
+        if text_shadow and text_shadow != 'none':
+            parts = text_shadow.split()
+            if len(parts) >= 2:
+                try:
+                    shadow_x = parts[0].replace('px', '')
+                    shadow_y = parts[1].replace('px', '')
+                    # FFmpeg shadowcolor format: color@alpha (0.5 = 50% opacity)
+                    shadow_params = f":shadowcolor=black@0.5:shadowx={shadow_x}:shadowy={shadow_y}"
+                    logger.info(f"🎨 Text shadow: x={shadow_x}, y={shadow_y}")
+                except:
+                    logger.warning(f"⚠️ Failed to parse textShadow: {text_shadow}")
+
         # Build drawtext filter
         next_label = f'txt{idx}'
         drawtext_filter = (
@@ -271,7 +286,7 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             f"fontfile='{fontfile}':"
             f"text='{safe_content}':"
             f"fontsize={font_size}:"
-            f"fontcolor=0x{color}:"
+            f"fontcolor=0x{color}{shadow_params}:"  # Add shadow params here
             f"x={x}-text_w/2:"  # Center text horizontally (like preview)
             f"y={y}-text_h/2:"  # Center text vertically (like preview)
             f"enable='between(t,{start_time},{end_time})'"
@@ -390,6 +405,21 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
         # Escape text for FFmpeg
         safe_content = content.replace("'", "\\'").replace(":", "\\:")
 
+        # Parse textShadow if present (CSS format: "1px 1px 2px rgba(0,0,0,0.5)")
+        text_shadow = style.get('textShadow', 'none')
+        shadow_params = ""
+        if text_shadow and text_shadow != 'none':
+            parts = text_shadow.split()
+            if len(parts) >= 2:
+                try:
+                    shadow_x = parts[0].replace('px', '')
+                    shadow_y = parts[1].replace('px', '')
+                    # FFmpeg shadowcolor format: color@alpha (0.5 = 50% opacity)
+                    shadow_params = f":shadowcolor=black@0.5:shadowx={shadow_x}:shadowy={shadow_y}"
+                    logger.info(f"🎨 Text shadow: x={shadow_x}, y={shadow_y}")
+                except:
+                    logger.warning(f"⚠️ Failed to parse textShadow: {text_shadow}")
+
         # Build drawtext filter
         next_label = f'txt{idx}'
         drawtext_filter = (
@@ -397,7 +427,7 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
             f"fontfile='{fontfile}':"
             f"text='{safe_content}':"
             f"fontsize={font_size}:"
-            f"fontcolor=0x{color}:"
+            f"fontcolor=0x{color}{shadow_params}:"  # Add shadow params here
             f"x={x}-text_w/2:"  # Center text horizontally (like preview)
             f"y={y}-text_h/2:"  # Center text vertically (like preview)
             f"enable='between(t,{start_time},{end_time})'"
