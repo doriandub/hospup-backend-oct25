@@ -447,11 +447,15 @@ async def generate_video_mediaconvert(
 ):
     """🎯 OPTIMIZED: MediaConvert (clips) → ECS FFmpeg (text overlay)"""
     try:
+        # Generate IDs if not provided
+        video_id = request.video_id or str(uuid.uuid4())
+        job_id = request.job_id or str(uuid.uuid4())
+
         print(f"🎯 OPTIMIZED video generation: MediaConvert → ECS FFmpeg")
-        print(f"📊 Payload: property_id={request.property_id}, video_id={request.video_id}, job_id={request.job_id}")
+        print(f"📊 Payload: property_id={request.property_id}, video_id={video_id}, job_id={job_id}")
         print(f"📹 Data: {len(request.segments)} segments (→ MediaConvert), {len(request.text_overlays)} overlays (→ ECS FFmpeg)")
         logger.info(f"🎯 OPTIMIZED workflow starting")
-        logger.info(f"📊 Payload: property_id={request.property_id}, video_id={request.video_id}, job_id={request.job_id}")
+        logger.info(f"📊 Payload: property_id={request.property_id}, video_id={video_id}, job_id={job_id}")
         logger.info(f"📹 Segments: {len(request.segments)}, Text overlays: {len(request.text_overlays)}")
 
         # Create video record in database
@@ -462,9 +466,9 @@ async def generate_video_mediaconvert(
 
             if user_id:
                 new_video = Video(
-                    id=request.video_id,
-                    title=f"Generated Video {request.video_id[:8]}",
-                    description=f"Optimized: MediaConvert + ECS job {request.job_id}",
+                    id=video_id,
+                    title=f"Generated Video {video_id[:8]}",
+                    description=f"Optimized: MediaConvert + ECS job {job_id}",
                     property_id=int(request.property_id) if request.property_id.isdigit() else None,
                     user_id=user_id,
                     status="processing",
@@ -472,7 +476,7 @@ async def generate_video_mediaconvert(
                 )
                 db.add(new_video)
                 await db.commit()
-                logger.info(f"✅ Video record created: {request.video_id}")
+                logger.info(f"✅ Video record created: {video_id}")
             else:
                 logger.warning("⚠️ No users found, skipping video record")
         except Exception as db_error:
@@ -487,8 +491,8 @@ async def generate_video_mediaconvert(
         # Prepare payload for MediaConvert Lambda
         mediaconvert_payload = {
             "property_id": request.property_id,
-            "video_id": request.video_id,
-            "job_id": request.job_id,
+            "video_id": video_id,
+            "job_id": job_id,
             "segments": request.segments,
             "text_overlays": request.text_overlays,
             "custom_script": request.custom_script or {},
@@ -512,7 +516,8 @@ async def generate_video_mediaconvert(
         print(f"   → Total expected: 8-25s")
 
         return MediaConvertJobResponse(
-            job_id=request.job_id,
+            job_id=job_id,
+            video_id=video_id,
             status="SUBMITTED",
             message=f"OPTIMIZED: MediaConvert assembling clips → ECS FFmpeg will add texts"
         )

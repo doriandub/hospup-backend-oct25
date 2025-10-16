@@ -39,8 +39,8 @@ class SmartMatchResponse(BaseModel):
 class MediaConvertRequest(BaseModel):
     """Request schema for MediaConvert generation - Clean payload format"""
     property_id: str
-    video_id: str
-    job_id: str
+    video_id: Optional[str] = None  # Optional - will be generated if not provided
+    job_id: Optional[str] = None     # Optional - will be generated if not provided
     segments: List[Dict[str, Any]]
     text_overlays: List[Dict[str, Any]]
     total_duration: float
@@ -51,6 +51,7 @@ class MediaConvertRequest(BaseModel):
 class MediaConvertJobResponse(BaseModel):
     """Response schema for MediaConvert job creation"""
     job_id: str
+    video_id: str  # Add video_id to response
     status: str
     message: str
 
