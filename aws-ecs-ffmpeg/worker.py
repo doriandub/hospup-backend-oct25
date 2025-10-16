@@ -25,17 +25,57 @@ WEBHOOK_URL = os.environ.get('WEBHOOK_URL', '')
 s3_client = boto3.client('s3', region_name=AWS_REGION)
 sqs_client = boto3.client('sqs', region_name=AWS_REGION)
 
-# Font mapping
+# Font mapping - 7 polices classiques (Google Fonts, OFL license)
 FONT_MAP = {
+    # Sans-Serif modernes
     'Roboto': '/usr/share/fonts/truetype/google-fonts/Roboto-Regular.ttf',
     'Roboto Bold': '/usr/share/fonts/truetype/google-fonts/Roboto-Bold.ttf',
-    'Montserrat': '/usr/share/fonts/truetype/google-fonts/Montserrat-Regular.ttf',
-    'Montserrat Bold': '/usr/share/fonts/truetype/google-fonts/Montserrat-Bold.ttf',
-    'Playfair Display': '/usr/share/fonts/truetype/google-fonts/PlayfairDisplay-Regular.ttf',
-    'Playfair Display Bold': '/usr/share/fonts/truetype/google-fonts/PlayfairDisplay-Bold.ttf',
     'Open Sans': '/usr/share/fonts/truetype/google-fonts/OpenSans-Regular.ttf',
     'Open Sans Bold': '/usr/share/fonts/truetype/google-fonts/OpenSans-Bold.ttf',
+    'Montserrat': '/usr/share/fonts/truetype/google-fonts/Montserrat-Regular.ttf',
+    'Montserrat Bold': '/usr/share/fonts/truetype/google-fonts/Montserrat-Bold.ttf',
+    'Lato': '/usr/share/fonts/truetype/google-fonts/Lato-Regular.ttf',
 }
+
+def get_font_file(overlay_style: Dict) -> str:
+    """
+    Get the correct font file path from overlay style
+
+    Handles:
+    - fontFamily (camelCase) from frontend
+    - font_family (snake_case) legacy
+    - Font names with fallbacks like "Roboto, sans-serif"
+    - fontWeight to select Regular/Bold variant
+
+    Args:
+        overlay_style: Style dict with fontFamily, fontWeight, fontStyle
+
+    Returns:
+        Path to font file
+    """
+    # Read fontFamily (camelCase) or font_family (snake_case)
+    font_family = overlay_style.get('fontFamily') or overlay_style.get('font_family', 'Roboto')
+    font_weight = overlay_style.get('fontWeight') or overlay_style.get('font_weight', 'normal')
+
+    # Parse font name - remove fallbacks like ", sans-serif", ", serif"
+    # "Roboto, sans-serif" → "Roboto"
+    # "Open Sans, sans-serif" → "Open Sans"
+    font_name = font_family.split(',')[0].strip()
+
+    # Determine if we need Bold variant
+    is_bold = font_weight in ['bold', 'Bold', '700', 700, 'bolder']
+
+    # Build full font key with weight
+    if is_bold:
+        font_key = f"{font_name} Bold"
+        # Try bold variant first, fallback to regular
+        if font_key in FONT_MAP:
+            return FONT_MAP[font_key]
+        # Fallback to regular if bold not available
+        logger.warning(f"⚠️ Bold variant not found for {font_name}, using regular")
+
+    # Return regular variant (or fallback to Roboto)
+    return FONT_MAP.get(font_name, FONT_MAP['Roboto'])
 
 def download_from_s3(s3_url: str, local_path: str):
     """Télécharge un fichier depuis S3"""
@@ -146,15 +186,16 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
 
     for idx, overlay in enumerate(text_overlays):
         content = overlay.get('content', '')
-        font_family = overlay.get('style', {}).get('font_family', 'Roboto')
-        font_size = overlay.get('style', {}).get('font_size', 48)
-        color = overlay.get('style', {}).get('color', '#FFFFFF')
+        style = overlay.get('style', {})
+        font_size = style.get('font_size', 48)
+        color = style.get('color', '#FFFFFF')
         position = overlay.get('position', {'x': 540, 'y': 960})
         start_time = overlay.get('start_time', 0)
         end_time = overlay.get('end_time', 999)
 
-        # Get font file path
-        fontfile = FONT_MAP.get(font_family, FONT_MAP['Roboto'])
+        # Get font file path using new parser
+        fontfile = get_font_file(style)
+        logger.info(f"📝 Text {idx+1}: '{content[:30]}' - Font: {fontfile}")
 
         # Convert color to FFmpeg hex format
         color_map = {
@@ -213,8 +254,9 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
     if filters:
         cmd.extend([
             '-c:v', 'libx264',
-            '-preset', 'fast',  # Faster preset since we're just overlaying text
-            '-crf', '23',
+            '-preset', 'veryfast',  # ⚡ OPTIMIZED: veryfast = best speed/quality/size balance
+            '-crf', '27',  # Good compression while maintaining quality
+            '-threads', '4',  # Multi-core encoding
             '-pix_fmt', 'yuv420p',
         ])
     else:
@@ -269,15 +311,15 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
     video_label = 'video'
     for idx, overlay in enumerate(text_overlays):
         content = overlay.get('content', '')
-        font_family = overlay.get('style', {}).get('font_family', 'Roboto')
-        font_size = overlay.get('style', {}).get('font_size', 48)
-        color = overlay.get('style', {}).get('color', '#FFFFFF')
+        style = overlay.get('style', {})
+        font_size = style.get('font_size', 48)
+        color = style.get('color', '#FFFFFF')
         position = overlay.get('position', {'x': 640, 'y': 360})
         start_time = overlay.get('start_time', 0)
         end_time = overlay.get('end_time', 999)
 
-        # Get font file path
-        fontfile = FONT_MAP.get(font_family, FONT_MAP['Roboto'])
+        # Get font file path using new parser
+        fontfile = get_font_file(style)
 
         # Convert color to FFmpeg hex format
         # Map named colors to hex
