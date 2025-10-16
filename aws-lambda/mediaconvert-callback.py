@@ -205,12 +205,21 @@ def send_to_ecs_ffmpeg(job_id: str, video_id: str, property_id: str, base_video_
         print(f"📥 Downloaded {len(text_overlays)} text overlays from S3: {text_overlays_s3_key}")
 
         # Prepare SQS message for ECS FFmpeg worker
+        # COMPATIBILITY: Send in format that old worker understands (segments)
+        # This allows old worker to add text overlays without needing new Docker image
         message = {
             'job_id': job_id,
             'video_id': video_id,
             'property_id': property_id,
-            'base_video_url': base_video_url,  # MediaConvert output video
+            'base_video_url': base_video_url,  # For new workers
             'mediaconvert_output_url': base_video_url,  # Alternative name
+            'segments': [{  # For old workers - single segment = MediaConvert output
+                'video_url': base_video_url,
+                'source_url': base_video_url,
+                'duration': 999,  # Will be detected automatically by FFmpeg
+                'start_time': 0,
+                'end_time': 999
+            }],
             'text_overlays': text_overlays  # Text overlays to add
         }
 

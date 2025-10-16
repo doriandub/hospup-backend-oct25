@@ -53,8 +53,17 @@ RUN wget -q -O /usr/share/fonts/truetype/google-fonts/Lato-Italic.ttf \
 RUN wget -q -O /usr/share/fonts/truetype/google-fonts/Lato-BoldItalic.ttf \
     https://github.com/google/fonts/raw/main/ofl/lato/Lato-BoldItalic.ttf
 
-# Note: Additional fonts (Merriweather, Playfair Display, Bebas Neue, Oswald) can be added
-# Current 16 variants cover most use cases with Regular, Bold, Italic, BoldItalic support
+# 17-20. Tinos (Serif - Times New Roman clone)
+RUN wget -q -O /usr/share/fonts/truetype/google-fonts/Tinos-Regular.ttf \
+    https://github.com/google/fonts/raw/main/apache/tinos/Tinos-Regular.ttf
+RUN wget -q -O /usr/share/fonts/truetype/google-fonts/Tinos-Bold.ttf \
+    https://github.com/google/fonts/raw/main/apache/tinos/Tinos-Bold.ttf
+RUN wget -q -O /usr/share/fonts/truetype/google-fonts/Tinos-Italic.ttf \
+    https://github.com/google/fonts/raw/main/apache/tinos/Tinos-Italic.ttf
+RUN wget -q -O /usr/share/fonts/truetype/google-fonts/Tinos-BoldItalic.ttf \
+    https://github.com/google/fonts/raw/main/apache/tinos/Tinos-BoldItalic.ttf
+
+# Note: 20 font variants total (5 families with Regular, Bold, Italic, BoldItalic support)
 
 # Rebuild font cache
 RUN fc-cache -fv

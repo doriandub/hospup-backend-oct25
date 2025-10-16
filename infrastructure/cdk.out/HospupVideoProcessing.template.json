@@ -340,7 +340,7 @@
        },
        {
         "Name": "WEBHOOK_URL",
-        "Value": "https://hospup-backend-production.up.railway.app/api/v1/videos/ffmpeg-callback"
+        "Value": "https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
        }
       ],
       "Essential": true,
@@ -495,7 +495,7 @@
      "MaximumPercent": 200,
      "MinimumHealthyPercent": 90
     },
-    "DesiredCount": 3,
+    "DesiredCount": 10,
     "EnableECSManagedTags": false,
     "NetworkConfiguration": {
      "AwsvpcConfiguration": {
@@ -588,8 +588,8 @@
   "FFmpegWorkerServiceTaskCountTargetACF53073": {
    "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
    "Properties": {
-    "MaxCapacity": 10,
-    "MinCapacity": 3,
+    "MaxCapacity": 50,
+    "MinCapacity": 10,
     "ResourceId": {
      "Fn::Join": [
       "",
@@ -981,11 +981,11 @@
   },
   "WarmPoolSize": {
    "Description": "Nombre de workers toujours actifs (warm pool)",
-   "Value": "3"
+   "Value": "10"
   },
   "MaxWorkers": {
    "Description": "Nombre maximum de workers (autoscaling)",
-   "Value": "10"
+   "Value": "50"
   },
   "DashboardURL": {
    "Description": "CloudWatch Dashboard URL",

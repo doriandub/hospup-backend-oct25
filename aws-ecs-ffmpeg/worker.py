@@ -25,7 +25,7 @@ WEBHOOK_URL = os.environ.get('WEBHOOK_URL', '')
 s3_client = boto3.client('s3', region_name=AWS_REGION)
 sqs_client = boto3.client('sqs', region_name=AWS_REGION)
 
-# Font mapping - 16 font variants (4 families × 4 variants: Regular, Bold, Italic, BoldItalic)
+# Font mapping - 20 font variants (5 families × 4 variants: Regular, Bold, Italic, BoldItalic)
 FONT_MAP = {
     # Roboto (Sans-Serif moderne, ultra-polyvalente)
     'Roboto': '/usr/share/fonts/truetype/google-fonts/Roboto-Regular.ttf',
@@ -50,6 +50,12 @@ FONT_MAP = {
     'Lato Bold': '/usr/share/fonts/truetype/google-fonts/Lato-Bold.ttf',
     'Lato Italic': '/usr/share/fonts/truetype/google-fonts/Lato-Italic.ttf',
     'Lato BoldItalic': '/usr/share/fonts/truetype/google-fonts/Lato-BoldItalic.ttf',
+
+    # Tinos (Serif - Times New Roman clone)
+    'Times New Roman': '/usr/share/fonts/truetype/google-fonts/Tinos-Regular.ttf',
+    'Times New Roman Bold': '/usr/share/fonts/truetype/google-fonts/Tinos-Bold.ttf',
+    'Times New Roman Italic': '/usr/share/fonts/truetype/google-fonts/Tinos-Italic.ttf',
+    'Times New Roman BoldItalic': '/usr/share/fonts/truetype/google-fonts/Tinos-BoldItalic.ttf',
 }
 
 def get_font_file(overlay_style: Dict) -> str:
@@ -260,7 +266,7 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             f"text='{safe_content}':"
             f"fontsize={font_size}:"
             f"fontcolor=0x{color}:"
-            f"x=(w-text_w)/2:"  # Center horizontally
+            f"x={x}:"  # Use position.x from JSON
             f"y={y}:"
             f"enable='between(t,{start_time},{end_time})'"
             f"[{next_label}]"
@@ -386,7 +392,7 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
             f"text='{safe_content}':"
             f"fontsize={font_size}:"
             f"fontcolor=0x{color}:"
-            f"x=(w-text_w)/2:"  # Center horizontally
+            f"x={x}:"  # Use position.x from JSON
             f"y={y}:"
             f"enable='between(t,{start_time},{end_time})'"
             f"[{next_label}]"

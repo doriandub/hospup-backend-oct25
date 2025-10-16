@@ -206,7 +206,7 @@ class VideoProcessingStack(Stack):
             environment={
                 "AWS_DEFAULT_REGION": self.region,
                 "SQS_QUEUE_URL": self.queue.queue_url,
-                "WEBHOOK_URL": "https://hospup-backend-production.up.railway.app/api/v1/videos/ffmpeg-callback"
+                "WEBHOOK_URL": "https://web-production-b52f.up.railway.app/api/v1/videos/ffmpeg-callback"
             }
         )
 
