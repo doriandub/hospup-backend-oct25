@@ -492,9 +492,12 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
 
             logger.info("✅ FFmpeg completed successfully")
 
-            # Upload to S3
-            output_s3_url = f"s3://hospup-files/generated-videos/{property_id}/{video_id}.mp4"
+            # Upload to S3 - use different filename to not overwrite MediaConvert output
+            # MediaConvert output: {video_id}.mp4 (no text)
+            # FFmpeg output: {video_id}_with_text.mp4 (with text)
+            output_s3_url = f"s3://hospup-files/generated-videos/{property_id}/{video_id}_with_text.mp4"
             final_url = upload_to_s3(output_file, output_s3_url)
+            logger.info(f"📤 Uploaded video WITH TEXT to: {final_url}")
 
             processing_time = time.time() - start_time
             logger.info(f"✅ Job {job_id} completed in {processing_time:.1f}s (mode={mode})")
