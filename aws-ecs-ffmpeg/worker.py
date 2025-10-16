@@ -51,7 +51,13 @@ FONT_MAP = {
     'Lato Italic': '/usr/share/fonts/truetype/google-fonts/Lato-Italic.ttf',
     'Lato BoldItalic': '/usr/share/fonts/truetype/google-fonts/Lato-BoldItalic.ttf',
 
-    # Tinos (Serif - Times New Roman clone)
+    # Tinos (Serif - Open-source font similar to Times New Roman)
+    'Tinos': '/usr/share/fonts/truetype/google-fonts/Tinos-Regular.ttf',
+    'Tinos Bold': '/usr/share/fonts/truetype/google-fonts/Tinos-Bold.ttf',
+    'Tinos Italic': '/usr/share/fonts/truetype/google-fonts/Tinos-Italic.ttf',
+    'Tinos BoldItalic': '/usr/share/fonts/truetype/google-fonts/Tinos-BoldItalic.ttf',
+
+    # Legacy compatibility (old data may use "Times New Roman")
     'Times New Roman': '/usr/share/fonts/truetype/google-fonts/Tinos-Regular.ttf',
     'Times New Roman Bold': '/usr/share/fonts/truetype/google-fonts/Tinos-Bold.ttf',
     'Times New Roman Italic': '/usr/share/fonts/truetype/google-fonts/Tinos-Italic.ttf',
@@ -266,8 +272,8 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             f"text='{safe_content}':"
             f"fontsize={font_size}:"
             f"fontcolor=0x{color}:"
-            f"x={x}:"  # Use position.x from JSON
-            f"y={y}:"
+            f"x={x}-text_w/2:"  # Center text horizontally (like preview)
+            f"y={y}-text_h/2:"  # Center text vertically (like preview)
             f"enable='between(t,{start_time},{end_time})'"
             f"[{next_label}]"
         )
@@ -392,8 +398,8 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
             f"text='{safe_content}':"
             f"fontsize={font_size}:"
             f"fontcolor=0x{color}:"
-            f"x={x}:"  # Use position.x from JSON
-            f"y={y}:"
+            f"x={x}-text_w/2:"  # Center text horizontally (like preview)
+            f"y={y}-text_h/2:"  # Center text vertically (like preview)
             f"enable='between(t,{start_time},{end_time})'"
             f"[{next_label}]"
         )
