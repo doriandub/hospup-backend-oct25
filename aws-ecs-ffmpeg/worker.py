@@ -25,16 +25,31 @@ WEBHOOK_URL = os.environ.get('WEBHOOK_URL', '')
 s3_client = boto3.client('s3', region_name=AWS_REGION)
 sqs_client = boto3.client('sqs', region_name=AWS_REGION)
 
-# Font mapping - 7 polices classiques (Google Fonts, OFL license)
+# Font mapping - 16 font variants (4 families × 4 variants: Regular, Bold, Italic, BoldItalic)
 FONT_MAP = {
-    # Sans-Serif modernes
+    # Roboto (Sans-Serif moderne, ultra-polyvalente)
     'Roboto': '/usr/share/fonts/truetype/google-fonts/Roboto-Regular.ttf',
     'Roboto Bold': '/usr/share/fonts/truetype/google-fonts/Roboto-Bold.ttf',
+    'Roboto Italic': '/usr/share/fonts/truetype/google-fonts/Roboto-Italic.ttf',
+    'Roboto BoldItalic': '/usr/share/fonts/truetype/google-fonts/Roboto-BoldItalic.ttf',
+
+    # Open Sans (Sans-Serif, très lisible)
     'Open Sans': '/usr/share/fonts/truetype/google-fonts/OpenSans-Regular.ttf',
     'Open Sans Bold': '/usr/share/fonts/truetype/google-fonts/OpenSans-Bold.ttf',
+    'Open Sans Italic': '/usr/share/fonts/truetype/google-fonts/OpenSans-Italic.ttf',
+    'Open Sans BoldItalic': '/usr/share/fonts/truetype/google-fonts/OpenSans-BoldItalic.ttf',
+
+    # Montserrat (Sans-Serif géométrique, style moderne)
     'Montserrat': '/usr/share/fonts/truetype/google-fonts/Montserrat-Regular.ttf',
     'Montserrat Bold': '/usr/share/fonts/truetype/google-fonts/Montserrat-Bold.ttf',
+    'Montserrat Italic': '/usr/share/fonts/truetype/google-fonts/Montserrat-Italic.ttf',
+    'Montserrat BoldItalic': '/usr/share/fonts/truetype/google-fonts/Montserrat-BoldItalic.ttf',
+
+    # Lato (Sans-Serif élégante)
     'Lato': '/usr/share/fonts/truetype/google-fonts/Lato-Regular.ttf',
+    'Lato Bold': '/usr/share/fonts/truetype/google-fonts/Lato-Bold.ttf',
+    'Lato Italic': '/usr/share/fonts/truetype/google-fonts/Lato-Italic.ttf',
+    'Lato BoldItalic': '/usr/share/fonts/truetype/google-fonts/Lato-BoldItalic.ttf',
 }
 
 def get_font_file(overlay_style: Dict) -> str:
@@ -45,7 +60,9 @@ def get_font_file(overlay_style: Dict) -> str:
     - fontFamily (camelCase) from frontend
     - font_family (snake_case) legacy
     - Font names with fallbacks like "Roboto, sans-serif"
-    - fontWeight to select Regular/Bold variant
+    - fontWeight to select Bold variant
+    - fontStyle to select Italic variant
+    - Combination of both for BoldItalic
 
     Args:
         overlay_style: Style dict with fontFamily, fontWeight, fontStyle
@@ -56,26 +73,40 @@ def get_font_file(overlay_style: Dict) -> str:
     # Read fontFamily (camelCase) or font_family (snake_case)
     font_family = overlay_style.get('fontFamily') or overlay_style.get('font_family', 'Roboto')
     font_weight = overlay_style.get('fontWeight') or overlay_style.get('font_weight', 'normal')
+    font_style = overlay_style.get('fontStyle') or overlay_style.get('font_style', 'normal')
 
     # Parse font name - remove fallbacks like ", sans-serif", ", serif"
     # "Roboto, sans-serif" → "Roboto"
     # "Open Sans, sans-serif" → "Open Sans"
     font_name = font_family.split(',')[0].strip()
 
-    # Determine if we need Bold variant
+    # Determine if we need Bold/Italic variants
     is_bold = font_weight in ['bold', 'Bold', '700', 700, 'bolder']
+    is_italic = font_style in ['italic', 'Italic', 'oblique', 'Oblique']
 
-    # Build full font key with weight
-    if is_bold:
+    # Build font key based on weight + style combination
+    if is_bold and is_italic:
+        font_key = f"{font_name} BoldItalic"
+    elif is_bold:
         font_key = f"{font_name} Bold"
-        # Try bold variant first, fallback to regular
-        if font_key in FONT_MAP:
-            return FONT_MAP[font_key]
-        # Fallback to regular if bold not available
-        logger.warning(f"⚠️ Bold variant not found for {font_name}, using regular")
+    elif is_italic:
+        font_key = f"{font_name} Italic"
+    else:
+        font_key = font_name  # Regular
 
-    # Return regular variant (or fallback to Roboto)
-    return FONT_MAP.get(font_name, FONT_MAP['Roboto'])
+    # Try to get the exact variant, fallback to regular
+    if font_key in FONT_MAP:
+        logger.info(f"🎨 Selected font: {font_key}")
+        return FONT_MAP[font_key]
+
+    # Fallback to regular variant of same family
+    if font_name in FONT_MAP:
+        logger.warning(f"⚠️ {font_key} not found, using {font_name} Regular")
+        return FONT_MAP[font_name]
+
+    # Ultimate fallback to Roboto Regular
+    logger.warning(f"⚠️ {font_name} not found, using Roboto Regular")
+    return FONT_MAP['Roboto']
 
 def download_from_s3(s3_url: str, local_path: str):
     """Télécharge un fichier depuis S3"""
