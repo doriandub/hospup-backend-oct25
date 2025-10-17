@@ -94,13 +94,19 @@ async def save_project(
 
         # Auto-set thumbnail from first SLOT (slot_0), not first contentVideo
         if request.project_data:
-            slot_assignments = request.project_data.get('slotAssignments', {})
+            slot_assignments = request.project_data.get('slotAssignments', [])  # Array, not dict!
             content_videos = request.project_data.get('contentVideos', [])
 
             # Find which video is assigned to slot_0 (first slot in timeline)
-            if 'slot_0' in slot_assignments and content_videos:
-                assigned_video_id = slot_assignments['slot_0']
+            # slotAssignments is an array: [{slotId: "slot_0", videoId: "abc-123"}, ...]
+            assigned_video_id = None
+            if isinstance(slot_assignments, list):
+                for assignment in slot_assignments:
+                    if assignment.get('slotId') == 'slot_0':
+                        assigned_video_id = assignment.get('videoId')
+                        break
 
+            if assigned_video_id and content_videos:
                 # Find the corresponding video in contentVideos
                 for vid in content_videos:
                     if vid.get('id') == assigned_video_id:
@@ -128,13 +134,19 @@ async def save_project(
         # Auto-set thumbnail from first SLOT (slot_0), not first contentVideo
         thumbnail_url = None
         if request.project_data:
-            slot_assignments = request.project_data.get('slotAssignments', {})
+            slot_assignments = request.project_data.get('slotAssignments', [])  # Array, not dict!
             content_videos = request.project_data.get('contentVideos', [])
 
             # Find which video is assigned to slot_0 (first slot in timeline)
-            if 'slot_0' in slot_assignments and content_videos:
-                assigned_video_id = slot_assignments['slot_0']
+            # slotAssignments is an array: [{slotId: "slot_0", videoId: "abc-123"}, ...]
+            assigned_video_id = None
+            if isinstance(slot_assignments, list):
+                for assignment in slot_assignments:
+                    if assignment.get('slotId') == 'slot_0':
+                        assigned_video_id = assignment.get('videoId')
+                        break
 
+            if assigned_video_id and content_videos:
                 # Find the corresponding video in contentVideos
                 for vid in content_videos:
                     if vid.get('id') == assigned_video_id:
