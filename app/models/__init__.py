@@ -8,5 +8,6 @@ from .property import Property
 from .asset import Asset  # For uploaded content (videos, images, etc.)
 from .video import Video  # For AI-generated videos
 from .template import Template  # For viral video templates
+from .preset import Preset  # For image adjustment presets
 
-__all__ = ["Base", "User", "Property", "Asset", "Video", "Template"]
+__all__ = ["Base", "User", "Property", "Asset", "Video", "Template", "Preset"]

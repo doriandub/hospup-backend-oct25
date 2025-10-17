@@ -31,3 +31,4 @@ class User(Base):
     # Relationships - SIMPLE comme avant migration
     assets = relationship("Asset", back_populates="user", cascade="all, delete-orphan")  # Uploaded content
     videos = relationship("Video", back_populates="user", cascade="all, delete-orphan")  # Generated videos
+    presets = relationship("Preset", back_populates="user", cascade="all, delete-orphan")  # Image adjustment presets
