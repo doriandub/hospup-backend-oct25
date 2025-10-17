@@ -17,7 +17,6 @@ from app.models.user import User
 from app.models.property import Property
 from app.models.asset import Asset
 from app.models.video import Video
-from app.models.template import Template
 
 # Configure structured logging
 structlog.configure(

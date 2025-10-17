@@ -25,7 +25,7 @@ class Video(Base):
 
     # Project System - NEW
     project_name = Column(String(255), nullable=True)  # Custom project name
-    template_id = Column(UUID, ForeignKey("templates.id", ondelete="SET NULL"), nullable=True)
+    template_id = Column(String(255), nullable=True)  # Template ID reference (stored as string, no FK)
     project_data = Column(JSONB, default={})  # Stores: templateSlots, slotAssignments, textOverlays, customScript
 
     # Video Generation Data
