@@ -71,6 +71,43 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+# Custom exception handler to ensure CORS headers on all errors
+@app.exception_handler(Exception)
+async def universal_exception_handler(request: Request, exc: Exception):
+    """Ensure CORS headers are present even on unhandled exceptions"""
+    from fastapi.responses import JSONResponse
+
+    # Get origin from request
+    origin = request.headers.get("origin", "")
+
+    # Create response with error details
+    response = JSONResponse(
+        status_code=500,
+        content={
+            "detail": f"Internal server error: {str(exc)[:200]}",
+            "error_type": type(exc).__name__
+        }
+    )
+
+    # Always add CORS headers if origin is allowed
+    allowed_origins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://hospup-frontend-2-kappa.vercel.app",
+        "https://hospup.vercel.app"
+    ]
+
+    if origin in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Expose-Headers"] = "*"
+
+    logger.error("Unhandled exception", error=str(exc), error_type=type(exc).__name__, path=request.url.path)
+
+    return response
+
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
 
