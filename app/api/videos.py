@@ -404,6 +404,53 @@ async def get_video(
             detail=f"Failed to fetch video: {str(e)}"
         )
 
+@router.delete("/{video_id}")
+async def delete_video(
+    video_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    🗑️ Supprimer une vidéo
+    """
+    try:
+        # Vérifier que la vidéo existe et appartient à l'utilisateur
+        result = await db.execute(
+            select(Video).where(
+                Video.id == video_id,
+                Video.user_id == current_user.id
+            )
+        )
+        video = result.scalar_one_or_none()
+
+        if not video:
+            raise HTTPException(
+                status_code=404,
+                detail="Video not found or access denied"
+            )
+
+        # Supprimer la vidéo
+        await db.delete(video)
+        await db.commit()
+
+        logger.info(f"✅ Video {video_id} deleted by user {current_user.id}")
+
+        return {
+            "status": "success",
+            "message": "Video deleted successfully",
+            "video_id": video_id
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error deleting video {video_id}: {str(e)}")
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete video: {str(e)}"
+        )
+
 @router.get("/")
 async def list_user_videos(
     current_user: User = Depends(get_current_user),
