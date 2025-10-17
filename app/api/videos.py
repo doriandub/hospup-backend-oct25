@@ -440,7 +440,11 @@ async def list_user_videos(
                 "created_at": video.created_at.isoformat() if video.created_at else None,
                 "updated_at": video.updated_at.isoformat() if video.updated_at else None,
                 "completed_at": video.completed_at.isoformat() if video.completed_at else None,
-                "last_saved_at": video.last_saved_at.isoformat() if video.last_saved_at else None
+                "last_saved_at": video.last_saved_at.isoformat() if video.last_saved_at else None,
+                # Include full project_data for draft projects (contains textOverlays, contentVideos, etc.)
+                "project_data": video.project_data if video.project_data else None,
+                # Backward compatibility: also expose contentVideos separately
+                "contentVideos": video.project_data.get("contentVideos", []) if video.project_data else []
             }
             for video in videos
         ]

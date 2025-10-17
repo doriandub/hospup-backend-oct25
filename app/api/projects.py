@@ -91,12 +91,32 @@ async def save_project(
         video.project_data = request.project_data
         video.last_saved_at = datetime.utcnow()
         video.updated_at = datetime.utcnow()
+
+        # Auto-set thumbnail from first video in contentVideos
+        if request.project_data and 'contentVideos' in request.project_data:
+            content_videos = request.project_data.get('contentVideos', [])
+            if content_videos and len(content_videos) > 0:
+                first_video = content_videos[0]
+                if 'thumbnail_url' in first_video:
+                    video.thumbnail_url = first_video['thumbnail_url']
+                    logger.info("🖼️ Thumbnail URL updated from first video", thumbnail_url=video.thumbnail_url)
+
         logger.info("✏️ Project fields updated", project_id=video.id)
 
     else:
         # Create new project
         video_id = str(uuid.uuid4())
         logger.info("🆕 Creating new project", video_id=video_id)
+
+        # Auto-set thumbnail from first video in contentVideos
+        thumbnail_url = None
+        if request.project_data and 'contentVideos' in request.project_data:
+            content_videos = request.project_data.get('contentVideos', [])
+            if content_videos and len(content_videos) > 0:
+                first_video = content_videos[0]
+                if 'thumbnail_url' in first_video:
+                    thumbnail_url = first_video['thumbnail_url']
+                    logger.info("🖼️ Setting thumbnail from first video", thumbnail_url=thumbnail_url)
 
         video = Video(
             id=video_id,
@@ -107,6 +127,7 @@ async def save_project(
             property_id=int(request.property_id),
             template_id=request.template_id,
             project_data=request.project_data,
+            thumbnail_url=thumbnail_url,
             source_type="viral_template_composer",
             status="draft",  # New status for unsaved projects
             last_saved_at=datetime.utcnow()
