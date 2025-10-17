@@ -11,7 +11,7 @@ import uuid
 from ..auth.dependencies import get_current_user
 from ..models.user import User
 from ..models.video import Video
-from ..infrastructure.database import get_db
+from ..core.database import get_db
 
 router = APIRouter()
 
