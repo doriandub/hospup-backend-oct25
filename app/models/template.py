@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 import uuid
 
-from app.core.database import Base
+from . import Base
 
 class Template(Base):
     __tablename__ = "templates"
