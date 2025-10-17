@@ -420,25 +420,30 @@ async def list_user_videos(
         )
         videos = result.scalars().all()
         
-        return {
-            "videos": [
-                {
-                    "id": video.id,
-                    "title": video.title,
-                    "description": video.description,
-                    "property_id": video.property_id,
-                    "status": video.status,
-                    "duration": video.duration,
-                    "file_url": video.file_url,
-                    "video_url": video.file_url,  # Frontend compatibility
-                    "thumbnail_url": video.thumbnail_url,
-                    "created_at": video.created_at.isoformat() if video.created_at else None,
-                    "updated_at": video.updated_at.isoformat() if video.updated_at else None
-                }
-                for video in videos
-            ],
-            "total": len(videos)
-        }
+        return [
+            {
+                "id": video.id,
+                "title": video.title,
+                "project_name": video.project_name,  # For composition projects
+                "description": video.description,
+                "property_id": video.property_id,
+                "template_id": str(video.template_id) if video.template_id else None,
+                "status": video.status,
+                "duration": video.duration,
+                "file_url": video.file_url,
+                "video_url": video.file_url,  # Frontend compatibility
+                "thumbnail_url": video.thumbnail_url,
+                "source_type": video.source_type,
+                "generation_method": video.generation_method,
+                "aws_job_id": video.aws_job_id,
+                "ai_description": video.ai_description,
+                "created_at": video.created_at.isoformat() if video.created_at else None,
+                "updated_at": video.updated_at.isoformat() if video.updated_at else None,
+                "completed_at": video.completed_at.isoformat() if video.completed_at else None,
+                "last_saved_at": video.last_saved_at.isoformat() if video.last_saved_at else None
+            }
+            for video in videos
+        ]
         
     except Exception as e:
         logger.error(f"❌ Error listing videos for user {current_user.id}: {str(e)}")

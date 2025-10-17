@@ -13,6 +13,7 @@ from .diagnostic import router as diagnostic_router
 from .viral_matching import router as viral_matching_router
 from .video_generation import router as video_generation_router
 from .ai import router as ai_router
+from .projects import router as projects_router
 
 api_router = APIRouter()
 api_router.include_router(health_router, tags=["health"])
@@ -22,6 +23,8 @@ api_router.include_router(quota_router, prefix="/quota", tags=["quota"])
 api_router.include_router(assets_router, prefix="/assets", tags=["assets"])
 # Video management - unified under /videos
 api_router.include_router(videos_router, prefix="/videos", tags=["videos"])
+# Project management - composition projects
+api_router.include_router(projects_router, prefix="/projects", tags=["projects"])
 api_router.include_router(upload_router, prefix="/upload", tags=["upload"])
 api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 api_router.include_router(diagnostic_router, prefix="/diagnostic", tags=["diagnostic"])
