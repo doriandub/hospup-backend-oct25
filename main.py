@@ -12,6 +12,13 @@ from app.core.database import engine
 from app.models import Base
 from app.api import api_router
 
+# Import all models to ensure they're registered with SQLAlchemy before create_all
+from app.models.user import User
+from app.models.property import Property
+from app.models.asset import Asset
+from app.models.video import Video
+from app.models.template import Template
+
 # Configure structured logging
 structlog.configure(
     processors=[
