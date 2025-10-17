@@ -199,9 +199,138 @@ def normalize_video(input_path: str, output_path: str, target_duration: float = 
     return output_path
 
 
-def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], output_path: str, temp_dir: str) -> List[str]:
+def build_image_adjustments_filter(presets: Dict) -> str:
     """
-    🎯 OPTIMIZED: Add text overlays to a pre-assembled MediaConvert video
+    Build FFmpeg video filter for image adjustments (brightness, contrast, saturation, etc.)
+
+    Args:
+        presets: Dictionary containing imageAdjustments settings
+
+    Returns:
+        FFmpeg filter string (e.g., "eq=brightness=0.1:contrast=1.2:saturation=1.5,...")
+    """
+    if not presets:
+        return ""
+
+    filters = []
+
+    # Basic adjustments using eq filter
+    eq_params = []
+
+    # Brightness: -100 to +100 → -1.0 to +1.0 (FFmpeg range)
+    brightness = presets.get('brightness', 0) / 100.0
+    if brightness != 0:
+        eq_params.append(f"brightness={brightness:.3f}")
+
+    # Contrast: -100 to +100 → 0.0 to 2.0 (FFmpeg: 1.0 = normal)
+    contrast_val = presets.get('contrast', 0)
+    contrast = 1.0 + (contrast_val / 100.0)  # -100→0.0, 0→1.0, +100→2.0
+    if contrast != 1.0:
+        eq_params.append(f"contrast={contrast:.3f}")
+
+    # Saturation: -100 to +100 → 0.0 to 3.0 (FFmpeg: 1.0 = normal)
+    sat_val = presets.get('saturation', 0)
+    saturation = 1.0 + (sat_val / 50.0)  # -100→-1.0, 0→1.0, +100→3.0
+    if saturation != 1.0:
+        eq_params.append(f"saturation={saturation:.3f}")
+
+    if eq_params:
+        filters.append(f"eq={':'.join(eq_params)}")
+
+    # Hue rotation: -180 to +180 degrees
+    hue = presets.get('hue', 0)
+    if hue != 0:
+        filters.append(f"hue=h={hue}")
+
+    # Temperature (blue-orange tint) using colorbalance
+    temperature = presets.get('temperature', 0)
+    if temperature != 0:
+        # Positive = warmer (more red/yellow), Negative = cooler (more blue)
+        # colorbalance: rs (red shadows), gs (green shadows), bs (blue shadows)
+        temp_factor = temperature / 100.0
+        rs = temp_factor * 0.3  # Add red for warmth
+        bs = -temp_factor * 0.3  # Remove blue for warmth
+        filters.append(f"colorbalance=rs={rs:.3f}:bs={bs:.3f}")
+
+    # Tint (green-magenta) using colorbalance
+    tint = presets.get('tint', 0)
+    if tint != 0:
+        # Positive = more magenta, Negative = more green
+        tint_factor = tint / 100.0
+        gs = -tint_factor * 0.3  # Remove green adds magenta
+        filters.append(f"colorbalance=gs={gs:.3f}")
+
+    # Highlights/Shadows using curves (advanced exposure control)
+    highlights = presets.get('highlights', 0)
+    shadows = presets.get('shadows', 0)
+
+    if highlights != 0 or shadows != 0:
+        # Build curves filter for selective exposure
+        # This is complex - simplified approach using curves
+        hl_factor = 1.0 + (highlights / 200.0)  # Reduce highlights
+        sh_factor = 1.0 + (shadows / 200.0)  # Lift shadows
+
+        # curves filter with master curve adjustment
+        # Format: curves=master='0/0 0.5/{mid} 1/1'
+        mid_point = 0.5 + (shadows - highlights) / 400.0
+        filters.append(f"curves=master='0/0 0.5/{mid_point:.3f} 1/1'")
+
+    # Whites/Blacks (similar to highlights/shadows but more extreme)
+    whites = presets.get('whites', 0)
+    blacks = presets.get('blacks', 0)
+
+    if whites != 0 or blacks != 0:
+        # Use curves for white/black point adjustment
+        white_point = 1.0 + (whites / 100.0)
+        black_point = 0.0 + (blacks / 100.0)
+        filters.append(f"curves=master='0/{black_point:.3f} 1/{white_point:.3f}'")
+
+    # Clarity (mid-tone contrast) using unsharp mask
+    clarity = presets.get('clarity', 0)
+    if clarity != 0:
+        clarity_amount = abs(clarity) / 100.0
+        if clarity > 0:
+            # Positive clarity = sharpen mid-tones
+            filters.append(f"unsharp=5:5:{clarity_amount}:5:5:0")
+
+    # Vibrance (selective saturation boost for muted colors)
+    vibrance = presets.get('vibrance', 0)
+    if vibrance != 0:
+        # Vibrance is complex - approximate with selective saturation
+        vib_factor = 1.0 + (vibrance / 100.0)
+        filters.append(f"vibrance={vib_factor:.3f}")
+
+    # Sharpness using unsharp filter
+    sharpness = presets.get('sharpness', 0)
+    if sharpness != 0:
+        sharp_amount = abs(sharpness) / 50.0  # 0-2.0 range
+        if sharpness > 0:
+            filters.append(f"unsharp=5:5:{sharp_amount}:5:5:{sharp_amount}")
+
+    # Vignette (darken edges) using vignette filter
+    vignette = presets.get('vignette', 0)
+    if vignette != 0:
+        # vignette filter: angle (spread), intensity
+        vign_intensity = abs(vignette) / 100.0  # 0-1.0
+        if vignette < 0:
+            # Negative vignette = brighten edges (inverse)
+            filters.append(f"vignette=PI/4:{-vign_intensity:.2f}")
+        else:
+            filters.append(f"vignette=PI/4:{vign_intensity:.2f}")
+
+    # Color adjustments (HSL for specific colors) - complex, skip for now
+    # This would require selective HSV adjustment per color range
+    # FFmpeg can do this with hue filter and range selection, but it's very complex
+
+    if not filters:
+        return ""
+
+    return ','.join(filters)
+
+
+def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], output_path: str, temp_dir: str, presets: Dict = None) -> List[str]:
+    """
+    🎯 OPTIMIZED: Add text overlays and image adjustments to a pre-assembled MediaConvert video
     This is MUCH faster than normalizing + concatenating segments
 
     Args:
@@ -209,24 +338,35 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
         text_overlays: List of text overlay configs
         output_path: Local path for final output
         temp_dir: Temporary directory for downloads
+        presets: Image adjustment presets (brightness, contrast, saturation, etc.)
 
     Returns:
         FFmpeg command to execute
     """
-    logger.info("🎯 OPTIMIZED MODE: Adding text overlays to MediaConvert video")
+    logger.info("🎯 OPTIMIZED MODE: Adding text overlays and image adjustments to MediaConvert video")
 
     # Download the pre-assembled MediaConvert video
     input_video = os.path.join(temp_dir, "mediaconvert_output.mp4")
     download_from_s3(base_video_url, input_video)
     logger.info(f"✅ Downloaded MediaConvert video: {base_video_url}")
 
-    # Build FFmpeg command - just overlay text on existing video
+    # Build FFmpeg command - apply image adjustments + overlay text on existing video
     cmd = ['ffmpeg', '-y', '-i', input_video]
 
-    # Build filter_complex for text overlays
+    # Build filter_complex for image adjustments + text overlays
     filters = []
     video_label = '0:v'  # Input video stream
 
+    # 1. Apply image adjustments first (if presets provided)
+    if presets:
+        logger.info(f"🎨 Applying image adjustments from presets")
+        image_filter = build_image_adjustments_filter(presets)
+        if image_filter:
+            filters.append(f"[{video_label}]{image_filter}[adjusted]")
+            video_label = 'adjusted'
+            logger.info(f"✅ Image adjustments filter: {image_filter[:100]}...")
+
+    # 2. Apply text overlays
     for idx, overlay in enumerate(text_overlays):
         content = overlay.get('content', '')
         style = overlay.get('style', {})
@@ -434,7 +574,7 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
     Traite un job de génération vidéo
 
     Supports 2 modes:
-    1. OPTIMIZED: base_video_url + text_overlays (MediaConvert output + text overlay)
+    1. OPTIMIZED: base_video_url + text_overlays + presets (MediaConvert output + text overlay + image adjustments)
     2. LEGACY: segments + text_overlays (full pipeline with normalization)
     """
     job_id = job_data.get('job_id', 'unknown')
@@ -444,6 +584,12 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
     # Check for optimized mode (MediaConvert output)
     base_video_url = job_data.get('base_video_url') or job_data.get('mediaconvert_output_url')
     text_overlays = job_data.get('text_overlays', [])
+
+    # Image adjustments presets (NEW!)
+    custom_script = job_data.get('custom_script', {})
+    presets = custom_script.get('presets') if custom_script else None
+    if presets:
+        logger.info(f"🎨 Image adjustments detected: {list(presets.keys())[:5]}...")
 
     # Legacy mode data
     segments = job_data.get('segments', [])
@@ -477,8 +623,8 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
 
             # Build FFmpeg command based on mode
             if mode == 'optimized':
-                logger.info("🔧 Building OPTIMIZED FFmpeg command (text overlay only)...")
-                cmd = add_text_overlays_to_video(base_video_url, text_overlays, output_file, temp_dir)
+                logger.info("🔧 Building OPTIMIZED FFmpeg command (image adjustments + text overlay)...")
+                cmd = add_text_overlays_to_video(base_video_url, text_overlays, output_file, temp_dir, presets)
             else:
                 logger.info("🔧 Building LEGACY FFmpeg command (normalize + concat + text)...")
                 cmd = build_ffmpeg_command(segments, text_overlays, output_file, temp_dir)

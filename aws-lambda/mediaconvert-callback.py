@@ -68,14 +68,19 @@ def lambda_handler(event, context):
             callback_data.update(output_urls)
             print(f"✅ Job completed successfully with outputs: {output_urls}")
 
-            # 🎯 OPTIMIZED WORKFLOW: Check if text overlays need to be added by ECS FFmpeg
+            # 🎯 OPTIMIZED WORKFLOW: Check if text overlays or image adjustments need to be added by ECS FFmpeg
             needs_text_overlay = user_metadata.get('needs_text_overlay') == 'true'
+            needs_image_adjustments = user_metadata.get('needs_image_adjustments') == 'true'
             text_overlays_s3_key = user_metadata.get('text_overlays_s3_key')
+            custom_script_s3_key = user_metadata.get('custom_script_s3_key')
 
-            if needs_text_overlay and text_overlays_s3_key and output_urls.get('output_url'):
-                print(f"🎯 OPTIMIZED MODE: Sending to ECS FFmpeg for text overlay")
+            if (needs_text_overlay or needs_image_adjustments) and output_urls.get('output_url'):
+                print(f"🎯 OPTIMIZED MODE: Sending to ECS FFmpeg for post-processing")
                 print(f"   MediaConvert output: {output_urls['output_url']}")
-                print(f"   Text overlays S3: {text_overlays_s3_key}")
+                if text_overlays_s3_key:
+                    print(f"   Text overlays S3: {text_overlays_s3_key}")
+                if custom_script_s3_key:
+                    print(f"   Custom script S3: {custom_script_s3_key}")
 
                 # Send job to ECS FFmpeg via SQS
                 ecs_success = send_to_ecs_ffmpeg(
@@ -83,7 +88,8 @@ def lambda_handler(event, context):
                     video_id=video_id,
                     property_id=property_id,
                     base_video_url=output_urls['output_url'],
-                    text_overlays_s3_key=text_overlays_s3_key
+                    text_overlays_s3_key=text_overlays_s3_key,
+                    custom_script_s3_key=custom_script_s3_key
                 )
 
                 if ecs_success:
@@ -186,23 +192,32 @@ def convert_s3_to_https_url(s3_path: str) -> str:
     # Fallback: construire avec le bucket par défaut
     return f"https://s3.eu-west-1.amazonaws.com/{S3_BUCKET}/{s3_path}"
 
-def send_to_ecs_ffmpeg(job_id: str, video_id: str, property_id: str, base_video_url: str, text_overlays_s3_key: str) -> bool:
+def send_to_ecs_ffmpeg(job_id: str, video_id: str, property_id: str, base_video_url: str, text_overlays_s3_key: str = None, custom_script_s3_key: str = None) -> bool:
     """
-    Envoyer un job à ECS FFmpeg via SQS pour ajouter les text overlays
+    Envoyer un job à ECS FFmpeg via SQS pour ajouter les text overlays et/ou appliquer les image adjustments
     """
     try:
         if not SQS_QUEUE_URL:
             print(f"❌ SQS_QUEUE_URL not configured - cannot send to ECS FFmpeg")
             return False
 
-        # Download text_overlays from S3
         s3_client = boto3.client('s3', region_name='eu-west-1')
 
-        # Parse S3 key from text_overlays_s3_key
-        text_overlays_obj = s3_client.get_object(Bucket=S3_BUCKET, Key=text_overlays_s3_key)
-        text_overlays = json.loads(text_overlays_obj['Body'].read().decode('utf-8'))
+        # Download text_overlays from S3 (if provided)
+        text_overlays = []
+        if text_overlays_s3_key:
+            text_overlays_obj = s3_client.get_object(Bucket=S3_BUCKET, Key=text_overlays_s3_key)
+            text_overlays = json.loads(text_overlays_obj['Body'].read().decode('utf-8'))
+            print(f"📥 Downloaded {len(text_overlays)} text overlays from S3: {text_overlays_s3_key}")
 
-        print(f"📥 Downloaded {len(text_overlays)} text overlays from S3: {text_overlays_s3_key}")
+        # Download custom_script from S3 (if provided)
+        custom_script = {}
+        if custom_script_s3_key:
+            custom_script_obj = s3_client.get_object(Bucket=S3_BUCKET, Key=custom_script_s3_key)
+            custom_script = json.loads(custom_script_obj['Body'].read().decode('utf-8'))
+            print(f"🎨 Downloaded custom_script from S3: {custom_script_s3_key}")
+            if custom_script.get('presets'):
+                print(f"   Presets keys: {list(custom_script['presets'].keys())[:5]}...")
 
         # Prepare SQS message for ECS FFmpeg worker
         # COMPATIBILITY: Send in format that old worker understands (segments)
@@ -220,11 +235,12 @@ def send_to_ecs_ffmpeg(job_id: str, video_id: str, property_id: str, base_video_
                 'start_time': 0,
                 'end_time': 999
             }],
-            'text_overlays': text_overlays  # Text overlays to add
+            'text_overlays': text_overlays,  # Text overlays to add
+            'custom_script': custom_script  # Image adjustments (presets)
         }
 
         print(f"📤 Sending to SQS: {SQS_QUEUE_URL}")
-        print(f"📦 Message: job_id={job_id}, base_video={base_video_url}, texts={len(text_overlays)}")
+        print(f"📦 Message: job_id={job_id}, base_video={base_video_url}, texts={len(text_overlays)}, presets={bool(custom_script.get('presets'))}")
 
         # Send message to SQS
         response = sqs_client.send_message(

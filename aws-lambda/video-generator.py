@@ -96,9 +96,11 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
         mediaconvert = boto3.client('mediaconvert', region_name='eu-west-1', endpoint_url=mediaconvert_endpoint)
         s3 = boto3.client('s3', region_name='eu-west-1')
 
-        # 🎯 OPTIMIZED WORKFLOW: Store text_overlays for ECS FFmpeg post-processing
-        # MediaConvert will ONLY assemble video, then ECS FFmpeg adds text overlays
+        # 🎯 OPTIMIZED WORKFLOW: Store text_overlays and custom_script for ECS FFmpeg post-processing
+        # MediaConvert will ONLY assemble video, then ECS FFmpeg adds text overlays + image adjustments
         text_overlays_s3_key = None
+        custom_script_s3_key = None
+
         if text_overlays and len(text_overlays) > 0:
             print(f"📝 Storing {len(text_overlays)} text overlays for ECS FFmpeg post-processing")
             text_overlays_s3_key = f"text-overlays/{job_id}/overlays.json"
@@ -115,6 +117,23 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             print(f"ℹ️  ECS FFmpeg will add text overlays after (CPU light)")
         else:
             print(f"ℹ️  No text overlays - MediaConvert will produce final video directly")
+
+        # Store custom_script (with presets) for ECS FFmpeg to apply image adjustments
+        if custom_script and custom_script.get('presets'):
+            print(f"🎨 Storing custom_script with presets for ECS FFmpeg post-processing")
+            custom_script_s3_key = f"custom-scripts/{job_id}/script.json"
+
+            # Upload custom_script JSON to S3 for ECS worker
+            s3.put_object(
+                Bucket=S3_BUCKET,
+                Key=custom_script_s3_key,
+                Body=json.dumps(custom_script).encode('utf-8'),
+                ContentType='application/json'
+            )
+            print(f"✅ Custom script saved to S3: {custom_script_s3_key}")
+            print(f"ℹ️  ECS FFmpeg will apply image adjustments from presets")
+        else:
+            print(f"ℹ️  No presets - no image adjustments will be applied")
 
         # Prepare MediaConvert job inputs from custom_script.clips (priority) or segments (fallback)
         inputs = []
@@ -315,6 +334,12 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             user_metadata['text_overlays_s3_key'] = text_overlays_s3_key
             user_metadata['needs_text_overlay'] = 'true'  # Flag for callback
             print(f"📝 UserMetadata includes text_overlays reference: {text_overlays_s3_key}")
+
+        # Add custom_script S3 key if exists (for ECS FFmpeg image adjustments)
+        if custom_script_s3_key:
+            user_metadata['custom_script_s3_key'] = custom_script_s3_key
+            user_metadata['needs_image_adjustments'] = 'true'  # Flag for callback
+            print(f"🎨 UserMetadata includes custom_script reference: {custom_script_s3_key}")
 
         response = mediaconvert.create_job(
             Role=mediaconvert_role,
