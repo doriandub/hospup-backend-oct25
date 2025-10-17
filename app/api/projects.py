@@ -92,14 +92,31 @@ async def save_project(
         video.last_saved_at = datetime.utcnow()
         video.updated_at = datetime.utcnow()
 
-        # Auto-set thumbnail from first video in contentVideos
-        if request.project_data and 'contentVideos' in request.project_data:
+        # Auto-set thumbnail from first SLOT (slot_0), not first contentVideo
+        if request.project_data:
+            slot_assignments = request.project_data.get('slotAssignments', {})
             content_videos = request.project_data.get('contentVideos', [])
-            if content_videos and len(content_videos) > 0:
+
+            # Find which video is assigned to slot_0 (first slot in timeline)
+            if 'slot_0' in slot_assignments and content_videos:
+                assigned_video_id = slot_assignments['slot_0']
+
+                # Find the corresponding video in contentVideos
+                for vid in content_videos:
+                    if vid.get('id') == assigned_video_id:
+                        if 'thumbnail_url' in vid:
+                            video.thumbnail_url = vid['thumbnail_url']
+                            logger.info("🖼️ Thumbnail URL updated from slot_0 video",
+                                      video_id=assigned_video_id,
+                                      thumbnail_url=video.thumbnail_url)
+                        break
+            elif content_videos and len(content_videos) > 0:
+                # Fallback: use first contentVideo if no slot assignments
                 first_video = content_videos[0]
                 if 'thumbnail_url' in first_video:
                     video.thumbnail_url = first_video['thumbnail_url']
-                    logger.info("🖼️ Thumbnail URL updated from first video", thumbnail_url=video.thumbnail_url)
+                    logger.info("🖼️ Thumbnail URL updated from first contentVideo (fallback)",
+                              thumbnail_url=video.thumbnail_url)
 
         logger.info("✏️ Project fields updated", project_id=video.id)
 
@@ -108,15 +125,32 @@ async def save_project(
         video_id = str(uuid.uuid4())
         logger.info("🆕 Creating new project", video_id=video_id)
 
-        # Auto-set thumbnail from first video in contentVideos
+        # Auto-set thumbnail from first SLOT (slot_0), not first contentVideo
         thumbnail_url = None
-        if request.project_data and 'contentVideos' in request.project_data:
+        if request.project_data:
+            slot_assignments = request.project_data.get('slotAssignments', {})
             content_videos = request.project_data.get('contentVideos', [])
-            if content_videos and len(content_videos) > 0:
+
+            # Find which video is assigned to slot_0 (first slot in timeline)
+            if 'slot_0' in slot_assignments and content_videos:
+                assigned_video_id = slot_assignments['slot_0']
+
+                # Find the corresponding video in contentVideos
+                for vid in content_videos:
+                    if vid.get('id') == assigned_video_id:
+                        if 'thumbnail_url' in vid:
+                            thumbnail_url = vid['thumbnail_url']
+                            logger.info("🖼️ Setting thumbnail from slot_0 video",
+                                      video_id=assigned_video_id,
+                                      thumbnail_url=thumbnail_url)
+                        break
+            elif content_videos and len(content_videos) > 0:
+                # Fallback: use first contentVideo if no slot assignments
                 first_video = content_videos[0]
                 if 'thumbnail_url' in first_video:
                     thumbnail_url = first_video['thumbnail_url']
-                    logger.info("🖼️ Setting thumbnail from first video", thumbnail_url=thumbnail_url)
+                    logger.info("🖼️ Setting thumbnail from first contentVideo (fallback)",
+                              thumbnail_url=thumbnail_url)
 
         video = Video(
             id=video_id,
