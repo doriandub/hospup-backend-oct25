@@ -37,10 +37,14 @@ async def lifespan(app: FastAPI):
     # Startup
     current_timestamp = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
     logger.info("Starting Hospup API", version="0.1.9", timestamp=current_timestamp)
-    # Create tables (in production, use Alembic migrations)
-    if settings.APP_ENV == "development":
+    # Create tables if they don't exist (safe for production - won't drop existing tables)
+    try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+        logger.info("Database tables created/verified successfully")
+    except Exception as e:
+        logger.error("Failed to create database tables", error=str(e))
+        # Don't fail startup - tables might already exist
     yield
     # Shutdown
     logger.info("Shutting down Hospup API")
