@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 import uuid
+import structlog
 
 from ..auth.dependencies import get_current_user
 from ..models.user import User
@@ -14,6 +15,7 @@ from ..models.video import Video
 from ..core.database import get_db
 
 router = APIRouter()
+logger = structlog.get_logger(__name__)
 
 
 # Schemas
@@ -52,12 +54,22 @@ async def save_project(
     Auto-creates or updates the video record
     """
 
+    logger.info("🔍 Project save request received",
+                project_id=request.project_id,
+                project_name=request.project_name,
+                template_id=request.template_id,
+                property_id=request.property_id,
+                user_id=current_user.id,
+                has_project_data=bool(request.project_data))
+
     # Generate project name if not provided
     if not request.project_name:
         request.project_name = f"Project {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        logger.info("📝 Generated project name", project_name=request.project_name)
 
     # If project_id provided, update existing
     if request.project_id:
+        logger.info("🔄 Updating existing project", project_id=request.project_id)
         result = await db.execute(
             select(Video).where(
                 Video.id == request.project_id,
@@ -67,6 +79,7 @@ async def save_project(
         video = result.scalar_one_or_none()
 
         if not video:
+            logger.warning("❌ Project not found for update", project_id=request.project_id, user_id=current_user.id)
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Project not found"
@@ -78,10 +91,13 @@ async def save_project(
         video.project_data = request.project_data
         video.last_saved_at = datetime.utcnow()
         video.updated_at = datetime.utcnow()
+        logger.info("✏️ Project fields updated", project_id=video.id)
 
     else:
         # Create new project
         video_id = str(uuid.uuid4())
+        logger.info("🆕 Creating new project", video_id=video_id)
+
         video = Video(
             id=video_id,
             title=request.project_name,
@@ -96,11 +112,21 @@ async def save_project(
             last_saved_at=datetime.utcnow()
         )
         db.add(video)
+        logger.info("➕ Video object added to session", video_id=video_id)
 
-    await db.commit()
-    await db.refresh(video)
+    try:
+        logger.info("💾 Committing to database...")
+        await db.commit()
+        logger.info("✅ Database commit successful")
 
-    return ProjectResponse(
+        await db.refresh(video)
+        logger.info("🔄 Video object refreshed", video_id=video.id, status=video.status)
+    except Exception as e:
+        logger.error("❌ Database commit failed", error=str(e), error_type=type(e).__name__)
+        await db.rollback()
+        raise
+
+    response = ProjectResponse(
         id=video.id,
         project_name=video.project_name or video.title,
         template_id=str(video.template_id) if video.template_id else None,
@@ -110,6 +136,13 @@ async def save_project(
         last_saved_at=video.last_saved_at.isoformat() if video.last_saved_at else video.created_at.isoformat(),
         created_at=video.created_at.isoformat()
     )
+
+    logger.info("✨ Project save completed successfully",
+                project_id=response.id,
+                project_name=response.project_name,
+                status=response.status)
+
+    return response
 
 
 @router.get("/{project_id}", response_model=ProjectResponse)
