@@ -199,20 +199,25 @@ def normalize_video(input_path: str, output_path: str, target_duration: float = 
     return output_path
 
 
-def build_image_adjustments_filter(presets: Dict) -> str:
+def build_image_adjustments_filter(presets: Dict, start_time: float = None, end_time: float = None) -> str:
     """
     Build FFmpeg video filter for image adjustments (brightness, contrast, saturation, etc.)
 
     Args:
         presets: Dictionary containing imageAdjustments settings
+        start_time: Start time in seconds (for temporal filtering with enable)
+        end_time: End time in seconds (for temporal filtering with enable)
 
     Returns:
-        FFmpeg filter string (e.g., "eq=brightness=0.1:contrast=1.2:saturation=1.5,...")
+        FFmpeg filter string (e.g., "eq=brightness=0.1:contrast=1.2:enable='between(t,0,2)',...")
     """
     if not presets:
         return ""
 
     filters = []
+
+    # Build enable expression if times are provided
+    enable_expr = f":enable='between(t,{start_time},{end_time})'" if start_time is not None and end_time is not None else ""
 
     # Basic adjustments using eq filter
     eq_params = []
@@ -235,12 +240,12 @@ def build_image_adjustments_filter(presets: Dict) -> str:
         eq_params.append(f"saturation={saturation:.3f}")
 
     if eq_params:
-        filters.append(f"eq={':'.join(eq_params)}")
+        filters.append(f"eq={':'.join(eq_params)}{enable_expr}")
 
     # Hue rotation: -180 to +180 degrees
     hue = presets.get('hue', 0)
     if hue != 0:
-        filters.append(f"hue=h={hue}")
+        filters.append(f"hue=h={hue}{enable_expr}")
 
     # Temperature (blue-orange tint) using colorbalance
     temperature = presets.get('temperature', 0)
@@ -250,7 +255,7 @@ def build_image_adjustments_filter(presets: Dict) -> str:
         temp_factor = temperature / 100.0
         rs = temp_factor * 0.3  # Add red for warmth
         bs = -temp_factor * 0.3  # Remove blue for warmth
-        filters.append(f"colorbalance=rs={rs:.3f}:bs={bs:.3f}")
+        filters.append(f"colorbalance=rs={rs:.3f}:bs={bs:.3f}{enable_expr}")
 
     # Tint (green-magenta) using colorbalance
     tint = presets.get('tint', 0)
@@ -258,7 +263,7 @@ def build_image_adjustments_filter(presets: Dict) -> str:
         # Positive = more magenta, Negative = more green
         tint_factor = tint / 100.0
         gs = -tint_factor * 0.3  # Remove green adds magenta
-        filters.append(f"colorbalance=gs={gs:.3f}")
+        filters.append(f"colorbalance=gs={gs:.3f}{enable_expr}")
 
     # Highlights/Shadows using curves (advanced exposure control)
     highlights = presets.get('highlights', 0)
@@ -273,7 +278,7 @@ def build_image_adjustments_filter(presets: Dict) -> str:
         # curves filter with master curve adjustment
         # Format: curves=master='0/0 0.5/{mid} 1/1'
         mid_point = 0.5 + (shadows - highlights) / 400.0
-        filters.append(f"curves=master='0/0 0.5/{mid_point:.3f} 1/1'")
+        filters.append(f"curves=master='0/0 0.5/{mid_point:.3f} 1/1'{enable_expr}")
 
     # Whites/Blacks (similar to highlights/shadows but more extreme)
     whites = presets.get('whites', 0)
@@ -283,7 +288,7 @@ def build_image_adjustments_filter(presets: Dict) -> str:
         # Use curves for white/black point adjustment
         white_point = 1.0 + (whites / 100.0)
         black_point = 0.0 + (blacks / 100.0)
-        filters.append(f"curves=master='0/{black_point:.3f} 1/{white_point:.3f}'")
+        filters.append(f"curves=master='0/{black_point:.3f} 1/{white_point:.3f}'{enable_expr}")
 
     # Clarity (mid-tone contrast) using unsharp mask
     clarity = presets.get('clarity', 0)
@@ -291,21 +296,21 @@ def build_image_adjustments_filter(presets: Dict) -> str:
         clarity_amount = abs(clarity) / 100.0
         if clarity > 0:
             # Positive clarity = sharpen mid-tones
-            filters.append(f"unsharp=5:5:{clarity_amount}:5:5:0")
+            filters.append(f"unsharp=5:5:{clarity_amount}:5:5:0{enable_expr}")
 
     # Vibrance (selective saturation boost for muted colors)
     vibrance = presets.get('vibrance', 0)
     if vibrance != 0:
         # Vibrance is complex - approximate with selective saturation
         vib_factor = 1.0 + (vibrance / 100.0)
-        filters.append(f"vibrance={vib_factor:.3f}")
+        filters.append(f"vibrance={vib_factor:.3f}{enable_expr}")
 
     # Sharpness using unsharp filter
     sharpness = presets.get('sharpness', 0)
     if sharpness != 0:
         sharp_amount = abs(sharpness) / 50.0  # 0-2.0 range
         if sharpness > 0:
-            filters.append(f"unsharp=5:5:{sharp_amount}:5:5:{sharp_amount}")
+            filters.append(f"unsharp=5:5:{sharp_amount}:5:5:{sharp_amount}{enable_expr}")
 
     # Vignette (darken edges) using vignette filter
     vignette = presets.get('vignette', 0)
@@ -314,9 +319,9 @@ def build_image_adjustments_filter(presets: Dict) -> str:
         vign_intensity = abs(vignette) / 100.0  # 0-1.0
         if vignette < 0:
             # Negative vignette = brighten edges (inverse)
-            filters.append(f"vignette=PI/4:{-vign_intensity:.2f}")
+            filters.append(f"vignette=PI/4:{-vign_intensity:.2f}{enable_expr}")
         else:
-            filters.append(f"vignette=PI/4:{vign_intensity:.2f}")
+            filters.append(f"vignette=PI/4:{vign_intensity:.2f}{enable_expr}")
 
     # Color adjustments (HSL for specific colors) - complex, skip for now
     # This would require selective HSV adjustment per color range
@@ -362,7 +367,7 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
     if clips_with_presets and len(clips_with_presets) > 0:
         logger.info(f"🎨 Applying per-clip image adjustments for {len(clips_with_presets)} clips")
 
-        # Build a single combined filter with temporal conditions
+        # Build filters with temporal conditions embedded in each filter
         for idx, clip in enumerate(clips_with_presets):
             presets = clip.get('presets')
             if not presets:
@@ -371,16 +376,15 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             start_time = clip.get('start_time', 0)
             end_time = clip.get('end_time', 999)
 
-            image_filter = build_image_adjustments_filter(presets)
+            # Build filter with enable conditions on each individual filter
+            image_filter = build_image_adjustments_filter(presets, start_time, end_time)
             if image_filter:
-                # Apply filter with temporal enable condition
-                # Note: eq filter supports enable parameter
+                # Apply filter chain (each filter already has :enable parameter)
                 next_label = f'adjusted{idx}'
-                # Wrap filter with enable condition
-                temporal_filter = f"[{video_label}]{image_filter}:enable='between(t,{start_time},{end_time})'[{next_label}]"
+                temporal_filter = f"[{video_label}]{image_filter}[{next_label}]"
                 filters.append(temporal_filter)
                 video_label = next_label
-                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s): applying presets")
+                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s): {image_filter[:100]}...")
 
     # 2. Apply text overlays
     for idx, overlay in enumerate(text_overlays):
