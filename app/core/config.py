@@ -45,12 +45,11 @@ class Settings(BaseSettings):
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_POOL_RECYCLE: int = 3600
 
-    # Database connection credentials (used when DATABASE_URL contains pooler)
-    # Default values work for this Supabase instance - override in Railway if needed
-    DB_USERNAME: str = "postgres.vvyhkjwymytnowsiwajm"
-    DB_PASSWORD: str = ".mvR66vs7YGQXJ#"  # URL decoded
-    DB_HOSTNAME: str = "aws-1-eu-west-1.pooler.supabase.com"
-    DB_PORT: int = 5432  # Session pooler - works better than 6543
+    # Database connection credentials (must be set via environment variables)
+    DB_USERNAME: Optional[str] = None
+    DB_PASSWORD: Optional[str] = None
+    DB_HOSTNAME: Optional[str] = None
+    DB_PORT: int = 5432
     DB_NAME: str = "postgres"
 
     # === CACHE (REDIS) ===
