@@ -328,7 +328,7 @@ def build_image_adjustments_filter(presets: Dict) -> str:
     return ','.join(filters)
 
 
-def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], output_path: str, temp_dir: str, presets: Dict = None) -> List[str]:
+def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], output_path: str, temp_dir: str, clips_with_presets: List[Dict] = None) -> List[str]:
     """
     🎯 OPTIMIZED: Add text overlays and image adjustments to a pre-assembled MediaConvert video
     This is MUCH faster than normalizing + concatenating segments
@@ -338,7 +338,7 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
         text_overlays: List of text overlay configs
         output_path: Local path for final output
         temp_dir: Temporary directory for downloads
-        presets: Image adjustment presets (brightness, contrast, saturation, etc.)
+        clips_with_presets: List of clips with their individual presets and time ranges
 
     Returns:
         FFmpeg command to execute
@@ -357,14 +357,30 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
     filters = []
     video_label = '0:v'  # Input video stream
 
-    # 1. Apply image adjustments first (if presets provided)
-    if presets:
-        logger.info(f"🎨 Applying image adjustments from presets")
-        image_filter = build_image_adjustments_filter(presets)
-        if image_filter:
-            filters.append(f"[{video_label}]{image_filter}[adjusted]")
-            video_label = 'adjusted'
-            logger.info(f"✅ Image adjustments filter: {image_filter[:100]}...")
+    # 1. Apply image adjustments per clip (if presets provided)
+    # Apply presets sequentially with temporal enable conditions
+    if clips_with_presets and len(clips_with_presets) > 0:
+        logger.info(f"🎨 Applying per-clip image adjustments for {len(clips_with_presets)} clips")
+
+        # Build a single combined filter with temporal conditions
+        for idx, clip in enumerate(clips_with_presets):
+            presets = clip.get('presets')
+            if not presets:
+                continue  # Skip clips without presets
+
+            start_time = clip.get('start_time', 0)
+            end_time = clip.get('end_time', 999)
+
+            image_filter = build_image_adjustments_filter(presets)
+            if image_filter:
+                # Apply filter with temporal enable condition
+                # Note: eq filter supports enable parameter
+                next_label = f'adjusted{idx}'
+                # Wrap filter with enable condition
+                temporal_filter = f"[{video_label}]{image_filter}:enable='between(t,{start_time},{end_time})'[{next_label}]"
+                filters.append(temporal_filter)
+                video_label = next_label
+                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s): applying presets")
 
     # 2. Apply text overlays
     for idx, overlay in enumerate(text_overlays):
@@ -585,11 +601,14 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
     base_video_url = job_data.get('base_video_url') or job_data.get('mediaconvert_output_url')
     text_overlays = job_data.get('text_overlays', [])
 
-    # Image adjustments presets (NEW!)
+    # Extract clips with presets from custom_script (NEW!)
     custom_script = job_data.get('custom_script', {})
-    presets = custom_script.get('presets') if custom_script else None
-    if presets:
-        logger.info(f"🎨 Image adjustments detected: {list(presets.keys())[:5]}...")
+    clips_with_presets = custom_script.get('clips', []) if custom_script else []
+
+    # Count how many clips have presets
+    clips_with_preset_count = sum(1 for clip in clips_with_presets if clip.get('presets'))
+    if clips_with_preset_count > 0:
+        logger.info(f"🎨 Found {clips_with_preset_count}/{len(clips_with_presets)} clips with image adjustments")
 
     # Legacy mode data
     segments = job_data.get('segments', [])
@@ -623,8 +642,8 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
 
             # Build FFmpeg command based on mode
             if mode == 'optimized':
-                logger.info("🔧 Building OPTIMIZED FFmpeg command (image adjustments + text overlay)...")
-                cmd = add_text_overlays_to_video(base_video_url, text_overlays, output_file, temp_dir, presets)
+                logger.info("🔧 Building OPTIMIZED FFmpeg command (per-clip image adjustments + text overlay)...")
+                cmd = add_text_overlays_to_video(base_video_url, text_overlays, output_file, temp_dir, clips_with_presets)
             else:
                 logger.info("🔧 Building LEGACY FFmpeg command (normalize + concat + text)...")
                 cmd = build_ffmpeg_command(segments, text_overlays, output_file, temp_dir)
