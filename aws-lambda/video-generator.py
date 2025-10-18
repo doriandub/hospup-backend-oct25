@@ -119,7 +119,15 @@ def process_with_mediaconvert(property_id, video_id, job_id, segments, text_over
             print(f"ℹ️  No text overlays - MediaConvert will produce final video directly")
 
         # Store custom_script (with presets) for ECS FFmpeg to apply image adjustments
-        if custom_script and custom_script.get('presets'):
+        # Check if ANY clip has presets (not custom_script.presets at root level!)
+        has_presets = False
+        if custom_script and custom_script.get('clips'):
+            for clip in custom_script['clips']:
+                if clip.get('presets'):
+                    has_presets = True
+                    break
+
+        if custom_script and has_presets:
             print(f"🎨 Storing custom_script with presets for ECS FFmpeg post-processing")
             custom_script_s3_key = f"custom-scripts/{job_id}/script.json"
 
