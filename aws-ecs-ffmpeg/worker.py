@@ -201,23 +201,25 @@ def normalize_video(input_path: str, output_path: str, target_duration: float = 
 
 def build_image_adjustments_filter(presets: Dict, start_time: float = None, end_time: float = None) -> str:
     """
-    Build FFmpeg video filter for image adjustments (brightness, contrast, saturation, etc.)
+    Build FFmpeg video filter for 4 basic image adjustments (MediaConvert-compatible)
+
+    Only supports: brightness, contrast, saturation, hue
+    Advanced presets removed to align with MediaConvert capabilities
+
+    IMPORTANT: No :enable here - it's added at the filter chain level (like drawtext)
 
     Args:
         presets: Dictionary containing imageAdjustments settings
-        start_time: Start time in seconds (for temporal filtering with enable)
-        end_time: End time in seconds (for temporal filtering with enable)
+        start_time: NOT USED - kept for compatibility
+        end_time: NOT USED - kept for compatibility
 
     Returns:
-        FFmpeg filter string (e.g., "eq=brightness=0.1:contrast=1.2:enable='between(t,0,2)',...")
+        FFmpeg filter string (e.g., "eq=brightness=0.1:contrast=1.2,hue=h=10")
     """
     if not presets:
         return ""
 
     filters = []
-
-    # Build enable expression if times are provided
-    enable_expr = f":enable='between(t,{start_time},{end_time})'" if start_time is not None and end_time is not None else ""
 
     # Basic adjustments using eq filter
     eq_params = []
@@ -240,92 +242,12 @@ def build_image_adjustments_filter(presets: Dict, start_time: float = None, end_
         eq_params.append(f"saturation={saturation:.3f}")
 
     if eq_params:
-        filters.append(f"eq={':'.join(eq_params)}{enable_expr}")
+        filters.append(f"eq={':'.join(eq_params)}")
 
     # Hue rotation: -180 to +180 degrees
     hue = presets.get('hue', 0)
     if hue != 0:
-        filters.append(f"hue=h={hue}{enable_expr}")
-
-    # Temperature (blue-orange tint) using colorbalance
-    temperature = presets.get('temperature', 0)
-    if temperature != 0:
-        # Positive = warmer (more red/yellow), Negative = cooler (more blue)
-        # colorbalance: rs (red shadows), gs (green shadows), bs (blue shadows)
-        temp_factor = temperature / 100.0
-        rs = temp_factor * 0.3  # Add red for warmth
-        bs = -temp_factor * 0.3  # Remove blue for warmth
-        filters.append(f"colorbalance=rs={rs:.3f}:bs={bs:.3f}{enable_expr}")
-
-    # Tint (green-magenta) using colorbalance
-    tint = presets.get('tint', 0)
-    if tint != 0:
-        # Positive = more magenta, Negative = more green
-        tint_factor = tint / 100.0
-        gs = -tint_factor * 0.3  # Remove green adds magenta
-        filters.append(f"colorbalance=gs={gs:.3f}{enable_expr}")
-
-    # Highlights/Shadows using curves (advanced exposure control)
-    highlights = presets.get('highlights', 0)
-    shadows = presets.get('shadows', 0)
-
-    if highlights != 0 or shadows != 0:
-        # Build curves filter for selective exposure
-        # This is complex - simplified approach using curves
-        hl_factor = 1.0 + (highlights / 200.0)  # Reduce highlights
-        sh_factor = 1.0 + (shadows / 200.0)  # Lift shadows
-
-        # curves filter with master curve adjustment
-        # Format: curves=master='0/0 0.5/{mid} 1/1'
-        mid_point = 0.5 + (shadows - highlights) / 400.0
-        filters.append(f"curves=master='0/0 0.5/{mid_point:.3f} 1/1'{enable_expr}")
-
-    # Whites/Blacks (similar to highlights/shadows but more extreme)
-    whites = presets.get('whites', 0)
-    blacks = presets.get('blacks', 0)
-
-    if whites != 0 or blacks != 0:
-        # Use curves for white/black point adjustment
-        white_point = 1.0 + (whites / 100.0)
-        black_point = 0.0 + (blacks / 100.0)
-        filters.append(f"curves=master='0/{black_point:.3f} 1/{white_point:.3f}'{enable_expr}")
-
-    # Clarity (mid-tone contrast) using unsharp mask
-    clarity = presets.get('clarity', 0)
-    if clarity != 0:
-        clarity_amount = abs(clarity) / 100.0
-        if clarity > 0:
-            # Positive clarity = sharpen mid-tones
-            filters.append(f"unsharp=5:5:{clarity_amount}:5:5:0{enable_expr}")
-
-    # Vibrance (selective saturation boost for muted colors)
-    vibrance = presets.get('vibrance', 0)
-    if vibrance != 0:
-        # Vibrance is complex - approximate with selective saturation
-        vib_factor = 1.0 + (vibrance / 100.0)
-        filters.append(f"vibrance={vib_factor:.3f}{enable_expr}")
-
-    # Sharpness using unsharp filter
-    sharpness = presets.get('sharpness', 0)
-    if sharpness != 0:
-        sharp_amount = abs(sharpness) / 50.0  # 0-2.0 range
-        if sharpness > 0:
-            filters.append(f"unsharp=5:5:{sharp_amount}:5:5:{sharp_amount}{enable_expr}")
-
-    # Vignette (darken edges) using vignette filter
-    vignette = presets.get('vignette', 0)
-    if vignette != 0:
-        # vignette filter: angle (spread), intensity
-        vign_intensity = abs(vignette) / 100.0  # 0-1.0
-        if vignette < 0:
-            # Negative vignette = brighten edges (inverse)
-            filters.append(f"vignette=PI/4:{-vign_intensity:.2f}{enable_expr}")
-        else:
-            filters.append(f"vignette=PI/4:{vign_intensity:.2f}{enable_expr}")
-
-    # Color adjustments (HSL for specific colors) - complex, skip for now
-    # This would require selective HSV adjustment per color range
-    # FFmpeg can do this with hue filter and range selection, but it's very complex
+        filters.append(f"hue=h={hue}")
 
     if not filters:
         return ""
@@ -363,33 +285,78 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
     video_label = '0:v'  # Input video stream
 
     # 1. Apply image adjustments per clip (if presets provided)
-    # Collect all preset filters and apply them in ONE chain (not sequential chains)
+    # Use :enable on EACH filter (same system as drawtext!) - all filters support timeline
     if clips_with_presets and len(clips_with_presets) > 0:
         logger.info(f"🎨 Applying per-clip image adjustments for {len(clips_with_presets)} clips")
 
-        # Collect all filters with their temporal enable conditions
-        all_preset_filters = []
+        # Apply each clip's presets as separate filters with :enable, chained like text overlays
         for idx, clip in enumerate(clips_with_presets):
             presets = clip.get('presets')
             if not presets:
-                continue  # Skip clips without presets
+                continue
 
             start_time = clip.get('start_time', 0)
             end_time = clip.get('end_time', 999)
 
-            # Build filter with enable conditions on each individual filter
-            image_filter = build_image_adjustments_filter(presets, start_time, end_time)
-            if image_filter:
-                all_preset_filters.append(image_filter)
-                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s): {image_filter[:80]}...")
+            # 🎯 TIMING CORRECTION: MediaConvert output has slight offset at start
+            # Shift all filter timings back slightly to align with actual video content
+            TIMING_OFFSET = 0.177  # Ultra fine-tuning: precise timing calibration
+            adjusted_start = max(0, start_time - TIMING_OFFSET)
+            adjusted_end = max(0, end_time - TIMING_OFFSET)
 
-        # Combine ALL preset filters into a single filter chain applied to the input
-        if all_preset_filters:
-            combined_filter = ','.join(all_preset_filters)
-            filters.append(f"[{video_label}]{combined_filter}[adjusted]")
-            video_label = 'adjusted'
-            logger.info(f"🎨 Combined {len(all_preset_filters)} preset filters into single chain")
-            logger.info(f"🎨 FULL PRESET FILTER: [{video_label}]{combined_filter}[adjusted]")
+            # Build enable expression (same as drawtext)
+            enable_expr = f":enable='between(t,{adjusted_start},{adjusted_end})'"
+            logger.info(f"📊 Clip {idx+1}: {start_time}s-{end_time}s → adjusted {adjusted_start}s-{adjusted_end}s")
+
+            # Extract ONLY 4 basic preset values (MediaConvert-compatible)
+            # 🎨 CALIBRATED TO MATCH CSS FILTERS VISUALLY
+            # Research: CSS filters work in RGB (multiply), FFmpeg eq works in YUV (brightness=add, contrast/sat=multiply)
+            # These formulas are calibrated to produce similar visual results
+
+            brightness_input = presets.get('brightness', 0)  # -100 to +100
+            contrast_input = presets.get('contrast', 0)      # -100 to +100
+            saturation_input = presets.get('saturation', 0)  # -100 to +100
+            hue = presets.get('hue', 0)                      # -180 to +180
+
+            # CSS formula (for reference): 1 + (value * 0.01) → range 0 to 2
+            css_brightness = 1 + (brightness_input * 0.01)
+            css_contrast = 1 + (contrast_input * 0.01)
+            css_saturation = 1 + (saturation_input * 0.01)
+
+            # FFmpeg eq conversion (calibrated to match CSS visually):
+            # Brightness: CSS multiplies RGB, FFmpeg adds to luma → scale down by 0.4 to approximate
+            brightness = (css_brightness - 1) * 0.4  # -0.4 to +0.4 (instead of -1 to +1)
+            # Contrast: Both multiply, similar behavior → use same value
+            contrast = css_contrast  # 0 to 2
+            # Saturation: Both multiply chroma, similar behavior → use same value
+            saturation = css_saturation  # 0 to 2
+
+            # 1. EQ filter (brightness, contrast, saturation)
+            eq_params = []
+            if brightness != 0:
+                eq_params.append(f"brightness={brightness:.3f}")
+            if contrast != 1.0:
+                eq_params.append(f"contrast={contrast:.3f}")
+            if saturation != 1.0:
+                eq_params.append(f"saturation={saturation:.3f}")
+
+            if eq_params:
+                next_label = f'eq{idx}'
+                eq_filter = f"[{video_label}]eq={':'.join(eq_params)}{enable_expr}[{next_label}]"
+                filters.append(eq_filter)
+                video_label = next_label
+                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) EQ: {':'.join(eq_params)}")
+
+            # 2. Hue filter
+            if hue != 0:
+                next_label = f'hue{idx}'
+                hue_filter = f"[{video_label}]hue=h={hue}{enable_expr}[{next_label}]"
+                filters.append(hue_filter)
+                video_label = next_label
+                logger.info(f"✅ Clip {idx+1} HUE: h={hue}")
+
+        if video_label != '0:v':
+            logger.info(f"🎨 Applied presets using :enable (same as text overlays!)")
         else:
             logger.warning(f"⚠️ No preset filters generated!")
 
