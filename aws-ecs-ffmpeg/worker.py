@@ -363,11 +363,12 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
     video_label = '0:v'  # Input video stream
 
     # 1. Apply image adjustments per clip (if presets provided)
-    # Apply presets sequentially with temporal enable conditions
+    # Collect all preset filters and apply them in ONE chain (not sequential chains)
     if clips_with_presets and len(clips_with_presets) > 0:
         logger.info(f"🎨 Applying per-clip image adjustments for {len(clips_with_presets)} clips")
 
-        # Build filters with temporal conditions embedded in each filter
+        # Collect all filters with their temporal enable conditions
+        all_preset_filters = []
         for idx, clip in enumerate(clips_with_presets):
             presets = clip.get('presets')
             if not presets:
@@ -379,12 +380,15 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             # Build filter with enable conditions on each individual filter
             image_filter = build_image_adjustments_filter(presets, start_time, end_time)
             if image_filter:
-                # Apply filter chain (each filter already has :enable parameter)
-                next_label = f'adjusted{idx}'
-                temporal_filter = f"[{video_label}]{image_filter}[{next_label}]"
-                filters.append(temporal_filter)
-                video_label = next_label
-                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s): {image_filter[:100]}...")
+                all_preset_filters.append(image_filter)
+                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s): {image_filter[:80]}...")
+
+        # Combine ALL preset filters into a single filter chain applied to the input
+        if all_preset_filters:
+            combined_filter = ','.join(all_preset_filters)
+            filters.append(f"[{video_label}]{combined_filter}[adjusted]")
+            video_label = 'adjusted'
+            logger.info(f"🎨 Combined {len(all_preset_filters)} preset filters into single chain")
 
     # 2. Apply text overlays
     for idx, overlay in enumerate(text_overlays):
