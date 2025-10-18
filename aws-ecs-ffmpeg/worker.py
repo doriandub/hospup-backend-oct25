@@ -389,6 +389,9 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             filters.append(f"[{video_label}]{combined_filter}[adjusted]")
             video_label = 'adjusted'
             logger.info(f"🎨 Combined {len(all_preset_filters)} preset filters into single chain")
+            logger.info(f"🎨 FULL PRESET FILTER: [{video_label}]{combined_filter}[adjusted]")
+        else:
+            logger.warning(f"⚠️ No preset filters generated!")
 
     # 2. Apply text overlays
     for idx, overlay in enumerate(text_overlays):
@@ -613,10 +616,19 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
     custom_script = job_data.get('custom_script', {})
     clips_with_presets = custom_script.get('clips', []) if custom_script else []
 
+    # DEBUG: Log full custom_script
+    logger.info(f"📜 Custom script received: {json.dumps(custom_script, indent=2) if custom_script else 'None'}")
+
     # Count how many clips have presets
     clips_with_preset_count = sum(1 for clip in clips_with_presets if clip.get('presets'))
     if clips_with_preset_count > 0:
         logger.info(f"🎨 Found {clips_with_preset_count}/{len(clips_with_presets)} clips with image adjustments")
+        # DEBUG: Log which clips have presets
+        for idx, clip in enumerate(clips_with_presets):
+            if clip.get('presets'):
+                logger.info(f"   Clip {idx+1}: {clip.get('start_time')}s-{clip.get('end_time')}s has presets: {list(clip['presets'].keys())}")
+    else:
+        logger.warning(f"⚠️ NO clips with presets found! Total clips: {len(clips_with_presets)}")
 
     # Legacy mode data
     segments = job_data.get('segments', [])
@@ -656,7 +668,8 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
                 logger.info("🔧 Building LEGACY FFmpeg command (normalize + concat + text)...")
                 cmd = build_ffmpeg_command(segments, text_overlays, output_file, temp_dir)
 
-            logger.info(f"🎥 Running FFmpeg: {' '.join(cmd[:10])}...")
+            logger.info(f"🎥 Running FFmpeg command...")
+            logger.info(f"   FULL COMMAND: {' '.join(cmd)}")
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
 
             if result.returncode != 0:
