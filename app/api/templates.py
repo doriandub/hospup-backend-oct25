@@ -20,7 +20,7 @@ class TemplateHistoryResponse(BaseModel):
     id: str
     title: str
     hotel_name: str
-    duration: int
+    duration: float
     script: str
     video_link: Optional[str] = None
     viewed_at: Optional[str] = None
