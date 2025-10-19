@@ -10,7 +10,7 @@ Renames the videos table to assets table and updates references.
 ### 2. `create_generated_videos_table.sql`
 Creates the videos table for AI-generated videos (separate from user uploads).
 
-### 3. `add_performance_indexes.sql` ✨ NEW
+### 3. `add_performance_indexes.sql`
 Adds performance indexes on frequently queried columns:
 - `videos.status` - Filter by processing status
 - `videos.source_type` - Filter by video source
@@ -18,6 +18,16 @@ Adds performance indexes on frequently queried columns:
 - Composite indexes for common query patterns
 
 **Impact**: Significantly improves query performance on filtered lists.
+
+### 4. `create_user_template_history.sql` ✨ NEW
+Creates table to track user template viewing history and favorites:
+- Track which templates each user has viewed
+- Favorite/like system for templates
+- View count and timestamps
+- Prevents showing same template twice
+- Enable filtering by favorites and sorting by date
+
+**Impact**: Enables template history, favorites, and personalized recommendations.
 
 ## How to Run
 
