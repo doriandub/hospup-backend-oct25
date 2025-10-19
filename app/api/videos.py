@@ -451,6 +451,98 @@ async def delete_video(
             detail=f"Failed to delete video: {str(e)}"
         )
 
+@router.post("/{video_id}/duplicate", status_code=status.HTTP_201_CREATED)
+async def duplicate_video(
+    video_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    📋 Dupliquer une vidéo
+    Crée une copie de la vidéo avec le statut 'draft' pour édition
+    """
+    try:
+        # Vérifier que la vidéo existe et appartient à l'utilisateur
+        result = await db.execute(
+            select(Video).where(
+                Video.id == video_id,
+                Video.user_id == current_user.id
+            )
+        )
+        original = result.scalar_one_or_none()
+
+        if not original:
+            raise HTTPException(
+                status_code=404,
+                detail="Video not found or access denied"
+            )
+
+        # Créer la duplication avec un nouveau titre
+        duplicated_title = f"{original.title} (Copie)"
+        duplicated_project_name = f"{original.project_name} (Copie)" if original.project_name else None
+
+        duplicated = Video(
+            user_id=current_user.id,
+            property_id=original.property_id,
+            title=duplicated_title,
+            project_name=duplicated_project_name,
+            description=original.description,
+            template_id=original.template_id,
+            source_type=original.source_type,
+            generation_method=original.generation_method,
+            ai_description=original.ai_description,
+            # Copy project data for composition projects
+            project_data=original.project_data if original.project_data else None,
+            # Reset video-specific fields
+            status="draft",  # Start as draft for editing
+            duration=original.duration or 0,
+            file_url=None,  # Will be generated when user publishes
+            thumbnail_url=None,  # Will be generated when user publishes
+            aws_job_id=None,  # Will be assigned when published
+            completed_at=None,
+            last_saved_at=datetime.utcnow()
+        )
+
+        db.add(duplicated)
+        await db.commit()
+        await db.refresh(duplicated)
+
+        logger.info(f"✅ Video {video_id} duplicated to {duplicated.id} by user {current_user.id}")
+
+        return {
+            "id": duplicated.id,
+            "title": duplicated.title,
+            "project_name": duplicated.project_name,
+            "description": duplicated.description,
+            "property_id": duplicated.property_id,
+            "template_id": str(duplicated.template_id) if duplicated.template_id else None,
+            "status": duplicated.status,
+            "duration": duplicated.duration,
+            "file_url": duplicated.file_url,
+            "video_url": duplicated.file_url,
+            "thumbnail_url": duplicated.thumbnail_url,
+            "source_type": duplicated.source_type,
+            "generation_method": duplicated.generation_method,
+            "aws_job_id": duplicated.aws_job_id,
+            "ai_description": duplicated.ai_description,
+            "created_at": duplicated.created_at.isoformat() if duplicated.created_at else None,
+            "updated_at": duplicated.updated_at.isoformat() if duplicated.updated_at else None,
+            "completed_at": duplicated.completed_at.isoformat() if duplicated.completed_at else None,
+            "last_saved_at": duplicated.last_saved_at.isoformat() if duplicated.last_saved_at else None,
+            "project_data": duplicated.project_data if duplicated.project_data else None,
+            "contentVideos": duplicated.project_data.get("contentVideos", []) if duplicated.project_data else []
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error duplicating video {video_id}: {str(e)}")
+        await db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to duplicate video: {str(e)}"
+        )
+
 @router.get("/")
 async def list_user_videos(
     current_user: User = Depends(get_current_user),
