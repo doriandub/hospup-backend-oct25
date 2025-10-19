@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, func, insert, update, desc, asc
+from sqlalchemy import select, and_, func, insert, update, desc, asc, text
 from typing import List, Optional
 from datetime import datetime
 import structlog
@@ -84,7 +84,7 @@ async def get_template_history(
             query += " ORDER BY h.view_count DESC, h.last_viewed_at DESC"
 
         result = await db.execute(
-            query,
+            text(query),
             {"user_id": current_user.id}
         )
 
@@ -131,7 +131,7 @@ async def mark_template_viewed(
     try:
         # Check if template exists
         template_check = await db.execute(
-            "SELECT id FROM templates WHERE id = :template_id",
+            text("SELECT id FROM templates WHERE id = :template_id"),
             {"template_id": str(template_id)}
         )
         if not template_check.fetchone():
@@ -142,10 +142,10 @@ async def mark_template_viewed(
 
         # Check if history record exists
         history_check = await db.execute(
-            """
+            text("""
             SELECT id, view_count FROM user_template_history
             WHERE user_id = :user_id AND template_id = :template_id
-            """,
+            """),
             {"user_id": current_user.id, "template_id": str(template_id)}
         )
         existing = history_check.fetchone()
@@ -153,23 +153,23 @@ async def mark_template_viewed(
         if existing:
             # Update existing record
             await db.execute(
-                """
+                text("""
                 UPDATE user_template_history
                 SET view_count = view_count + 1,
                     last_viewed_at = NOW(),
                     updated_at = NOW()
                 WHERE user_id = :user_id AND template_id = :template_id
-                """,
+                """),
                 {"user_id": current_user.id, "template_id": str(template_id)}
             )
         else:
             # Insert new record
             await db.execute(
-                """
+                text("""
                 INSERT INTO user_template_history
                 (user_id, template_id, viewed_at, last_viewed_at, view_count, is_favorite)
                 VALUES (:user_id, :template_id, NOW(), NOW(), 1, false)
-                """,
+                """),
                 {"user_id": current_user.id, "template_id": str(template_id)}
             )
 
@@ -202,10 +202,10 @@ async def toggle_template_favorite(
     try:
         # Check if history record exists
         history_check = await db.execute(
-            """
+            text("""
             SELECT id FROM user_template_history
             WHERE user_id = :user_id AND template_id = :template_id
-            """,
+            """),
             {"user_id": current_user.id, "template_id": str(template_id)}
         )
         existing = history_check.fetchone()
@@ -213,11 +213,11 @@ async def toggle_template_favorite(
         if not existing:
             # Create history record if it doesn't exist
             await db.execute(
-                """
+                text("""
                 INSERT INTO user_template_history
                 (user_id, template_id, viewed_at, last_viewed_at, view_count, is_favorite)
                 VALUES (:user_id, :template_id, NOW(), NOW(), 1, :is_favorite)
-                """,
+                """),
                 {
                     "user_id": current_user.id,
                     "template_id": str(template_id),
@@ -227,12 +227,12 @@ async def toggle_template_favorite(
         else:
             # Update favorite status
             await db.execute(
-                """
+                text("""
                 UPDATE user_template_history
                 SET is_favorite = :is_favorite,
                     updated_at = NOW()
                 WHERE user_id = :user_id AND template_id = :template_id
-                """,
+                """),
                 {
                     "user_id": current_user.id,
                     "template_id": str(template_id),
