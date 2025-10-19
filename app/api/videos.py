@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from typing import Optional
 import logging
 import json
+import uuid
 from datetime import datetime
 
 from app.core.database import get_db
@@ -477,11 +478,12 @@ async def duplicate_video(
                 detail="Video not found or access denied"
             )
 
-        # Créer la duplication avec un nouveau titre
+        # Créer la duplication avec un nouveau titre et un nouvel ID
         duplicated_title = f"{original.title} (Copie)"
         duplicated_project_name = f"{original.project_name} (Copie)" if original.project_name else None
 
         duplicated = Video(
+            id=str(uuid.uuid4()),  # Generate new UUID for duplicated video
             user_id=current_user.id,
             property_id=original.property_id,
             title=duplicated_title,
