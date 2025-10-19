@@ -92,6 +92,18 @@ async def save_project(
         video.last_saved_at = datetime.utcnow()
         video.updated_at = datetime.utcnow()
 
+        # Calculate and update total duration from templateSlots (end_time of last slot)
+        if request.project_data and 'templateSlots' in request.project_data:
+            template_slots = request.project_data.get('templateSlots', [])
+            if template_slots:
+                # Get the last slot by order or by end_time
+                last_slot = max(template_slots, key=lambda s: s.get('end_time', 0))
+                total_duration = last_slot.get('end_time', 0)
+                video.duration = int(total_duration)  # Store as integer seconds
+                logger.info("📊 Calculated total duration from templateSlots",
+                           duration=total_duration,
+                           num_slots=len(template_slots))
+
         # Auto-set thumbnail from first SLOT (slot_0), not first contentVideo
         if request.project_data:
             slot_assignments = request.project_data.get('slotAssignments', [])  # Array, not dict!
@@ -164,6 +176,18 @@ async def save_project(
                     logger.info("🖼️ Setting thumbnail from first contentVideo (fallback)",
                               thumbnail_url=thumbnail_url)
 
+        # Calculate total duration from templateSlots (end_time of last slot)
+        total_duration = 0
+        if request.project_data and 'templateSlots' in request.project_data:
+            template_slots = request.project_data.get('templateSlots', [])
+            if template_slots:
+                # Get the last slot by order or by end_time
+                last_slot = max(template_slots, key=lambda s: s.get('end_time', 0))
+                total_duration = last_slot.get('end_time', 0)
+                logger.info("📊 Calculated total duration from templateSlots",
+                           duration=total_duration,
+                           num_slots=len(template_slots))
+
         video = Video(
             id=video_id,
             title=request.project_name,
@@ -176,6 +200,7 @@ async def save_project(
             thumbnail_url=thumbnail_url,
             source_type="viral_template_composer",
             status="draft",  # New status for unsaved projects
+            duration=int(total_duration),  # Store calculated duration
             last_saved_at=datetime.utcnow()
         )
         db.add(video)
