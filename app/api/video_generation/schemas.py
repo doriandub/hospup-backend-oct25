@@ -67,3 +67,21 @@ class VideoStatusResponse(BaseModel):
     createdAt: Optional[str] = None
     completedAt: Optional[str] = None
     errorMessage: Optional[str] = None
+
+
+class InstagramDescriptionRequest(BaseModel):
+    """Request schema for Instagram description generation"""
+    property_id: str
+    template_id: Optional[str] = None
+    video_id: Optional[str] = None
+    language: str = "fr"
+    length: str = "medium"  # short, medium, long
+    custom_prompt: Optional[str] = None
+    property_description: Optional[str] = None
+
+
+class InstagramDescriptionResponse(BaseModel):
+    """Response schema for Instagram description generation"""
+    description: str
+    language: str
+    length: str
