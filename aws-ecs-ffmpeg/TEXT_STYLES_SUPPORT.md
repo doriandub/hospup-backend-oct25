@@ -83,12 +83,19 @@ After modifying `worker.py`, rebuild and push the Docker container:
 
 ```bash
 cd /Users/doriandubord/Desktop/hospup-project/hospup-backend/aws-ecs-ffmpeg
-docker build --platform linux/amd64 -t 412655955859.dkr.ecr.us-east-1.amazonaws.com/hospup-ffmpeg-worker:latest .
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 412655955859.dkr.ecr.us-east-1.amazonaws.com
-docker push 412655955859.dkr.ecr.us-east-1.amazonaws.com/hospup-ffmpeg-worker:latest
-```
 
-Then update the ECS service to use the new container.
+# Build Docker image
+docker build --platform linux/amd64 -t 412655955859.dkr.ecr.eu-west-1.amazonaws.com/hospup-ffmpeg-worker:latest .
+
+# Login to ECR
+aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 412655955859.dkr.ecr.eu-west-1.amazonaws.com
+
+# Push to ECR
+docker push 412655955859.dkr.ecr.eu-west-1.amazonaws.com/hospup-ffmpeg-worker:latest
+
+# Update ECS service
+aws ecs update-service --cluster hospup-video-processing --service ffmpeg-worker-service --force-new-deployment --region eu-west-1
+```
 
 ## 🐛 Known Limitations
 
