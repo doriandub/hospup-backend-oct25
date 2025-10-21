@@ -364,7 +364,7 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
     for idx, overlay in enumerate(text_overlays):
         content = overlay.get('content', '')
         style = overlay.get('style', {})
-        font_size = style.get('font_size', 48)
+        font_size = style.get('font_size') or style.get('fontSize', 48)
         color = style.get('color', '#FFFFFF')
         position = overlay.get('position', {'x': 540, 'y': 960})
         start_time = overlay.get('start_time', 0)
@@ -398,19 +398,94 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
         # Escape text for FFmpeg
         safe_content = content.replace("'", "\\'").replace(":", "\\:")
 
-        # Build drawtext filter
+        # Build drawtext filter - start with basic params
+        drawtext_params = [
+            f"fontfile='{fontfile}'",
+            f"text='{safe_content}'",
+            f"fontsize={font_size}",
+            f"fontcolor=0x{color}",
+            f"x={x}-text_w/2",  # Center text horizontally
+            f"y={y}-text_h/2",  # Center text vertically
+        ]
+
+        # 🎨 NEW: Parse backgroundColor (box)
+        bg_color = style.get('backgroundColor')
+        if bg_color and bg_color != 'transparent' and bg_color != 'none':
+            # Parse rgba(0,0,0,0.7) or #000000
+            if bg_color.startswith('rgba'):
+                # Extract rgba values: rgba(r,g,b,a)
+                import re
+                match = re.match(r'rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)', bg_color)
+                if match:
+                    r, g, b, a = match.groups()
+                    a = float(a) if a else 1.0
+                    # FFmpeg boxcolor format: RRGGBB@alpha (alpha 0-1)
+                    boxcolor = f"{int(r):02x}{int(g):02x}{int(b):02x}@{a}"
+                    drawtext_params.append("box=1")
+                    drawtext_params.append(f"boxcolor=0x{boxcolor}")
+                    logger.info(f"  📦 Background: {bg_color} → 0x{boxcolor}")
+            elif bg_color.startswith('#'):
+                # Hex color #RRGGBB or #RRGGBBAA
+                hex_color = bg_color[1:]
+                if len(hex_color) == 8:  # With alpha
+                    rgb = hex_color[:6]
+                    alpha_hex = hex_color[6:8]
+                    alpha = int(alpha_hex, 16) / 255.0
+                    boxcolor = f"{rgb}@{alpha:.2f}"
+                elif len(hex_color) == 6:  # No alpha
+                    boxcolor = f"{hex_color}@1.0"
+                else:
+                    boxcolor = "000000@0.7"  # Fallback
+                drawtext_params.append("box=1")
+                drawtext_params.append(f"boxcolor=0x{boxcolor}")
+                logger.info(f"  📦 Background: {bg_color} → 0x{boxcolor}")
+
+        # 🎨 NEW: Parse padding (boxborderw)
+        padding = style.get('padding')
+        if padding and bg_color:  # Only add padding if box is enabled
+            # Parse "4px 8px" or "4px" → use first value as border width
+            import re
+            padding_match = re.search(r'(\d+)', str(padding))
+            if padding_match:
+                padding_px = int(padding_match.group(1))
+                drawtext_params.append(f"boxborderw={padding_px}")
+                logger.info(f"  📐 Padding: {padding} → boxborderw={padding_px}")
+
+        # 🎨 NEW: Parse textShadow
+        text_shadow = style.get('textShadow')
+        if text_shadow and text_shadow != 'none':
+            # Parse "2px 2px 4px rgba(0,0,0,0.5)" or "2px 2px 4px black"
+            # For now, use simple defaults if shadow is enabled
+            drawtext_params.append("shadowcolor=black@0.5")
+            drawtext_params.append("shadowx=2")
+            drawtext_params.append("shadowy=2")
+            logger.info(f"  🌑 Shadow: {text_shadow}")
+
+        # 🎨 NEW: Parse webkitTextStroke (text border)
+        text_stroke = style.get('webkitTextStroke') or style.get('textStroke')
+        if text_stroke and text_stroke != 'none':
+            # Parse "2px #000000" or just check if it exists
+            import re
+            stroke_match = re.search(r'(\d+)px\s+(#[0-9a-fA-F]{6}|[a-z]+)', str(text_stroke))
+            if stroke_match:
+                stroke_width = int(stroke_match.group(1))
+                stroke_color = stroke_match.group(2)
+                if stroke_color.startswith('#'):
+                    stroke_color = stroke_color[1:]
+                elif stroke_color in color_map:
+                    stroke_color = color_map[stroke_color]
+                else:
+                    stroke_color = '000000'
+                drawtext_params.append(f"borderw={stroke_width}")
+                drawtext_params.append(f"bordercolor=0x{stroke_color}")
+                logger.info(f"  🖊️ Stroke: {text_stroke} → borderw={stroke_width}, bordercolor=0x{stroke_color}")
+
+        # Add timing
+        drawtext_params.append(f"enable='between(t,{start_time},{end_time})'")
+
+        # Combine all params
         next_label = f'txt{idx}'
-        drawtext_filter = (
-            f"[{video_label}]drawtext="
-            f"fontfile='{fontfile}':"
-            f"text='{safe_content}':"
-            f"fontsize={font_size}:"
-            f"fontcolor=0x{color}:"
-            f"x={x}-text_w/2:"  # Center text horizontally (like preview)
-            f"y={y}-text_h/2:"  # Center text vertically (like preview)
-            f"enable='between(t,{start_time},{end_time})'"
-            f"[{next_label}]"
-        )
+        drawtext_filter = f"[{video_label}]drawtext={':'.join(drawtext_params)}[{next_label}]"
 
         filters.append(drawtext_filter)
         video_label = next_label
@@ -489,7 +564,7 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
     for idx, overlay in enumerate(text_overlays):
         content = overlay.get('content', '')
         style = overlay.get('style', {})
-        font_size = style.get('font_size', 48)
+        font_size = style.get('font_size') or style.get('fontSize', 48)
         color = style.get('color', '#FFFFFF')
         position = overlay.get('position', {'x': 640, 'y': 360})
         start_time = overlay.get('start_time', 0)
@@ -499,7 +574,6 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
         fontfile = get_font_file(style)
 
         # Convert color to FFmpeg hex format
-        # Map named colors to hex
         color_map = {
             'white': 'FFFFFF',
             'black': '000000',
@@ -515,7 +589,6 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
             color = color_map[color.lower()]
         elif color.startswith('#'):
             color = color[1:]  # Remove #
-        # If already hex (no #), use as-is
 
         # Calculate position (center anchor)
         x = position['x']
@@ -524,19 +597,80 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
         # Escape text for FFmpeg
         safe_content = content.replace("'", "\\'").replace(":", "\\:")
 
-        # Build drawtext filter
+        # Build drawtext filter - start with basic params
+        drawtext_params = [
+            f"fontfile='{fontfile}'",
+            f"text='{safe_content}'",
+            f"fontsize={font_size}",
+            f"fontcolor=0x{color}",
+            f"x={x}-text_w/2",
+            f"y={y}-text_h/2",
+        ]
+
+        # 🎨 Parse backgroundColor (box)
+        bg_color = style.get('backgroundColor')
+        if bg_color and bg_color != 'transparent' and bg_color != 'none':
+            import re
+            if bg_color.startswith('rgba'):
+                match = re.match(r'rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)', bg_color)
+                if match:
+                    r, g, b, a = match.groups()
+                    a = float(a) if a else 1.0
+                    boxcolor = f"{int(r):02x}{int(g):02x}{int(b):02x}@{a}"
+                    drawtext_params.append("box=1")
+                    drawtext_params.append(f"boxcolor=0x{boxcolor}")
+            elif bg_color.startswith('#'):
+                hex_color = bg_color[1:]
+                if len(hex_color) == 8:
+                    rgb = hex_color[:6]
+                    alpha = int(hex_color[6:8], 16) / 255.0
+                    boxcolor = f"{rgb}@{alpha:.2f}"
+                elif len(hex_color) == 6:
+                    boxcolor = f"{hex_color}@1.0"
+                else:
+                    boxcolor = "000000@0.7"
+                drawtext_params.append("box=1")
+                drawtext_params.append(f"boxcolor=0x{boxcolor}")
+
+        # 🎨 Parse padding (boxborderw)
+        padding = style.get('padding')
+        if padding and bg_color:
+            import re
+            padding_match = re.search(r'(\d+)', str(padding))
+            if padding_match:
+                padding_px = int(padding_match.group(1))
+                drawtext_params.append(f"boxborderw={padding_px}")
+
+        # 🎨 Parse textShadow
+        text_shadow = style.get('textShadow')
+        if text_shadow and text_shadow != 'none':
+            drawtext_params.append("shadowcolor=black@0.5")
+            drawtext_params.append("shadowx=2")
+            drawtext_params.append("shadowy=2")
+
+        # 🎨 Parse webkitTextStroke (text border)
+        text_stroke = style.get('webkitTextStroke') or style.get('textStroke')
+        if text_stroke and text_stroke != 'none':
+            import re
+            stroke_match = re.search(r'(\d+)px\s+(#[0-9a-fA-F]{6}|[a-z]+)', str(text_stroke))
+            if stroke_match:
+                stroke_width = int(stroke_match.group(1))
+                stroke_color = stroke_match.group(2)
+                if stroke_color.startswith('#'):
+                    stroke_color = stroke_color[1:]
+                elif stroke_color in color_map:
+                    stroke_color = color_map[stroke_color]
+                else:
+                    stroke_color = '000000'
+                drawtext_params.append(f"borderw={stroke_width}")
+                drawtext_params.append(f"bordercolor=0x{stroke_color}")
+
+        # Add timing
+        drawtext_params.append(f"enable='between(t,{start_time},{end_time})'")
+
+        # Combine all params
         next_label = f'txt{idx}'
-        drawtext_filter = (
-            f"[{video_label}]drawtext="
-            f"fontfile='{fontfile}':"
-            f"text='{safe_content}':"
-            f"fontsize={font_size}:"
-            f"fontcolor=0x{color}:"
-            f"x={x}-text_w/2:"  # Center text horizontally (like preview)
-            f"y={y}-text_h/2:"  # Center text vertically (like preview)
-            f"enable='between(t,{start_time},{end_time})'"
-            f"[{next_label}]"
-        )
+        drawtext_filter = f"[{video_label}]drawtext={':'.join(drawtext_params)}[{next_label}]"
 
         filters.append(drawtext_filter)
         video_label = next_label
