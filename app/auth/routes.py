@@ -365,7 +365,7 @@ async def google_callback(
         access_token = create_access_token(data={"sub": str(user.id)})
         refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
-        # Set HttpOnly cookies
+        # Set HttpOnly cookies (for fallback compatibility)
         response.set_cookie(
             key="access_token",
             value=access_token,
@@ -386,11 +386,12 @@ async def google_callback(
             domain=settings.COOKIE_DOMAIN
         )
 
-        # Redirect to frontend dashboard
+        # Redirect to frontend OAuth callback with token in URL
+        # Frontend will extract token and store in localStorage
         frontend_url = settings.ALLOWED_ORIGINS[0] if settings.ALLOWED_ORIGINS else "http://localhost:3000"
-        redirect_url = f"{frontend_url}/dashboard"
+        redirect_url = f"{frontend_url}/auth/callback?token={access_token}"
 
-        logger.info("Redirecting to frontend", url=redirect_url)
+        logger.info("Redirecting to frontend OAuth callback", url=frontend_url + "/auth/callback")
         return RedirectResponse(url=redirect_url)
 
     except httpx.HTTPError as e:
