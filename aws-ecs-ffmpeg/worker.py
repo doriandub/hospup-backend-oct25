@@ -203,8 +203,10 @@ def build_image_adjustments_filter(presets: Dict, start_time: float = None, end_
     """
     Build FFmpeg video filter for 4 basic image adjustments (MediaConvert-compatible)
 
-    Only supports: brightness, contrast, saturation, hue
+    Only supports: brightness (via gamma), contrast, saturation, hue
     Advanced presets removed to align with MediaConvert capabilities
+
+    ⚠️ Uses eq=gamma for brightness (multiplicative, like CSS) instead of eq=brightness (additive, creates voile blanc)
 
     IMPORTANT: No :enable here - it's added at the filter chain level (like drawtext)
 
@@ -214,28 +216,29 @@ def build_image_adjustments_filter(presets: Dict, start_time: float = None, end_
         end_time: NOT USED - kept for compatibility
 
     Returns:
-        FFmpeg filter string (e.g., "eq=brightness=0.1:contrast=1.2,hue=h=10")
+        FFmpeg filter string (e.g., "eq=gamma=1.5:contrast=1.2,hue=h=10")
     """
     if not presets:
         return ""
 
     filters = []
 
-    # Basic adjustments using eq filter
+    # Brightness: Use colorchannelmixer for RGB multiplication (fast & matches CSS)
+    brightness_val = presets.get('brightness', 0)
+    css_brightness = 1.0 + (brightness_val / 100.0)  # -100→0.0, 0→1.0, +100→2.0
+    if css_brightness != 1.0:
+        # colorchannelmixer: multiply RGB channels (rr/gg/bb coefficients)
+        mult = css_brightness
+        filters.append(f"colorchannelmixer=rr={mult:.3f}:gg={mult:.3f}:bb={mult:.3f}")
+
+    # Contrast & Saturation using eq filter
     eq_params = []
 
-    # Brightness: -100 to +100 → -1.0 to +1.0 (FFmpeg range)
-    brightness = presets.get('brightness', 0) / 100.0
-    if brightness != 0:
-        eq_params.append(f"brightness={brightness:.3f}")
-
-    # Contrast: -100 to +100 → 0.0 to 2.0 (FFmpeg: 1.0 = normal)
     contrast_val = presets.get('contrast', 0)
     contrast = 1.0 + (contrast_val / 100.0)  # -100→0.0, 0→1.0, +100→2.0
     if contrast != 1.0:
         eq_params.append(f"contrast={contrast:.3f}")
 
-    # Saturation: -100 to +100 → 0.0 to 3.0 (FFmpeg: 1.0 = normal)
     sat_val = presets.get('saturation', 0)
     saturation = 1.0 + (sat_val / 50.0)  # -100→-1.0, 0→1.0, +100→3.0
     if saturation != 1.0:
@@ -298,15 +301,10 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             start_time = clip.get('start_time', 0)
             end_time = clip.get('end_time', 999)
 
-            # 🎯 TIMING CORRECTION: MediaConvert output has slight offset at start
-            # Shift all filter timings back slightly to align with actual video content
-            TIMING_OFFSET = 0.177  # Ultra fine-tuning: precise timing calibration
-            adjusted_start = max(0, start_time - TIMING_OFFSET)
-            adjusted_end = max(0, end_time - TIMING_OFFSET)
-
             # Build enable expression (same as drawtext)
-            enable_expr = f":enable='between(t,{adjusted_start},{adjusted_end})'"
-            logger.info(f"📊 Clip {idx+1}: {start_time}s-{end_time}s → adjusted {adjusted_start}s-{adjusted_end}s")
+            # No timing offset - clips should match exactly as provided
+            enable_expr = f":enable='between(t,{start_time},{end_time})'"
+            logger.info(f"📊 Clip {idx+1}: {start_time}s-{end_time}s (no offset)")
 
             # Extract ONLY 4 basic preset values (MediaConvert-compatible)
             # 🎨 CALIBRATED TO MATCH CSS FILTERS VISUALLY
@@ -323,29 +321,39 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             css_contrast = 1 + (contrast_input * 0.01)
             css_saturation = 1 + (saturation_input * 0.01)
 
-            # FFmpeg eq conversion (calibrated to match CSS visually):
-            # Brightness: CSS multiplies RGB, FFmpeg adds to luma → scale down by 0.4 to approximate
-            brightness = (css_brightness - 1) * 0.4  # -0.4 to +0.4 (instead of -1 to +1)
-            # Contrast: Both multiply, similar behavior → use same value
-            contrast = css_contrast  # 0 to 2
-            # Saturation: Both multiply chroma, similar behavior → use same value
-            saturation = css_saturation  # 0 to 2
+            # FFmpeg conversion to match CSS visually:
+            # ⚠️ Use lutyuv for brightness (linear multiply like CSS), not eq=brightness (additive) or eq=gamma (power curve)!
+            # CSS brightness(2.0) = output = input × 2.0 (linear multiplication)
+            # FFmpeg eq=gamma uses: output = input^(1/gamma) (power curve, not linear!)
+            # FFmpeg lutyuv uses: y=clip(val*multiplier) (linear multiplication, matches CSS!)
 
-            # 1. EQ filter (brightness, contrast, saturation)
-            eq_params = []
-            if brightness != 0:
-                eq_params.append(f"brightness={brightness:.3f}")
-            if contrast != 1.0:
-                eq_params.append(f"contrast={contrast:.3f}")
-            if saturation != 1.0:
-                eq_params.append(f"saturation={saturation:.3f}")
-
-            if eq_params:
-                next_label = f'eq{idx}'
-                eq_filter = f"[{video_label}]eq={':'.join(eq_params)}{enable_expr}[{next_label}]"
-                filters.append(eq_filter)
+            # 1. Brightness filter using colorchannelmixer (RGB multiplication, fast & matches CSS)
+            if css_brightness != 1.0:
+                next_label = f'bright{idx}'
+                # colorchannelmixer: multiply each RGB channel (rr/gg/bb coefficients)
+                mult = css_brightness
+                bright_filter = f"[{video_label}]colorchannelmixer=rr={mult:.3f}:gg={mult:.3f}:bb={mult:.3f}{enable_expr}[{next_label}]"
+                filters.append(bright_filter)
                 video_label = next_label
-                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) EQ: {':'.join(eq_params)}")
+                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) BRIGHTNESS (colorchannelmixer): {css_brightness:.3f}x")
+
+            # 2. Contrast using lutrgb (RGB space, matches CSS formula)
+            if css_contrast != 1.0:
+                next_label = f'contrast{idx}'
+                # CSS contrast formula: output = (input - 128) * multiplier + 128
+                # Apply to each RGB channel separately, clamp to 0-255
+                contrast_filter = f"[{video_label}]lutrgb=r='clip((val-128)*{css_contrast:.3f}+128,0,255)':g='clip((val-128)*{css_contrast:.3f}+128,0,255)':b='clip((val-128)*{css_contrast:.3f}+128,0,255)'{enable_expr}[{next_label}]"
+                filters.append(contrast_filter)
+                video_label = next_label
+                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) CONTRAST (lutrgb RGB): {css_contrast:.3f}x")
+
+            # 3. Saturation using eq filter
+            if css_saturation != 1.0:
+                next_label = f'sat{idx}'
+                sat_filter = f"[{video_label}]eq=saturation={css_saturation:.3f}{enable_expr}[{next_label}]"
+                filters.append(sat_filter)
+                video_label = next_label
+                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) SATURATION (eq): {css_saturation:.3f}x")
 
             # 2. Hue filter
             if hue != 0:
@@ -373,6 +381,14 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
         # Get font file path using new parser
         fontfile = get_font_file(style)
         logger.info(f"📝 Text {idx+1}: '{content[:30]}' - Font: {fontfile}")
+
+        # 🐛 DEBUG: Log received style values for background and shadow
+        logger.info(f"  🎨 Style received:")
+        logger.info(f"    - backgroundColor: {style.get('backgroundColor')}")
+        logger.info(f"    - backgroundOpacity: {style.get('backgroundOpacity')}")
+        logger.info(f"    - backgroundPadding: {style.get('backgroundPadding')}")
+        logger.info(f"    - shadowColor: {style.get('shadowColor')}")
+        logger.info(f"    - shadowOpacity: {style.get('shadowOpacity')}")
 
         # Convert color to FFmpeg hex format
         color_map = {
@@ -408,26 +424,36 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             f"y={y}-text_h/2",  # Center text vertically
         ]
 
-        # 🎨 NEW: Parse backgroundColor (box)
+        # 🎨 NEW: Parse backgroundColor (box) - Support both granular and legacy formats
         bg_color = style.get('backgroundColor')
+        bg_opacity = style.get('backgroundOpacity')  # 0-100
+
         if bg_color and bg_color != 'transparent' and bg_color != 'none':
-            # Parse rgba(0,0,0,0.7) or #000000
+            # Parse color
             if bg_color.startswith('rgba'):
                 # Extract rgba values: rgba(r,g,b,a)
                 import re
                 match = re.match(r'rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)', bg_color)
                 if match:
                     r, g, b, a = match.groups()
-                    a = float(a) if a else 1.0
-                    # FFmpeg boxcolor format: RRGGBB@alpha (alpha 0-1)
-                    boxcolor = f"{int(r):02x}{int(g):02x}{int(b):02x}@{a}"
+                    # Use granular opacity if provided, otherwise use rgba alpha
+                    if bg_opacity is not None:
+                        alpha = bg_opacity / 100.0  # Convert 0-100 to 0-1
+                    else:
+                        alpha = float(a) if a else 1.0
+                    boxcolor = f"{int(r):02x}{int(g):02x}{int(b):02x}@{alpha:.2f}"
                     drawtext_params.append("box=1")
                     drawtext_params.append(f"boxcolor=0x{boxcolor}")
-                    logger.info(f"  📦 Background: {bg_color} → 0x{boxcolor}")
+                    logger.info(f"  📦 Background: {bg_color} opacity={alpha:.2f} → 0x{boxcolor}")
             elif bg_color.startswith('#'):
                 # Hex color #RRGGBB or #RRGGBBAA
                 hex_color = bg_color[1:]
-                if len(hex_color) == 8:  # With alpha
+                if bg_opacity is not None:
+                    # Use granular opacity
+                    alpha = bg_opacity / 100.0
+                    rgb = hex_color[:6] if len(hex_color) >= 6 else "000000"
+                    boxcolor = f"{rgb}@{alpha:.2f}"
+                elif len(hex_color) == 8:  # With alpha in hex
                     rgb = hex_color[:6]
                     alpha_hex = hex_color[6:8]
                     alpha = int(alpha_hex, 16) / 255.0
@@ -440,26 +466,72 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
                 drawtext_params.append(f"boxcolor=0x{boxcolor}")
                 logger.info(f"  📦 Background: {bg_color} → 0x{boxcolor}")
 
-        # 🎨 NEW: Parse padding (boxborderw)
-        padding = style.get('padding')
-        if padding and bg_color:  # Only add padding if box is enabled
-            # Parse "4px 8px" or "4px" → use first value as border width
-            import re
-            padding_match = re.search(r'(\d+)', str(padding))
-            if padding_match:
-                padding_px = int(padding_match.group(1))
-                drawtext_params.append(f"boxborderw={padding_px}")
-                logger.info(f"  📐 Padding: {padding} → boxborderw={padding_px}")
+        # 🎨 NEW: Parse padding (boxborderw) - Support granular padding
+        bg_padding = style.get('backgroundPadding')  # Direct pixel value
+        padding = style.get('padding')  # Legacy format "4px"
 
-        # 🎨 NEW: Parse textShadow
+        if bg_color and bg_color != 'transparent':  # Only add padding if box is enabled
+            if bg_padding is not None:
+                # Use granular padding value (already in pixels)
+                drawtext_params.append(f"boxborderw={int(bg_padding)}")
+                logger.info(f"  📐 Padding: {bg_padding}px → boxborderw={int(bg_padding)}")
+            elif padding:
+                # Parse legacy "4px 8px" or "4px" → use first value as border width
+                import re
+                padding_match = re.search(r'(\d+)', str(padding))
+                if padding_match:
+                    padding_px = int(padding_match.group(1))
+                    drawtext_params.append(f"boxborderw={padding_px}")
+                    logger.info(f"  📐 Padding (legacy): {padding} → boxborderw={padding_px}")
+
+        # 🎨 NEW: Parse textShadow - Support both granular and legacy formats
+        shadow_color = style.get('shadowColor')
+        shadow_opacity = style.get('shadowOpacity')  # 0-100
+        shadow_offset_x = style.get('shadowOffsetX')  # -20 to 20
+        shadow_offset_y = style.get('shadowOffsetY')  # -20 to 20
+        shadow_blur = style.get('shadowBlur')  # 0-20 (not used by FFmpeg, preview only)
         text_shadow = style.get('textShadow')
-        if text_shadow and text_shadow != 'none':
-            # Parse "2px 2px 4px rgba(0,0,0,0.5)" or "2px 2px 4px black"
-            # For now, use simple defaults if shadow is enabled
-            drawtext_params.append("shadowcolor=black@0.5")
-            drawtext_params.append("shadowx=2")
-            drawtext_params.append("shadowy=2")
-            logger.info(f"  🌑 Shadow: {text_shadow}")
+
+        # Priority: Use granular settings if any are defined
+        if any([shadow_color, shadow_opacity is not None, shadow_offset_x is not None,
+                shadow_offset_y is not None, shadow_blur is not None]):
+            # Build shadow from granular settings
+            s_color = shadow_color if shadow_color else '#000000'
+            s_opacity = (shadow_opacity / 100.0) if shadow_opacity is not None else 0.5
+            # Fixed offset values (user no longer controls X/Y distance)
+            s_x = 3  # Fixed shadow distance
+            s_y = 3  # Fixed shadow distance
+            # Note: FFmpeg drawtext doesn't support blur, only x/y offset
+
+            # Convert hex color to name or use directly
+            if s_color.startswith('#'):
+                # FFmpeg shadowcolor accepts color names or hex without #
+                s_color_ffmpeg = s_color[1:]  # Remove #
+            else:
+                s_color_ffmpeg = s_color
+
+            drawtext_params.append(f"shadowcolor=0x{s_color_ffmpeg}@{s_opacity:.2f}")
+            drawtext_params.append(f"shadowx={int(s_x)}")
+            drawtext_params.append(f"shadowy={int(s_y)}")
+            logger.info(f"  🌑 Shadow (granular): color={s_color} opacity={s_opacity:.2f} x={s_x} y={s_y}")
+        elif text_shadow and text_shadow != 'none':
+            # Parse legacy CSS shadow format "2px 2px 4px rgba(0,0,0,0.5)"
+            import re
+            shadow_match = re.match(r'([+-]?\d+)px\s+([+-]?\d+)px(?:\s+\d+px)?\s+rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)', text_shadow)
+            if shadow_match:
+                s_x, s_y, r, g, b, a = shadow_match.groups()
+                s_opacity = float(a) if a else 0.5
+                s_color_hex = f"{int(r):02x}{int(g):02x}{int(b):02x}"
+                drawtext_params.append(f"shadowcolor=0x{s_color_hex}@{s_opacity:.2f}")
+                drawtext_params.append(f"shadowx={s_x}")
+                drawtext_params.append(f"shadowy={s_y}")
+                logger.info(f"  🌑 Shadow (parsed): {text_shadow} → x={s_x} y={s_y} color=0x{s_color_hex}@{s_opacity:.2f}")
+            else:
+                # Fallback to simple defaults
+                drawtext_params.append("shadowcolor=black@0.5")
+                drawtext_params.append("shadowx=2")
+                drawtext_params.append("shadowy=2")
+                logger.info(f"  🌑 Shadow (default): {text_shadow}")
 
         # 🎨 NEW: Parse webkitTextStroke (text border)
         text_stroke = style.get('webkitTextStroke') or style.get('textStroke')
@@ -486,6 +558,9 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
         # Combine all params
         next_label = f'txt{idx}'
         drawtext_filter = f"[{video_label}]drawtext={':'.join(drawtext_params)}[{next_label}]"
+
+        # 🐛 DEBUG: Log final drawtext filter command
+        logger.info(f"  ✅ Final drawtext filter: {drawtext_filter}")
 
         filters.append(drawtext_filter)
         video_label = next_label
@@ -672,6 +747,9 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
         next_label = f'txt{idx}'
         drawtext_filter = f"[{video_label}]drawtext={':'.join(drawtext_params)}[{next_label}]"
 
+        # 🐛 DEBUG: Log final drawtext filter command
+        logger.info(f"  ✅ Final drawtext filter: {drawtext_filter}")
+
         filters.append(drawtext_filter)
         video_label = next_label
 
@@ -711,11 +789,19 @@ def process_job(job_data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Check for optimized mode (MediaConvert output)
     base_video_url = job_data.get('base_video_url') or job_data.get('mediaconvert_output_url')
-    text_overlays = job_data.get('text_overlays', [])
 
-    # Extract clips with presets from custom_script (NEW!)
+    # Extract custom_script (has full text styles + clip presets)
     custom_script = job_data.get('custom_script', {})
     clips_with_presets = custom_script.get('clips', []) if custom_script else []
+
+    # 🎨 IMPORTANT: Prefer custom_script['texts'] over text_overlays for full style support
+    # custom_script['texts'] has backgroundColor, padding, textShadow, webkitTextStroke, etc.
+    if custom_script and custom_script.get('texts'):
+        text_overlays = custom_script['texts']
+        logger.info(f"✅ Using text overlays from custom_script: {len(text_overlays)} texts with full styles")
+    else:
+        text_overlays = job_data.get('text_overlays', [])
+        logger.info(f"⚠️ Using text overlays from job_data root: {len(text_overlays)} texts (may lack full styles)")
 
     # DEBUG: Log full custom_script
     logger.info(f"📜 Custom script received: {json.dumps(custom_script, indent=2) if custom_script else 'None'}")

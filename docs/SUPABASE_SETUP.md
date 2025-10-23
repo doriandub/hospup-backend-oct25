@@ -59,6 +59,7 @@ CREATE TABLE public.templates (
     -- Social media data
     video_link text,
     account_link text,
+    thumbnail_link text,
     audio text,
     
     -- Performance metrics

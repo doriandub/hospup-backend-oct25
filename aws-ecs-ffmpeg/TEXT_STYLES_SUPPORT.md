@@ -122,3 +122,25 @@ aws ecs update-service --cluster hospup-video-processing --service ffmpeg-worker
 - ✅ Added webkitTextStroke support (borderw, bordercolor)
 - ✅ Added fontSize camelCase support
 - ✅ Applied changes to both OPTIMIZED and LEGACY modes
+- ✅ Fixed worker to read text styles from `custom_script['texts']` instead of `text_overlays`
+
+## 🔍 Technical Details
+
+### Data Flow
+1. **Frontend (Compose page)** → Sends `custom_script` with `texts` array containing full styles
+2. **Railway Backend** → Forwards to MediaConvert Lambda with `custom_script`
+3. **MediaConvert Lambda** → Assembles video clips, then triggers ECS worker with `custom_script`
+4. **ECS Worker** → Reads `custom_script['texts']` (NOT `text_overlays`) to get full style information
+
+### Key Fix
+The worker now prioritizes `custom_script['texts']` over `text_overlays` because:
+- `custom_script['texts']` contains the full style object from the Compose page
+- `text_overlays` may be missing advanced styles like backgroundColor, padding, etc.
+
+```python
+# In worker.py process_job():
+if custom_script and custom_script.get('texts'):
+    text_overlays = custom_script['texts']  # Has full styles!
+else:
+    text_overlays = job_data.get('text_overlays', [])  # Fallback
+```

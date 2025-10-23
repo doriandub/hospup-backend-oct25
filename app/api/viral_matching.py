@@ -36,6 +36,7 @@ class ViralTemplateResponse(BaseModel):
     followers: Optional[int] = None
     username: Optional[str] = None
     video_link: Optional[str] = None
+    thumbnail_link: Optional[str] = None
     audio_url: Optional[str] = None
     script: Optional[Dict[str, Any]] = None
     duration: Optional[float] = None
@@ -111,6 +112,7 @@ async def list_viral_templates(
                     "followers": template.followers,
                     "username": template.username,
                     "video_link": template.video_link,
+                    "thumbnail_link": template.thumbnail_link,
                     "audio_url": template.audio,
                     "script": script_data,
                     "duration": float(template.duration) if template.duration else None,
@@ -193,6 +195,7 @@ async def get_viral_template(
             "followers": template.followers,
             "username": template.username,
             "video_link": template.video_link,
+            "thumbnail_link": template.thumbnail_link,
             "audio_url": template.audio,
             "script": script_data,
             "duration": float(template.duration) if template.duration else None,

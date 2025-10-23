@@ -1,9 +1,13 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie, Request
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import redis
 import structlog
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import secrets
 
 from ..core.database import get_db
 from ..core.config import settings
@@ -244,3 +248,166 @@ async def logout(response: Response):
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Get current user information - ASYNC VERSION"""
     return UserResponse.model_validate(current_user)
+
+@router.get("/google")
+async def google_login(request: Request):
+    """Initiate Google OAuth flow"""
+
+    if not settings.GOOGLE_CLIENT_ID:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google OAuth not configured"
+        )
+
+    # Generate state token for CSRF protection
+    state = secrets.token_urlsafe(32)
+
+    # Store state in Redis with 10 minute expiry
+    try:
+        redis_client = redis.from_url(settings.REDIS_URL)
+        redis_client.setex(f"oauth_state:{state}", 600, "valid")
+        redis_client.close()
+    except Exception as e:
+        logger.warning("Failed to store OAuth state", error=str(e))
+
+    # Build Google OAuth URL
+    google_oauth_url = (
+        "https://accounts.google.com/o/oauth2/v2/auth?"
+        f"client_id={settings.GOOGLE_CLIENT_ID}&"
+        f"redirect_uri={settings.GOOGLE_REDIRECT_URI}&"
+        "response_type=code&"
+        "scope=openid email profile&"
+        f"state={state}"
+    )
+
+    logger.info("Initiating Google OAuth flow", state=state)
+    return RedirectResponse(url=google_oauth_url)
+
+@router.get("/google/callback")
+async def google_callback(
+    code: str,
+    state: str,
+    response: Response,
+    db: AsyncSession = Depends(get_db)
+):
+    """Handle Google OAuth callback"""
+
+    # Verify state token
+    try:
+        redis_client = redis.from_url(settings.REDIS_URL)
+        stored_state = redis_client.get(f"oauth_state:{state}")
+        redis_client.delete(f"oauth_state:{state}")
+        redis_client.close()
+
+        if not stored_state:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired state token"
+            )
+    except Exception as e:
+        logger.warning("State verification failed", error=str(e))
+
+    # Exchange code for tokens
+    try:
+        import httpx
+
+        token_url = "https://oauth2.googleapis.com/token"
+        token_data = {
+            "code": code,
+            "client_id": settings.GOOGLE_CLIENT_ID,
+            "client_secret": settings.GOOGLE_CLIENT_SECRET,
+            "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+            "grant_type": "authorization_code"
+        }
+
+        async with httpx.AsyncClient() as client:
+            token_response = await client.post(token_url, data=token_data)
+            token_response.raise_for_status()
+            tokens = token_response.json()
+
+        # Verify the ID token
+        id_info = id_token.verify_oauth2_token(
+            tokens["id_token"],
+            google_requests.Request(),
+            settings.GOOGLE_CLIENT_ID
+        )
+
+        # Extract user info
+        email = id_info.get("email")
+        google_id = id_info.get("sub")
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email not provided by Google"
+            )
+
+        logger.info("Google OAuth successful", email=email)
+
+        # Check if user exists
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            # Create new user
+            user = User(
+                email=email,
+                hashed_password=get_password_hash(secrets.token_urlsafe(32))  # Random password
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+            logger.info("New user created via Google OAuth", user_id=user.id, email=email)
+        else:
+            logger.info("Existing user logged in via Google OAuth", user_id=user.id, email=email)
+
+        # Create tokens
+        access_token = create_access_token(data={"sub": str(user.id)})
+        refresh_token = create_refresh_token(data={"sub": str(user.id)})
+
+        # Set HttpOnly cookies
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            httponly=True,
+            secure=settings.COOKIE_SECURE,
+            samesite=settings.COOKIE_SAMESITE,
+            domain=settings.COOKIE_DOMAIN
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            max_age=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+            httponly=True,
+            secure=settings.COOKIE_SECURE,
+            samesite=settings.COOKIE_SAMESITE,
+            domain=settings.COOKIE_DOMAIN
+        )
+
+        # Redirect to frontend dashboard
+        frontend_url = settings.ALLOWED_ORIGINS[0] if settings.ALLOWED_ORIGINS else "http://localhost:3000"
+        redirect_url = f"{frontend_url}/dashboard"
+
+        logger.info("Redirecting to frontend", url=redirect_url)
+        return RedirectResponse(url=redirect_url)
+
+    except httpx.HTTPError as e:
+        logger.error("Token exchange failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to exchange authorization code"
+        )
+    except ValueError as e:
+        logger.error("Token verification failed", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid ID token"
+        )
+    except Exception as e:
+        logger.error("Google OAuth callback error", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentication failed"
+        )

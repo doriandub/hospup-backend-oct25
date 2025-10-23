@@ -65,6 +65,11 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 20
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: Optional[str] = None
+
     # === CORS & COOKIES ===
     ALLOWED_ORIGINS: List[str] = [
         "https://hospup-frontend.vercel.app",

@@ -219,6 +219,12 @@ def send_to_ecs_ffmpeg(job_id: str, video_id: str, property_id: str, base_video_
             if custom_script.get('presets'):
                 print(f"   Presets keys: {list(custom_script['presets'].keys())[:5]}...")
 
+        # 🎨 IMPORTANT: Ensure text_overlays are in custom_script['texts'] for full style support
+        # The worker reads from custom_script['texts'] to get backgroundColor, padding, etc.
+        if text_overlays and not custom_script.get('texts'):
+            custom_script['texts'] = text_overlays
+            print(f"✅ Added {len(text_overlays)} texts to custom_script['texts'] for full style support")
+
         # Prepare SQS message for ECS FFmpeg worker
         # COMPATIBILITY: Send in format that old worker understands (segments)
         # This allows old worker to add text overlays without needing new Docker image
@@ -235,8 +241,8 @@ def send_to_ecs_ffmpeg(job_id: str, video_id: str, property_id: str, base_video_
                 'start_time': 0,
                 'end_time': 999
             }],
-            'text_overlays': text_overlays,  # Text overlays to add
-            'custom_script': custom_script  # Image adjustments (presets)
+            'text_overlays': text_overlays,  # Legacy fallback
+            'custom_script': custom_script  # Contains texts with full styles + image adjustments (presets)
         }
 
         print(f"📤 Sending to SQS: {SQS_QUEUE_URL}")

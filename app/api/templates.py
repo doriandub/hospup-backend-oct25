@@ -23,6 +23,7 @@ class TemplateHistoryResponse(BaseModel):
     duration: float
     script: str
     video_link: Optional[str] = None
+    thumbnail_link: Optional[str] = None
     viewed_at: Optional[str] = None
     last_viewed_at: Optional[str] = None
     view_count: Optional[int] = 1
@@ -60,6 +61,7 @@ async def get_template_history(
                 t.duration,
                 t.script,
                 t.video_link,
+                t.thumbnail_link,
                 h.viewed_at,
                 h.last_viewed_at,
                 h.view_count,
@@ -98,10 +100,11 @@ async def get_template_history(
                 duration=row[3],
                 script=row[4],
                 video_link=row[5],
-                viewed_at=row[6].isoformat() if row[6] else None,
-                last_viewed_at=row[7].isoformat() if row[7] else None,
-                view_count=row[8],
-                is_favorite=row[9]
+                thumbnail_link=row[6],
+                viewed_at=row[7].isoformat() if row[7] else None,
+                last_viewed_at=row[8].isoformat() if row[8] else None,
+                view_count=row[9],
+                is_favorite=row[10]
             ))
 
         return templates

@@ -25,6 +25,7 @@ class Template(Base):
     # Social media links and data
     video_link = Column(Text, nullable=True)
     account_link = Column(Text, nullable=True)
+    thumbnail_link = Column(Text, nullable=True)  # Instagram thumbnail URL
     audio = Column(Text, nullable=True)  # audio file URL or identifier
     
     # Performance metrics
@@ -66,6 +67,7 @@ class Template(Base):
             'country': self.country,
             'video_link': self.video_link,
             'account_link': self.account_link,
+            'thumbnail_link': self.thumbnail_link,
             'audio': self.audio,
             'followers': self.followers,
             'views': self.views,
