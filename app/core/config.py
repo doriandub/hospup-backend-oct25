@@ -72,8 +72,8 @@ class Settings(BaseSettings):
 
     # === CORS & COOKIES ===
     ALLOWED_ORIGINS: List[str] = [
-        "https://hospup-frontend.vercel.app",
-        "https://hospup-frontend-2-kappa.vercel.app"
+        "https://hospup-frontend-2-kappa.vercel.app",
+        "https://hospup-frontend.vercel.app"
     ]
     ALLOW_VERCEL_DOMAINS: bool = True
     COOKIE_DOMAIN: Optional[str] = None
