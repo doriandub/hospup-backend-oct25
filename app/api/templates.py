@@ -28,6 +28,10 @@ class TemplateHistoryResponse(BaseModel):
     last_viewed_at: Optional[str] = None
     view_count: Optional[int] = 1
     is_favorite: Optional[bool] = False
+    video_views: Optional[int] = 0
+    likes: Optional[int] = 0
+    followers: Optional[int] = 0
+    audio: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -65,7 +69,11 @@ async def get_template_history(
                 h.viewed_at,
                 h.last_viewed_at,
                 h.view_count,
-                h.is_favorite
+                h.is_favorite,
+                t.views,
+                t.likes,
+                t.followers,
+                t.audio
             FROM templates t
             INNER JOIN user_template_history h ON t.id = h.template_id
             WHERE h.user_id = :user_id
@@ -90,6 +98,10 @@ async def get_template_history(
 
         rows = result.fetchall()
 
+        logger.info(f"Found {len(rows)} templates for user {current_user.id}")
+        if rows:
+            logger.info(f"First row data: {dict(zip(['id', 'title', 'hotel_name', 'duration', 'script', 'video_link', 'thumbnail_link', 'viewed_at', 'last_viewed_at', 'view_count', 'is_favorite', 'views', 'likes', 'followers', 'audio'], rows[0]))}")
+
         # Convert to response format
         templates = []
         for row in rows:
@@ -104,7 +116,11 @@ async def get_template_history(
                 viewed_at=row[7].isoformat() if row[7] else None,
                 last_viewed_at=row[8].isoformat() if row[8] else None,
                 view_count=row[9],
-                is_favorite=row[10]
+                is_favorite=row[10],
+                video_views=row[11] if row[11] is not None else 0,
+                likes=row[12] if row[12] is not None else 0,
+                followers=row[13] if row[13] is not None else 0,
+                audio=row[14]
             ))
 
         return templates
