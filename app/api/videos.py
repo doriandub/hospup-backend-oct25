@@ -554,13 +554,18 @@ async def list_user_videos(
     📋 Lister toutes les vidéos de l'utilisateur
     """
     try:
+        from ..models.template import Template
+        from sqlalchemy.orm import joinedload
+
+        # Join with templates table to get video_link and audio
         result = await db.execute(
-            select(Video)
+            select(Video, Template)
+            .outerjoin(Template, Video.template_id == Template.id)
             .where(Video.user_id == current_user.id)
             .order_by(Video.created_at.desc())
         )
-        videos = result.scalars().all()
-        
+        rows = result.all()
+
         return [
             {
                 "id": video.id,
@@ -585,11 +590,14 @@ async def list_user_videos(
                 # Include full project_data for draft projects (contains textOverlays, contentVideos, etc.)
                 "project_data": video.project_data if video.project_data else None,
                 # Backward compatibility: also expose contentVideos separately
-                "contentVideos": video.project_data.get("contentVideos", []) if video.project_data else []
+                "contentVideos": video.project_data.get("contentVideos", []) if video.project_data else [],
+                # Template data (video_link and audio from associated template)
+                "video_link": template.video_link if template else None,
+                "audio": template.audio if template else None,
             }
-            for video in videos
+            for video, template in rows
         ]
-        
+
     except Exception as e:
         logger.error(f"❌ Error listing videos for user {current_user.id}: {str(e)}")
         raise HTTPException(
