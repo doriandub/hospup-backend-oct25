@@ -301,10 +301,15 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             start_time = clip.get('start_time', 0)
             end_time = clip.get('end_time', 999)
 
+            # 🎯 TIMING CORRECTION: MediaConvert output has slight offset at start
+            # Shift all filter timings back slightly to align with actual video content
+            TIMING_OFFSET = 0.177  # Ultra fine-tuning: precise timing calibration
+            adjusted_start = max(0, start_time - TIMING_OFFSET)
+            adjusted_end = max(0, end_time - TIMING_OFFSET)
+
             # Build enable expression (same as drawtext)
-            # No timing offset - clips should match exactly as provided
-            enable_expr = f":enable='between(t,{start_time},{end_time})'"
-            logger.info(f"📊 Clip {idx+1}: {start_time}s-{end_time}s (no offset)")
+            enable_expr = f":enable='between(t,{adjusted_start},{adjusted_end})'"
+            logger.info(f"📊 Clip {idx+1}: {start_time}s-{end_time}s → adjusted {adjusted_start}s-{adjusted_end}s")
 
             # Extract ONLY 4 basic preset values (MediaConvert-compatible)
             # 🎨 CALIBRATED TO MATCH CSS FILTERS VISUALLY
@@ -388,7 +393,10 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
         logger.info(f"    - backgroundOpacity: {style.get('backgroundOpacity')}")
         logger.info(f"    - backgroundPadding: {style.get('backgroundPadding')}")
         logger.info(f"    - shadowColor: {style.get('shadowColor')}")
-        logger.info(f"    - shadowOpacity: {style.get('shadowOpacity')}")
+        logger.info(f"    - shadowOpacity: {style.get('shadowOpacity')} (type: {type(style.get('shadowOpacity')).__name__})")
+        logger.info(f"    - shadowBlur: {style.get('shadowBlur')}")
+        logger.info(f"    - shadowOffsetX: {style.get('shadowOffsetX')}")
+        logger.info(f"    - shadowOffsetY: {style.get('shadowOffsetY')}")
 
         # Convert color to FFmpeg hex format
         color_map = {
@@ -486,18 +494,48 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
 
         # 🎨 NEW: Parse textShadow - Support both granular and legacy formats
         shadow_color = style.get('shadowColor')
-        shadow_opacity = style.get('shadowOpacity')  # 0-100
+        shadow_opacity_raw = style.get('shadowOpacity')  # 0-100
         shadow_offset_x = style.get('shadowOffsetX')  # -20 to 20
         shadow_offset_y = style.get('shadowOffsetY')  # -20 to 20
         shadow_blur = style.get('shadowBlur')  # 0-20 (not used by FFmpeg, preview only)
         text_shadow = style.get('textShadow')
 
-        # Priority: Use granular settings if any are defined
-        if any([shadow_color, shadow_opacity is not None, shadow_offset_x is not None,
-                shadow_offset_y is not None, shadow_blur is not None]):
+        # 🔍 Convert shadow_opacity to number (could be string from JSON)
+        shadow_opacity = None
+        if shadow_opacity_raw is not None:
+            try:
+                shadow_opacity = float(shadow_opacity_raw)
+            except (ValueError, TypeError):
+                logger.error(f"  ❌ Invalid shadowOpacity value: {shadow_opacity_raw} (type: {type(shadow_opacity_raw).__name__})")
+                shadow_opacity = None
+
+        # Priority: Use granular settings - Apply shadow if shadowOpacity > 0
+        if shadow_opacity is not None and shadow_opacity > 0:
             # Build shadow from granular settings
-            s_color = shadow_color if shadow_color else '#000000'
-            s_opacity = (shadow_opacity / 100.0) if shadow_opacity is not None else 0.5
+            # Auto-detect shadow color based on text color for better visibility
+            if not shadow_color:
+                # If text is light (white/bright), use dark shadow
+                # If text is dark, use light shadow
+                text_color_hex = color if not color.lower() in ['white', 'yellow', 'cyan'] else 'FFFFFF'
+                # Remove # if present
+                if text_color_hex.startswith('#'):
+                    text_color_hex = text_color_hex[1:]
+                # Simple brightness check: if text has high RGB values, use black shadow, else white
+                try:
+                    r = int(text_color_hex[0:2], 16) if len(text_color_hex) >= 2 else 255
+                    g = int(text_color_hex[2:4], 16) if len(text_color_hex) >= 4 else 255
+                    b = int(text_color_hex[4:6], 16) if len(text_color_hex) >= 6 else 255
+                    brightness = (r + g + b) / 3
+                    # If text is bright (>128), use black shadow, otherwise white shadow
+                    s_color = '#000000' if brightness > 128 else '#FFFFFF'
+                    logger.info(f"  🎨 Auto-detected shadow color: {s_color} (text brightness: {brightness:.0f})")
+                except Exception as e:
+                    logger.error(f"  ❌ Shadow color detection failed: {e}")
+                    s_color = '#000000'  # Fallback to black
+            else:
+                s_color = shadow_color
+
+            s_opacity = shadow_opacity / 100.0
             # Fixed offset values (user no longer controls X/Y distance)
             s_x = 3  # Fixed shadow distance
             s_y = 3  # Fixed shadow distance
@@ -639,6 +677,10 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
     for idx, overlay in enumerate(text_overlays):
         content = overlay.get('content', '')
         style = overlay.get('style', {})
+
+        # 🔍 DEBUG: Log FULL style object to see shadow parameters
+        logger.info(f"📝 Text {idx+1}: '{content[:30]}...' FULL STYLE: {json.dumps(style, indent=2)}")
+
         font_size = style.get('font_size') or style.get('fontSize', 48)
         color = style.get('color', '#FFFFFF')
         position = overlay.get('position', {'x': 640, 'y': 360})
@@ -716,12 +758,91 @@ def build_ffmpeg_command(segments: List[Dict], text_overlays: List[Dict], output
                 padding_px = int(padding_match.group(1))
                 drawtext_params.append(f"boxborderw={padding_px}")
 
-        # 🎨 Parse textShadow
+        # 🎨 NEW: Parse textShadow - Support both granular and legacy formats
+        shadow_color = style.get('shadowColor')
+        shadow_opacity_raw = style.get('shadowOpacity')  # 0-100
+        shadow_offset_x = style.get('shadowOffsetX')  # -20 to 20
+        shadow_offset_y = style.get('shadowOffsetY')  # -20 to 20
+        shadow_blur = style.get('shadowBlur')  # 0-20 (not used by FFmpeg, preview only)
         text_shadow = style.get('textShadow')
+
+        # 🔍 Convert shadow_opacity to number (could be string from JSON)
+        shadow_opacity = None
+        if shadow_opacity_raw is not None:
+            try:
+                shadow_opacity = float(shadow_opacity_raw)
+            except (ValueError, TypeError):
+                logger.error(f"  ❌ Invalid shadowOpacity value: {shadow_opacity_raw} (type: {type(shadow_opacity_raw).__name__})")
+                shadow_opacity = None
+
+        # 🔍 DEBUG: Log shadow extraction
+        logger.info(f"  🌑 Shadow params extracted: color={shadow_color}, opacity={shadow_opacity} (raw={shadow_opacity_raw}, type={type(shadow_opacity_raw).__name__}), offsetX={shadow_offset_x}, offsetY={shadow_offset_y}, blur={shadow_blur}, textShadow={text_shadow}")
+
+        # Priority: Use granular settings - Apply shadow if shadowOpacity > 0
+        if shadow_opacity is not None and shadow_opacity > 0:
+            logger.info(f"  ✅ Shadow condition MET! Applying shadow with opacity={shadow_opacity}")
+            # Build shadow from granular settings
+            # Auto-detect shadow color based on text color for better visibility
+            if not shadow_color:
+                # If text is light (white/bright), use dark shadow
+                # If text is dark, use light shadow
+                text_color_hex = color if not color.lower() in ['white', 'yellow', 'cyan'] else 'FFFFFF'
+                # Remove # if present
+                if text_color_hex.startswith('#'):
+                    text_color_hex = text_color_hex[1:]
+                # Simple brightness check: if text has high RGB values, use black shadow, else white
+                try:
+                    r = int(text_color_hex[0:2], 16) if len(text_color_hex) >= 2 else 255
+                    g = int(text_color_hex[2:4], 16) if len(text_color_hex) >= 4 else 255
+                    b = int(text_color_hex[4:6], 16) if len(text_color_hex) >= 6 else 255
+                    brightness = (r + g + b) / 3
+                    # If text is bright (>128), use black shadow, otherwise white shadow
+                    s_color = '#000000' if brightness > 128 else '#FFFFFF'
+                    logger.info(f"  🎨 Auto-detected shadow color: {s_color} (text brightness: {brightness:.0f})")
+                except Exception as e:
+                    logger.error(f"  ❌ Shadow color detection failed: {e}")
+                    s_color = '#000000'  # Fallback to black
+            else:
+                s_color = shadow_color
+
+            s_opacity = shadow_opacity / 100.0
+            # Fixed offset values (user no longer controls X/Y distance)
+            s_x = 3  # Fixed shadow distance
+            s_y = 3  # Fixed shadow distance
+            # Note: FFmpeg drawtext doesn't support blur, only x/y offset
+
+            # Convert hex color to name or use directly
+            if s_color.startswith('#'):
+                # FFmpeg shadowcolor accepts color names or hex without #
+                s_color_ffmpeg = s_color[1:]  # Remove #
+            else:
+                s_color_ffmpeg = s_color
+
+            drawtext_params.append(f"shadowcolor=0x{s_color_ffmpeg}@{s_opacity:.2f}")
+            drawtext_params.append(f"shadowx={int(s_x)}")
+            drawtext_params.append(f"shadowy={int(s_y)}")
+            logger.info(f"  🌑 Shadow (granular): color={s_color} opacity={s_opacity:.2f} x={s_x} y={s_y}")
+        else:
+            logger.info(f"  ❌ Shadow condition NOT MET! shadow_opacity={shadow_opacity} (is None: {shadow_opacity is None}, is > 0: {shadow_opacity > 0 if shadow_opacity is not None else 'N/A'})")
+
         if text_shadow and text_shadow != 'none':
-            drawtext_params.append("shadowcolor=black@0.5")
-            drawtext_params.append("shadowx=2")
-            drawtext_params.append("shadowy=2")
+            # Parse legacy CSS shadow format "2px 2px 4px rgba(0,0,0,0.5)"
+            import re
+            shadow_match = re.match(r'([+-]?\d+)px\s+([+-]?\d+)px(?:\s+\d+px)?\s+rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)', text_shadow)
+            if shadow_match:
+                s_x, s_y, r, g, b, a = shadow_match.groups()
+                s_opacity = float(a) if a else 0.5
+                s_color_hex = f"{int(r):02x}{int(g):02x}{int(b):02x}"
+                drawtext_params.append(f"shadowcolor=0x{s_color_hex}@{s_opacity:.2f}")
+                drawtext_params.append(f"shadowx={s_x}")
+                drawtext_params.append(f"shadowy={s_y}")
+                logger.info(f"  🌑 Shadow (parsed): {text_shadow} → x={s_x} y={s_y} color=0x{s_color_hex}@{s_opacity:.2f}")
+            else:
+                # Fallback to simple defaults
+                drawtext_params.append("shadowcolor=black@0.5")
+                drawtext_params.append("shadowx=2")
+                drawtext_params.append("shadowy=2")
+                logger.info(f"  🌑 Shadow (default): {text_shadow}")
 
         # 🎨 Parse webkitTextStroke (text border)
         text_stroke = style.get('webkitTextStroke') or style.get('textStroke')
