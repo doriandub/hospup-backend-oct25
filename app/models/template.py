@@ -40,19 +40,6 @@ class Template(Base):
     # Content and script
     script = Column(Text, nullable=True)  # Store script as JSON string (from Airtable)
     slots = Column(Integer, nullable=True, default=0)  # Number of clips/slots in template
-
-    # Optional metadata (for backward compatibility)
-    title = Column(Text, nullable=True)
-    description = Column(Text, nullable=True)
-    thumbnail_link = Column(Text, nullable=True)  # Moved from above
-    category = Column(Text, nullable=True)
-    tags = Column(ARRAY(Text), nullable=True)
-    is_active = Column(Boolean, nullable=True)
-    popularity_score = Column(Numeric(4, 2), nullable=True)
-    viral_potential = Column(Text, nullable=True)
-    usage_count = Column(Integer, nullable=True)
-    last_used_at = Column(DateTime(timezone=True), nullable=True)
-    time_posted = Column(Text, nullable=True)  # Moved from above
     
     def to_dict(self):
         """Convert template to dictionary for API responses."""
@@ -83,18 +70,18 @@ class Template(Base):
             'duration': float(self.duration) if self.duration else None,
             'script': script_data,  # Parsed JSON or None
             'slots': self.slots or 0,
-            # Optional fields (may be None)
-            'thumbnail_link': self.thumbnail_link,
-            'title': self.title or self.hotel_name,  # Fallback to hotel_name
-            'description': self.description,
-            'category': self.category or 'hotel',
-            'tags': self.tags or [],
-            'is_active': self.is_active if self.is_active is not None else True,
-            'popularity_score': float(self.popularity_score) if self.popularity_score else 5.0,
-            'viral_potential': self.viral_potential or 'medium',
-            'usage_count': self.usage_count or 0,
-            'time_posted': self.time_posted,
-            'last_used_at': self.last_used_at.isoformat() if self.last_used_at else None,
+            # Computed/fallback fields for frontend compatibility
+            'title': self.hotel_name,  # Use hotel_name as title
+            'description': None,
+            'thumbnail_link': None,
+            'category': 'hotel',
+            'tags': [],
+            'is_active': True,
+            'popularity_score': 5.0,
+            'viral_potential': 'medium',
+            'usage_count': 0,
+            'time_posted': None,
+            'last_used_at': None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
