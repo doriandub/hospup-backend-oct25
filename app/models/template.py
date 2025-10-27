@@ -25,40 +25,47 @@ class Template(Base):
     # Social media links and data
     video_link = Column(Text, nullable=True)
     account_link = Column(Text, nullable=True)
-    thumbnail_link = Column(Text, nullable=True)  # Instagram thumbnail URL
     audio = Column(Text, nullable=True)  # audio file URL or identifier
-    
+
     # Performance metrics
     followers = Column(BigInteger, default=0)
     views = Column(BigInteger, default=0)
     likes = Column(BigInteger, default=0)
     comments = Column(BigInteger, default=0)
     ratio = Column(Numeric(10, 2), nullable=True)  # engagement ratio
-    
+
     # Video details
     duration = Column(Numeric(8, 2), nullable=True)  # duration in seconds
-    time_posted = Column(DateTime(timezone=True), nullable=True)
     
     # Content and script
-    script = Column(JSONB, nullable=True)  # Store script as JSON
+    script = Column(Text, nullable=True)  # Store script as JSON string (from Airtable)
+    slots = Column(Integer, nullable=True, default=0)  # Number of clips/slots in template
+
+    # Optional metadata (for backward compatibility)
     title = Column(Text, nullable=True)
     description = Column(Text, nullable=True)
-    
-    # Template metadata
-    category = Column(Text, default='hotel')
-    tags = Column(ARRAY(Text), default=[])
-    is_active = Column(Boolean, default=True)
-    popularity_score = Column(Numeric(4, 2), default=5.0)
-    
-    # Viral potential classification
-    viral_potential = Column(Text, default='medium')  # low, medium, high
-    
-    # Template usage tracking
-    usage_count = Column(Integer, default=0)
+    thumbnail_link = Column(Text, nullable=True)  # Moved from above
+    category = Column(Text, nullable=True)
+    tags = Column(ARRAY(Text), nullable=True)
+    is_active = Column(Boolean, nullable=True)
+    popularity_score = Column(Numeric(4, 2), nullable=True)
+    viral_potential = Column(Text, nullable=True)
+    usage_count = Column(Integer, nullable=True)
     last_used_at = Column(DateTime(timezone=True), nullable=True)
+    time_posted = Column(Text, nullable=True)  # Moved from above
     
     def to_dict(self):
         """Convert template to dictionary for API responses."""
+        import json
+
+        # Parse script if it's a string
+        script_data = self.script
+        if isinstance(self.script, str):
+            try:
+                script_data = json.loads(self.script)
+            except:
+                script_data = None
+
         return {
             'id': str(self.id),
             'hotel_name': self.hotel_name,
@@ -67,24 +74,26 @@ class Template(Base):
             'country': self.country,
             'video_link': self.video_link,
             'account_link': self.account_link,
-            'thumbnail_link': self.thumbnail_link,
             'audio': self.audio,
-            'followers': self.followers,
-            'views': self.views,
-            'likes': self.likes,
-            'comments': self.comments,
+            'followers': int(self.followers) if self.followers else 0,
+            'views': int(self.views) if self.views else 0,
+            'likes': int(self.likes) if self.likes else 0,
+            'comments': int(self.comments) if self.comments else 0,
             'ratio': float(self.ratio) if self.ratio else None,
             'duration': float(self.duration) if self.duration else None,
-            'time_posted': self.time_posted.isoformat() if self.time_posted else None,
-            'script': self.script,
-            'title': self.title,
+            'script': script_data,  # Parsed JSON or None
+            'slots': self.slots or 0,
+            # Optional fields (may be None)
+            'thumbnail_link': self.thumbnail_link,
+            'title': self.title or self.hotel_name,  # Fallback to hotel_name
             'description': self.description,
-            'category': self.category,
+            'category': self.category or 'hotel',
             'tags': self.tags or [],
-            'is_active': self.is_active,
-            'popularity_score': float(self.popularity_score) if self.popularity_score else None,
-            'viral_potential': self.viral_potential,
-            'usage_count': self.usage_count,
+            'is_active': self.is_active if self.is_active is not None else True,
+            'popularity_score': float(self.popularity_score) if self.popularity_score else 5.0,
+            'viral_potential': self.viral_potential or 'medium',
+            'usage_count': self.usage_count or 0,
+            'time_posted': self.time_posted,
             'last_used_at': self.last_used_at.isoformat() if self.last_used_at else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
