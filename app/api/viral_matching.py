@@ -160,29 +160,16 @@ async def get_viral_template(
         if script_data and 'clips' in script_data:
             logger.info(f"📋 Template {template.hotel_name} has {len(script_data['clips'])} clips")
 
-        # Return simple dict without Pydantic model validation
-        return {
-            "id": str(template.id),
-            "title": template.title or f"{template.hotel_name or 'Hotel'} - {template.country or 'Location'}",
-            "description": template.description or f"Viral video from {template.hotel_name or 'Hotel'} in {template.country or 'Location'}",
-            "category": template.category or "hotel",
-            "popularity_score": float(template.popularity_score or 5.0),
-            "total_duration_min": max(15.0, float(template.duration or 30.0) - 5),
-            "total_duration_max": min(60.0, float(template.duration or 30.0) + 10),
-            "tags": template.tags or [],
-            "views": template.views,
-            "likes": template.likes,
-            "comments": template.comments,
-            "followers": template.followers,
-            "username": template.username,
-            "video_link": template.video_link,
-            "thumbnail_link": template.thumbnail_link,
-            "audio": template.audio,
-            "script": script_data,
-            "duration": float(template.duration) if template.duration else None,
-            "country": template.country,
-            "hotel_name": template.hotel_name
-        }
+        # Use to_dict() which handles all fields correctly
+        template_dict = template.to_dict()
+
+        # Override script with parsed version and add duration range fields
+        template_dict["script"] = script_data
+        duration = float(template.duration) if template.duration else 30.0
+        template_dict["total_duration_min"] = max(15.0, duration - 5)
+        template_dict["total_duration_max"] = min(60.0, duration + 10)
+
+        return template_dict
 
     except HTTPException:
         raise
