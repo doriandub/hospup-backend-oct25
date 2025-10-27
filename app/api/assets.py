@@ -339,21 +339,32 @@ async def _restart_asset_processing_logic(
 
         logger.info(f"🔄 Processing restarted for asset: {asset_id}, S3 key: {s3_key}")
 
-        # Trigger Celery task for asset processing (same as initial upload)
+        # Trigger video processing (sync mode - Celery worker not running on Railway)
         from tasks.video_processing_tasks import process_uploaded_video
+        import asyncio
 
-        # Delay the task execution (async)
-        task = process_uploaded_video.delay(asset_id, s3_key)
+        try:
+            # Run the sync function in a thread pool to not block the event loop
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(None, process_uploaded_video, asset_id, s3_key)
 
-        logger.info(f"✅ Processing task queued: {task.id}")
+            logger.info(f"✅ Processing completed: {result}")
 
-        return {
-            "message": "Asset processing restarted",
-            "asset_id": asset_id,
-            "status": asset.status,
-            "task_id": task.id,
-            "s3_key": s3_key
-        }
+            return {
+                "message": "Asset processing completed",
+                "asset_id": asset_id,
+                "result": result,
+                "s3_key": s3_key
+            }
+        except Exception as processing_error:
+            logger.error(f"❌ Processing failed: {processing_error}")
+            # Don't raise - just return error info
+            return {
+                "message": "Asset processing failed",
+                "asset_id": asset_id,
+                "error": str(processing_error),
+                "s3_key": s3_key
+            }
 
     except Exception as e:
         logger.error(f"❌ Processing restart failed: {e}")
