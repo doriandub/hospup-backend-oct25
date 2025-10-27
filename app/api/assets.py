@@ -306,26 +306,53 @@ async def _restart_asset_processing_logic(
         )
 
     # Only restart if asset is in processing or uploaded state
-    if asset.status not in ["uploaded", "processing"]:
+    if asset.status not in ["uploaded", "processing", "ready"]:
         raise HTTPException(
             status_code=400,
             detail=f"Cannot restart processing for asset with status: {asset.status}"
         )
 
     try:
+        # Extract S3 key from file_url
+        s3_key = None
+        if asset.file_url:
+            # Handle different URL formats
+            if "amazonaws.com/" in asset.file_url:
+                # Format: https://s3.region.amazonaws.com/bucket/key or https://bucket.s3.region.amazonaws.com/key
+                s3_key = asset.file_url.split("amazonaws.com/")[-1].split("?")[0]
+                # Remove bucket name if present at start
+                if s3_key.startswith(f"{settings.S3_BUCKET_NAME}/"):
+                    s3_key = s3_key[len(settings.S3_BUCKET_NAME)+1:]
+            elif settings.STORAGE_PUBLIC_BASE in asset.file_url:
+                # Format: https://storage_public_base/key
+                s3_key = asset.file_url.replace(f"{settings.STORAGE_PUBLIC_BASE}/", "")
+
+        if not s3_key:
+            raise HTTPException(
+                status_code=400,
+                detail="Could not extract S3 key from asset file_url"
+            )
+
         # Reset status to uploaded to trigger reprocessing
         asset.status = "uploaded"
         await db.commit()
 
-        logger.info(f"🔄 Processing restarted for asset: {asset_id}")
+        logger.info(f"🔄 Processing restarted for asset: {asset_id}, S3 key: {s3_key}")
 
-        # TODO: Trigger asset processing pipeline here
-        # This could be a Celery task, webhook, or queue message
+        # Trigger Celery task for asset processing (same as initial upload)
+        from tasks.video_processing_tasks import process_uploaded_video
+
+        # Delay the task execution (async)
+        task = process_uploaded_video.delay(asset_id, s3_key)
+
+        logger.info(f"✅ Processing task queued: {task.id}")
 
         return {
             "message": "Asset processing restarted",
             "asset_id": asset_id,
-            "status": asset.status
+            "status": asset.status,
+            "task_id": task.id,
+            "s3_key": s3_key
         }
 
     except Exception as e:
