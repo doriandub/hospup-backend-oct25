@@ -94,29 +94,13 @@ async def list_viral_templates(
                     except json.JSONDecodeError:
                         script_data = {}
 
-                # Return simple dict without Pydantic model validation
-                template_dict = {
-                    "id": str(template.id),
-                    "title": template.title or f"{template.hotel_name or 'Hotel'} - {template.country or 'Location'}",
-                    "description": template.description or f"Viral video from {template.hotel_name or 'Hotel'} in {template.country or 'Location'}",
-                    "category": template.category or "hotel",
-                    "popularity_score": float(template.popularity_score or 5.0),
-                    "total_duration_min": max(15.0, float(template.duration or 30.0) - 5),
-                    "total_duration_max": min(60.0, float(template.duration or 30.0) + 10),
-                    "tags": template.tags or [],
-                    "views": template.views,
-                    "likes": template.likes,
-                    "comments": template.comments,
-                    "followers": template.followers,
-                    "username": template.username,
-                    "video_link": template.video_link,
-                    "thumbnail_link": template.thumbnail_link,
-                    "audio": template.audio,
-                    "script": script_data,
-                    "duration": float(template.duration) if template.duration else None,
-                    "country": template.country,
-                    "hotel_name": template.hotel_name
-                }
+                # Use to_dict() which handles all fields correctly
+                template_dict = template.to_dict()
+
+                # Add computed duration range fields
+                duration = float(template.duration) if template.duration else 30.0
+                template_dict["total_duration_min"] = max(15.0, duration - 5)
+                template_dict["total_duration_max"] = min(60.0, duration + 10)
                 result_templates.append(template_dict)
                 logger.info(f"✅ Processed template: {template.hotel_name} ({template.country})")
             except Exception as template_error:
