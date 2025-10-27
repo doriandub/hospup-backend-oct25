@@ -64,8 +64,7 @@ async def smart_match_videos_to_slots(
 
         # Get template details
         result = await db.execute(select(Template).filter(
-            Template.id == request.template_id,
-            Template.is_active == True
+            Template.id == request.template_id
         ))
         template = result.scalar_one_or_none()
 
@@ -156,8 +155,7 @@ async def smart_match_videos_ai(
 
         # Get template details
         result = await db.execute(select(Template).filter(
-            Template.id == request.template_id,
-            Template.is_active == True
+            Template.id == request.template_id
         ))
         template = result.scalar_one_or_none()
 
