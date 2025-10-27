@@ -32,6 +32,7 @@ class TemplateHistoryResponse(BaseModel):
     likes: Optional[int] = 0
     followers: Optional[int] = 0
     audio: Optional[str] = None
+    slots: Optional[int] = 0
 
     class Config:
         from_attributes = True
@@ -60,12 +61,10 @@ async def get_template_history(
         query = """
             SELECT
                 t.id,
-                t.title,
                 t.hotel_name,
                 t.duration,
                 t.script,
                 t.video_link,
-                t.thumbnail_link,
                 h.viewed_at,
                 h.last_viewed_at,
                 h.view_count,
@@ -73,7 +72,9 @@ async def get_template_history(
                 t.views,
                 t.likes,
                 t.followers,
-                t.audio
+                t.audio,
+                t.slots,
+                t.country
             FROM templates t
             INNER JOIN user_template_history h ON t.id = h.template_id
             WHERE h.user_id = :user_id
@@ -100,27 +101,31 @@ async def get_template_history(
 
         logger.info(f"Found {len(rows)} templates for user {current_user.id}")
         if rows:
-            logger.info(f"First row data: {dict(zip(['id', 'title', 'hotel_name', 'duration', 'script', 'video_link', 'thumbnail_link', 'viewed_at', 'last_viewed_at', 'view_count', 'is_favorite', 'views', 'likes', 'followers', 'audio'], rows[0]))}")
+            logger.info(f"First row data: {dict(zip(['id', 'hotel_name', 'duration', 'script', 'video_link', 'viewed_at', 'last_viewed_at', 'view_count', 'is_favorite', 'views', 'likes', 'followers', 'audio', 'slots', 'country'], rows[0]))}")
 
         # Convert to response format
         templates = []
         for row in rows:
+            hotel_name = row[1] or "Unknown Hotel"
+            country = row[14] if len(row) > 14 else None
+
             templates.append(TemplateHistoryResponse(
                 id=str(row[0]),
-                title=row[1],
-                hotel_name=row[2],
-                duration=row[3],
-                script=row[4],
-                video_link=row[5],
-                thumbnail_link=row[6],
-                viewed_at=row[7].isoformat() if row[7] else None,
-                last_viewed_at=row[8].isoformat() if row[8] else None,
-                view_count=row[9],
-                is_favorite=row[10],
-                video_views=row[11] if row[11] is not None else 0,
-                likes=row[12] if row[12] is not None else 0,
-                followers=row[13] if row[13] is not None else 0,
-                audio=row[14]
+                title=f"{hotel_name} - {country}" if country else hotel_name,  # Use hotel_name as title
+                hotel_name=hotel_name,
+                duration=row[2] if row[2] is not None else 30.0,
+                script=row[3] or "{}",
+                video_link=row[4],
+                thumbnail_link=None,  # No longer in database
+                viewed_at=row[5].isoformat() if row[5] else None,
+                last_viewed_at=row[6].isoformat() if row[6] else None,
+                view_count=row[7],
+                is_favorite=row[8],
+                video_views=row[9] if row[9] is not None else 0,
+                likes=row[10] if row[10] is not None else 0,
+                followers=row[11] if row[11] is not None else 0,
+                audio=row[12],
+                slots=row[13] if len(row) > 13 and row[13] is not None else 0
             ))
 
         return templates
