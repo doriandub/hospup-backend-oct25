@@ -289,47 +289,45 @@ async def get_asset(
     )
 
 
-@router.post("/{asset_id}/restart-processing")
-async def restart_asset_processing(
+async def _restart_asset_processing_logic(
     asset_id: str,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: User,
+    db: AsyncSession
 ):
-    """Restart processing for stuck asset"""
-    
+    """Shared logic for restarting asset processing"""
     stmt = select(Asset).where(and_(Asset.id == asset_id, Asset.user_id == current_user.id))
     result = await db.execute(stmt)
     asset = result.scalar_one_or_none()
-    
+
     if not asset:
         raise HTTPException(
             status_code=404,
             detail="Asset not found or not owned by user"
         )
-    
+
     # Only restart if asset is in processing or uploaded state
     if asset.status not in ["uploaded", "processing"]:
         raise HTTPException(
             status_code=400,
             detail=f"Cannot restart processing for asset with status: {asset.status}"
         )
-    
+
     try:
         # Reset status to uploaded to trigger reprocessing
         asset.status = "uploaded"
         await db.commit()
-        
+
         logger.info(f"🔄 Processing restarted for asset: {asset_id}")
-        
+
         # TODO: Trigger asset processing pipeline here
         # This could be a Celery task, webhook, or queue message
-        
+
         return {
             "message": "Asset processing restarted",
             "asset_id": asset_id,
             "status": asset.status
         }
-        
+
     except Exception as e:
         logger.error(f"❌ Processing restart failed: {e}")
         await db.rollback()
@@ -337,6 +335,24 @@ async def restart_asset_processing(
             status_code=500,
             detail=f"Failed to restart processing: {str(e)}"
         )
+
+@router.post("/{asset_id}/restart-processing")
+async def restart_asset_processing(
+    asset_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Restart processing for stuck asset"""
+    return await _restart_asset_processing_logic(asset_id, current_user, db)
+
+@router.post("/{asset_id}/retry-analysis")
+async def retry_asset_analysis(
+    asset_id: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Retry AI analysis for uploaded asset (alias for restart-processing)"""
+    return await _restart_asset_processing_logic(asset_id, current_user, db)
 
 
 @router.put("/{asset_id}", response_model=AssetResponse)
