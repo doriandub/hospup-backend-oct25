@@ -50,8 +50,6 @@ class SmartMatchRequest(BaseModel):
 
 # Supabase-powered viral templates system
 # Templates are now stored in Supabase database and accessed via Template model
-
-
 @router.get("/viral-templates")
 async def list_viral_templates(
     category: Optional[str] = Query(None, description="Filter by category"),
@@ -67,16 +65,16 @@ async def list_viral_templates(
         from sqlalchemy import select
 
         # Get all templates from Supabase, ordered by views descending - ASYNC QUERY
-        stmt = select(Template).where(Template.is_active == True).order_by(Template.views.desc())
+        stmt = select(Template).order_by(Template.views.desc())
         result = await db.execute(stmt)
         templates_db = result.scalars().all()
 
-        logger.info(f"📊 Found {len(templates_db)} active templates in Supabase")
+        logger.info(f"📊 Found {len(templates_db)} templates in Supabase")
 
         # Debug: log the first template raw data
         if templates_db:
             first_template = templates_db[0]
-            logger.info(f"🔍 First template debug: id={first_template.id}, hotel_name='{first_template.hotel_name}', views={first_template.views}, is_active={first_template.is_active}")
+            logger.info(f"🔍 First template debug: id={first_template.id}, hotel_name='{first_template.hotel_name}', views={first_template.views}")
 
         result_templates = []
         for template in templates_db:
@@ -152,7 +150,6 @@ async def get_viral_template(
         # Query template from Supabase database - ASYNC QUERY
         stmt = select(Template).where(
             Template.id == template_id,
-            Template.is_active == True
         )
         result = await db.execute(stmt)
         template = result.scalars().first()
@@ -234,7 +231,6 @@ async def smart_match_template(
             raise HTTPException(status_code=404, detail="Property not found")
 
         # Get available templates from Supabase database - ASYNC QUERY
-        stmt = select(Template).where(Template.is_active == True)
         if request.exclude_template_id:
             stmt = stmt.where(Template.id != request.exclude_template_id)
 
@@ -293,12 +289,10 @@ async def get_viral_matching_stats(
         from sqlalchemy import select, func
 
         # Get total templates count - ASYNC
-        stmt = select(func.count()).select_from(Template).where(Template.is_active == True)
         result = await db.execute(stmt)
         total_templates = result.scalar()
 
         # Get templates by category - ASYNC
-        stmt = select(Template.category).where(Template.is_active == True)
         result = await db.execute(stmt)
         categories = result.scalars().all()
         category_counts = {}
@@ -306,7 +300,6 @@ async def get_viral_matching_stats(
             category_counts[category or 'unknown'] = category_counts.get(category or 'unknown', 0) + 1
 
         # Get total views across all templates - ASYNC
-        stmt = select(Template).where(Template.is_active == True)
         result = await db.execute(stmt)
         templates = result.scalars().all()
         total_views = sum(t.views or 0 for t in templates)
@@ -351,7 +344,6 @@ async def seed_templates(
         import uuid
 
         # Check if templates already exist - ASYNC
-        stmt = select(func.count()).select_from(Template).where(Template.is_active == True)
         result = await db.execute(stmt)
         existing_count = result.scalar()
 
@@ -445,8 +437,7 @@ async def seed_templates(
                 hotel_name=template_data["hotel_name"],
                 country=template_data["country"],
                 video_link=template_data["video_link"],
-                script=template_data["script"],
-                is_active=True
+                script=template_data["script"]
             )
             db.add(new_template)
 
