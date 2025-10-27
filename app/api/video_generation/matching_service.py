@@ -28,7 +28,16 @@ def parse_template_slots(script: Any) -> List[Dict[str, Any]]:
         else:
             script_data = script
 
-        clips = script_data.get('clips', [])
+        # Handle two formats:
+        # 1. Old format: {"clips": [{"order":1,...}]}
+        # 2. New format: [{"order":1,...}]
+        if isinstance(script_data, dict):
+            clips = script_data.get('clips', [])
+        elif isinstance(script_data, list):
+            clips = script_data
+        else:
+            logger.warning(f"Unexpected script format: {type(script_data)}")
+            return []
 
         slots = []
         for i, clip in enumerate(clips):
