@@ -142,6 +142,17 @@ async def prepare_aws_lambda_payload(
         logger.info(f"  ✓ text_overlays count: {len(payload['text_overlays'])}")
         logger.info(f"  ✓ webhook_url: {payload['webhook_url']}")
 
+        # 🐛 DEBUG: Log text overlay styles being sent to worker
+        for i, text in enumerate(payload['text_overlays']):
+            style = text.get('style', {})
+            logger.info(f"  📝 Text overlay {i + 1} style:")
+            logger.info(f"    - shadowColor: {style.get('shadowColor')}")
+            logger.info(f"    - shadowOpacity: {style.get('shadowOpacity')} (type: {type(style.get('shadowOpacity')).__name__})")
+            logger.info(f"    - shadowBlur: {style.get('shadowBlur')}")
+            logger.info(f"    - shadowOffsetX: {style.get('shadowOffsetX')}")
+            logger.info(f"    - shadowOffsetY: {style.get('shadowOffsetY')}")
+            logger.info(f"    - Full style: {style}")
+
         logger.info(f"🚀 Lambda routing: {'FFmpeg' if force_ffmpeg else 'MediaConvert'} with {len(payload['text_overlays'])} text overlays")
 
         # Additional validation

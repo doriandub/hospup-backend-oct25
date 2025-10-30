@@ -288,11 +288,14 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
     video_label = '0:v'  # Input video stream
 
     # 1. Apply image adjustments per clip (if presets provided)
-    # Use :enable on EACH filter (same system as drawtext!) - all filters support timeline
+    # 🎯 CRITICAL: Combine ALL filters into ONE chain with :enable (not sequential chains!)
+    # This matches the working approach from commit 80aad54
     if clips_with_presets and len(clips_with_presets) > 0:
         logger.info(f"🎨 Applying per-clip image adjustments for {len(clips_with_presets)} clips")
 
-        # Apply each clip's presets as separate filters with :enable, chained like text overlays
+        # Collect ALL preset filters to combine into a single chain
+        all_preset_filters = []
+
         for idx, clip in enumerate(clips_with_presets):
             presets = clip.get('presets')
             if not presets:
@@ -313,9 +316,6 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
 
             # Extract ONLY 4 basic preset values (MediaConvert-compatible)
             # 🎨 CALIBRATED TO MATCH CSS FILTERS VISUALLY
-            # Research: CSS filters work in RGB (multiply), FFmpeg eq works in YUV (brightness=add, contrast/sat=multiply)
-            # These formulas are calibrated to produce similar visual results
-
             brightness_input = presets.get('brightness', 0)  # -100 to +100
             contrast_input = presets.get('contrast', 0)      # -100 to +100
             saturation_input = presets.get('saturation', 0)  # -100 to +100
@@ -326,50 +326,44 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
             css_contrast = 1 + (contrast_input * 0.01)
             css_saturation = 1 + (saturation_input * 0.01)
 
-            # FFmpeg conversion to match CSS visually:
-            # ⚠️ Use lutyuv for brightness (linear multiply like CSS), not eq=brightness (additive) or eq=gamma (power curve)!
-            # CSS brightness(2.0) = output = input × 2.0 (linear multiplication)
-            # FFmpeg eq=gamma uses: output = input^(1/gamma) (power curve, not linear!)
-            # FFmpeg lutyuv uses: y=clip(val*multiplier) (linear multiplication, matches CSS!)
+            # Build individual filters with :enable (but don't chain them yet!)
+            clip_filters = []
 
             # 1. Brightness filter using colorchannelmixer (RGB multiplication, fast & matches CSS)
             if css_brightness != 1.0:
-                next_label = f'bright{idx}'
-                # colorchannelmixer: multiply each RGB channel (rr/gg/bb coefficients)
                 mult = css_brightness
-                bright_filter = f"[{video_label}]colorchannelmixer=rr={mult:.3f}:gg={mult:.3f}:bb={mult:.3f}{enable_expr}[{next_label}]"
-                filters.append(bright_filter)
-                video_label = next_label
-                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) BRIGHTNESS (colorchannelmixer): {css_brightness:.3f}x")
+                bright_filter = f"colorchannelmixer=rr={mult:.3f}:gg={mult:.3f}:bb={mult:.3f}{enable_expr}"
+                clip_filters.append(bright_filter)
+                logger.info(f"  ✅ Brightness: {css_brightness:.3f}x")
 
             # 2. Contrast using lutrgb (RGB space, matches CSS formula)
             if css_contrast != 1.0:
-                next_label = f'contrast{idx}'
-                # CSS contrast formula: output = (input - 128) * multiplier + 128
-                # Apply to each RGB channel separately, clamp to 0-255
-                contrast_filter = f"[{video_label}]lutrgb=r='clip((val-128)*{css_contrast:.3f}+128,0,255)':g='clip((val-128)*{css_contrast:.3f}+128,0,255)':b='clip((val-128)*{css_contrast:.3f}+128,0,255)'{enable_expr}[{next_label}]"
-                filters.append(contrast_filter)
-                video_label = next_label
-                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) CONTRAST (lutrgb RGB): {css_contrast:.3f}x")
+                contrast_filter = f"lutrgb=r='clip((val-128)*{css_contrast:.3f}+128,0,255)':g='clip((val-128)*{css_contrast:.3f}+128,0,255)':b='clip((val-128)*{css_contrast:.3f}+128,0,255)'{enable_expr}"
+                clip_filters.append(contrast_filter)
+                logger.info(f"  ✅ Contrast: {css_contrast:.3f}x")
 
             # 3. Saturation using eq filter
             if css_saturation != 1.0:
-                next_label = f'sat{idx}'
-                sat_filter = f"[{video_label}]eq=saturation={css_saturation:.3f}{enable_expr}[{next_label}]"
-                filters.append(sat_filter)
-                video_label = next_label
-                logger.info(f"✅ Clip {idx+1} ({start_time}s-{end_time}s) SATURATION (eq): {css_saturation:.3f}x")
+                sat_filter = f"eq=saturation={css_saturation:.3f}{enable_expr}"
+                clip_filters.append(sat_filter)
+                logger.info(f"  ✅ Saturation: {css_saturation:.3f}x")
 
-            # 2. Hue filter
+            # 4. Hue filter
             if hue != 0:
-                next_label = f'hue{idx}'
-                hue_filter = f"[{video_label}]hue=h={hue}{enable_expr}[{next_label}]"
-                filters.append(hue_filter)
-                video_label = next_label
-                logger.info(f"✅ Clip {idx+1} HUE: h={hue}")
+                hue_filter = f"hue=h={hue}{enable_expr}"
+                clip_filters.append(hue_filter)
+                logger.info(f"  ✅ Hue: {hue}°")
 
-        if video_label != '0:v':
-            logger.info(f"🎨 Applied presets using :enable (same as text overlays!)")
+            # Add all filters for this clip to the global list
+            all_preset_filters.extend(clip_filters)
+
+        # 🎯 CRITICAL FIX: Combine ALL filters into ONE chain applied to [0:v]
+        # This prevents filters from stacking - each activates only during its time via :enable
+        if all_preset_filters:
+            combined_filter = ','.join(all_preset_filters)
+            filters.append(f"[{video_label}]{combined_filter}[adjusted]")
+            video_label = 'adjusted'
+            logger.info(f"🎨 Combined {len(all_preset_filters)} filters into single chain (prevents stacking)")
         else:
             logger.warning(f"⚠️ No preset filters generated!")
 
@@ -476,6 +470,7 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
 
         # 🎨 NEW: Parse padding (boxborderw) - Support granular padding
         bg_padding = style.get('backgroundPadding')  # Direct pixel value
+        bg_blur = style.get('backgroundBlur')  # Blur in pixels (0-20)
         padding = style.get('padding')  # Legacy format "4px"
 
         if bg_color and bg_color != 'transparent':  # Only add padding if box is enabled
@@ -491,6 +486,10 @@ def add_text_overlays_to_video(base_video_url: str, text_overlays: List[Dict], o
                     padding_px = int(padding_match.group(1))
                     drawtext_params.append(f"boxborderw={padding_px}")
                     logger.info(f"  📐 Padding (legacy): {padding} → boxborderw={padding_px}")
+
+            # Log backgroundBlur (for preview only - FFmpeg drawtext doesn't support box blur)
+            if bg_blur is not None and bg_blur > 0:
+                logger.info(f"  🌫️  Background blur: {bg_blur}px (preview only - not supported in FFmpeg drawtext)")
 
         # 🎨 NEW: Parse textShadow - Support both granular and legacy formats
         shadow_color = style.get('shadowColor')
