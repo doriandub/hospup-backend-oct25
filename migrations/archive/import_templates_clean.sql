@@ -1,0 +1,3390 @@
+-- Import des templates depuis CSV Airtable (version nettoyée)
+-- Généré automatiquement
+
+BEGIN;
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DPWgJUbjBOb/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/1603924337250554/',
+  1058444,
+  1183292,
+  1.1,
+  77422,
+  884,
+  7.8,
+  '[{"order":1,"start":0,"end":7.8,"duration":7.8,"description":"chandelier, table, flowers, phone, chairs, carpet, window, wall, light fixtures, ceiling"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DP7SQZmEw2F/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/221128155390959/',
+  1058444,
+  789831,
+  0.7,
+  41974,
+  597,
+  14.3,
+  '[{"order":1,"start":0,"end":2.1,"duration":2.1,"description":"doors, chandelier, hallway, table, chairs, floor, wall, decor, women"},{"order":2,"start":2.1,"end":3.1,"duration":1,"description":"chandelier, table, chairs, vase, flowers, glass, plates, napkins, waiter, window, curtains, wall, decor, light, floor, carpet"},{"order":3,"start":3.1,"end":4.1,"duration":1,"description":"table, plates, glasses, knife, fork, napkin, marble, hand, pattern, background"},{"order":4,"start":4.1,"end":5.1,"duration":1,"description":"table, napkin, plate, fork, knife, glass, lamp, tablecloth, hand, silverware"},{"order":5,"start":5.1,"end":6.1,"duration":1,"description":"table, chair, glass, napkin, lamp, mirror, chandelier, wall, carpet, waiter, plate, cutlery, decoration"},{"order":6,"start":6.1,"end":7.1,"duration":1,"description":"waiter, glass, table, napkin, lamp, chair, plate, silverware, wall, mirror, light, decoration"},{"order":7,"start":7.1,"end":8.2,"duration":1,"description":"restaurant, table, lamp, waiter, chair, chandelier, window, wall, light, glass, plate, silverware, napkin, decor"},{"order":8,"start":8.2,"end":9.2,"duration":1,"description":"chandelier, table, chairs, flowers, vase, silverware, glasses, napkins, wall, mirror, decor, people, light"},{"order":9,"start":9.2,"end":10.2,"duration":1,"description":"table, man, plant, window, chairs, candelabra, floor, wall, light, decor, vase"},{"order":10,"start":10.2,"end":11.2,"duration":1.1,"description":"chandelier, table, flowers, candles, chairs, marble, woman, wall, mirror, light, decor, floor"},{"order":11,"start":11.2,"end":12.2,"duration":1,"description":"candle, flame, hand, match, candelabra, table, flowers, vase, marble, plate, fork, knife, chair"},{"order":12,"start":12.2,"end":14.3,"duration":2.1,"description":"chandelier, table, chairs, candles, flowers, carpet, wall, window, light, decor, ceiling, gold, marble"}]',
+  12
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DPLmbqvgJeQ/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/913579088826358/',
+  1058444,
+  940254,
+  0.9,
+  37838,
+  821,
+  20.5,
+  '[{"order":1,"start":0,"end":1.1,"duration":1.1,"description":"restaurant, table, chairs, chandelier, waiter, plate, food, pastries, jars, silverware, carpet, wall, window, decor"},{"order":2,"start":1.1,"end":2.3,"duration":1.2,"description":"plate, food, glass, wine, water, pancake, berries, strawberries, blueberries, fork, knife, table, hand, pastry, croissant, dessert, napkin"},{"order":3,"start":2.3,"end":3.8,"duration":1.5,"description":"sign, wall, door, fruit, display, shelf"},{"order":4,"start":3.8,"end":4.5,"duration":0.7,"description":"hands, melon, leaves, shelf, wall"},{"order":5,"start":4.5,"end":5.2,"duration":0.7,"description":"kitchen, chef, fruits, vegetables, herbs, cutting board, knife, plates, bowls, baskets, countertop, sink, shelves, light, tiles, wall"},{"order":6,"start":5.2,"end":6,"duration":0.7,"description":"melon, knife, hand, cutting board, spoon, bowl, strawberries, cherries, fruit, plate, countertop, kitchen, wall, tiles"},{"order":7,"start":6,"end":6.7,"duration":0.7,"description":"chef, kitchen, countertop, cutting board, mandoline, fruit, plate, bowl, herbs, vegetables, sink, shelves, wall, light"},{"order":8,"start":6.7,"end":7.5,"duration":0.8,"description":"knife, hand, vegetable, cutting board, green surface, slices, kitchen, countertop, herbs"},{"order":9,"start":7.5,"end":8.2,"duration":0.7,"description":"knife, hand, cutting board, onion, fruit, plate, strawberries, cherries, peaches, apricots, mint, countertop, green mat"},{"order":10,"start":8.2,"end":8.9,"duration":0.7,"description":"plate, hand, sauce, countertop, bowl, kitchen, surface"},{"order":11,"start":8.9,"end":9.7,"duration":0.8,"description":"plate, fruit, hands, strawberries, mango, kitchen, countertop, bowl, container"},{"order":12,"start":9.7,"end":10.5,"duration":0.8,"description":"plate, fruit, hands, chef, mango, apple, countertop, bowl, knife, ring"},{"order":13,"start":10.5,"end":11.2,"duration":0.7,"description":"plate, fruit, strawberries, apricots, hand, knife, table, countertop, pineapple, garnish"},{"order":14,"start":11.2,"end":11.9,"duration":0.8,"description":"shelf, strawberries, leaves, plate, hand, apricots, basket, countertop, tiles"},{"order":15,"start":11.9,"end":12.7,"duration":0.7,"description":"fruit, apples, cherries, strawberries, pineapple, melon, mint leaves, bowls, plates, countertop, hands, ring, silver trays, kitchen"},{"order":16,"start":12.7,"end":14.3,"duration":1.6,"description":"kitchen, chef, counter, fruits, strawberries, pineapple, grapes, lemons, melons, bowls, trays, herbs, shelves, light, tiles, sink"},{"order":17,"start":14.3,"end":15.7,"duration":1.4,"description":"staircase, railing, painting, chandelier, wall, carpet, waiters, trays, food, hallway, light fixtures"},{"order":18,"start":15.7,"end":16.4,"duration":0.7,"description":"door, number, chandelier, curtain, window, basket, fruit, hallway, carpet, wall, light, furniture"},{"order":19,"start":16.4,"end":17.1,"duration":0.7,"description":"chandelier, table, flowers, sofa, chair, window, curtain, plate, strawberries, chef, marble, carpet, glass, vase, picture, light"},{"order":20,"start":17.1,"end":17.9,"duration":0.8,"description":"chandelier, window, curtains, sofa, table, flowers, fruit, plates, glasses, napkins, men, uniforms, tray, marble, carpet"},{"order":21,"start":17.9,"end":20.1,"duration":2.2,"description":"chandelier, table, flowers, glasses, fruit, sofa, carpet, mirror, window, curtain, wall, lamp, men, uniforms, decor"},{"order":22,"start":20.1,"end":20.5,"duration":0.4,"description":"I''m unable to analyze images directly. However, if you describe the content of the property video, I can help you generate a list of concrete keywords based on your description."}]',
+  22
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DO-zuV9lTQK/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/772676519021267/',
+  1058444,
+  813468,
+  0.8,
+  33814,
+  583,
+  9.9,
+  '[{"order":1,"start":0,"end":9.9,"duration":9.9,"description":"bed, chandelier, window, curtains, flowers, table, chair, sofa, wall, door, floor, bottle, glasses, tray, lamp"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DNdpslFNuby/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/689379484121925/',
+  1058444,
+  923997,
+  0.9,
+  36039,
+  552,
+  7.4,
+  '[{"order":1,"start":0,"end":7.4,"duration":7.4,"description":"Eiffel Tower, balcony, flowers, table, chairs, candles, wine glasses, plates, cutlery, sky, buildings, sunset."}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DMnzYmPN2sS/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/2270412036519338/',
+  1058444,
+  593814,
+  0.6,
+  26021,
+  460,
+  12.2,
+  '[{"order":1,"start":0,"end":1.2,"duration":1.2,"description":"building, balconies, plants, awnings, entrance, door, windows, people, street, lamp posts, hedges, pavement"},{"order":2,"start":1.2,"end":2.1,"duration":0.9,"description":"chandelier, table, chairs, flowers, window, wall, ceiling, carpet, plates, glasses, cutlery, bread, fruit, decor, light fixtures, gold, marble"},{"order":3,"start":2.1,"end":3.4,"duration":1.2,"description":"table, chairs, plates, glasses, cutlery, food, fruit, pastries, orange juice, dessert, woman, plants, wall, windows, umbrellas, courtyard, greenery"},{"order":4,"start":3.4,"end":4.4,"duration":1,"description":"balcony, flowers, red, chair, table, Eiffel Tower, trees, street, lights, building, sky"},{"order":5,"start":4.4,"end":5.6,"duration":1.2,"description":"Eiffel Tower, sky, clouds, terrace, table, chairs, flowers, red cushions, woman, glass, bottle, plate, strawberries, cutlery, napkin, greenery, cityscape."},{"order":6,"start":5.6,"end":6.6,"duration":1,"description":"table, flowers, plates, food, croissants, glass, juice, teapot, Eiffel Tower, buildings, sky, umbrella, balcony, railing, strawberries, jam"},{"order":7,"start":6.6,"end":7.6,"duration":1,"description":"table, flowers, bottles, mannequin, wall, shelves, light, floor, rug, person, display"},{"order":8,"start":7.6,"end":8.7,"duration":1.1,"description":"courtyard, building, windows, ivy, tables, chairs, umbrellas, plants, floor, doors, balconies"},{"order":9,"start":8.7,"end":9.9,"duration":1.2,"description":"restaurant, tables, chairs, umbrellas, waiter, plants, dishes, glasses, patio, building, windows, wall, shadows, tablecloths, cushions"},{"order":10,"start":9.9,"end":10.9,"duration":1,"description":"restaurant, tables, chairs, tablecloths, plates, glasses, cutlery, flowers, plants, ceiling, lights, artwork, bar, windows"},{"order":11,"start":10.9,"end":12.2,"duration":1.3,"description":"table, chairs, glasses, candles, flowers, plates, food, balcony, Eiffel Tower, window, night, city lights"}]',
+  11
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DORY4J5jSg8/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/1888078911922981/',
+  1058444,
+  1316923,
+  1.2,
+  56414,
+  897,
+  25.8,
+  '[{"order":1,"start":0,"end":1.6,"duration":1.6,"description":"doors, chandelier, people, cart, table, flowers, carpet, wall, ceiling, light, room"},{"order":2,"start":1.6,"end":2.6,"duration":1,"description":"chandelier, flowers, table, chairs, glasses, bar, mirror, wall, decor, countertop, vase, artwork, window, light"},{"order":3,"start":2.6,"end":3.5,"duration":0.8,"description":"chandelier, table, chairs, flowers, vase, marble, waiter, wall, light, decor, pattern, window"},{"order":4,"start":3.5,"end":4.5,"duration":1,"description":"restaurant, table, chairs, candelabra, candle, napkin, glass, plate, cutlery, wall, mirror, chandelier, window, decor, floor"},{"order":5,"start":4.5,"end":5.6,"duration":1.1,"description":"chandelier, table, chairs, flowers, vase, mirror, people, plates, glasses, candles, marble, wall, artwork, carpet, light fixtures"},{"order":6,"start":5.6,"end":6.6,"duration":1,"description":"bottle, wine, table, glasses, waiter, chandelier, mirror, decor, plate, napkin, silverware, carpet, chair, light"},{"order":7,"start":6.6,"end":7.5,"duration":0.9,"description":"champagne, glass, table, plate, napkin, fork, knife, chandelier, mirror, water glass, candle, tablecloth, restaurant, decor, furniture"},{"order":8,"start":7.5,"end":8.5,"duration":1,"description":"lamp, table, glass, wine, water, plate, food, waiter, mirror, chandelier, chairs, carpet, wall, window, cutlery, napkin, tray"},{"order":9,"start":8.5,"end":9.5,"duration":1,"description":"woman, cart, food, vegetables, plate, teapot, cups, table, floor, door, glass, pattern, wall, light"},{"order":10,"start":9.5,"end":10.9,"duration":1.4,"description":"restaurant, table, chairs, napkins, plates, glasses, cutlery, food, drink, candle, lamp, mirror, chandelier, staff, decor"},{"order":11,"start":10.9,"end":11.9,"duration":1,"description":"table, plate, bowl, dessert, spoon, glass, cocktail, menu, lamp, hand, fork, wine glass, decoration"},{"order":12,"start":11.9,"end":13,"duration":1,"description":"restaurant, table, chairs, waiter, lamp, glasses, wine, plates, cutlery, napkins, flowers, chandelier, window, wall, decor"},{"order":13,"start":13,"end":14,"duration":1,"description":"plate, food, caviar, glass, wine, water, table, napkin, fork, knife, chandelier, reflection, candle, dessert, sauce, tablecloth"},{"order":14,"start":14,"end":15,"duration":1.1,"description":"plate, food, caviar, pastry, fork, hand, table, candle, glass, napkin, chair, tablecloth, decor"},{"order":15,"start":15,"end":16,"duration":1,"description":"waiter, plate, food, vegetables, glass, water, wine, candle, table, cutlery, napkin, chair, chandelier, restaurant, decor, people, dessert, bread, bowl"},{"order":16,"start":16,"end":17,"duration":1,"description":"plate, food, vegetables, sauce, glass, wine, water, cutlery, napkin, table, candle, chair, tablecloth, background"},{"order":17,"start":17,"end":18.1,"duration":1.1,"description":"table, mirror, chandelier, glassware, silverware, countertop, floor, carpet, wall, reflection, person"},{"order":18,"start":18.1,"end":19.1,"duration":1,"description":"chef, kitchen, counter, cutting board, mirror, flowers, candles, plates, glassware, silverware, decor, chandelier, wall, furniture, chefs"},{"order":19,"start":19.1,"end":20.1,"duration":1,"description":"table, chair, lamp, glass, dessert, plate, spoon, menu, waiter, flowers, chandelier, mirror, window, wall, floor"},{"order":20,"start":20.1,"end":21.3,"duration":1.1,"description":"plate, food, sauce, glass, wine, water, spoon, candle, table, napkin, cup, herbs"},{"order":21,"start":21.3,"end":22.4,"duration":1.1,"description":"chef, table, dish, smoke, glass, water bottle, chairs, chandelier, restaurant, plate, silver, napkin, flowers, decor"},{"order":22,"start":22.4,"end":23.7,"duration":1.3,"description":"restaurant, table, chairs, waiter, tray, glasses, plates, lamp, decor, mirror, chandelier, guests, floor, carpet"},{"order":23,"start":23.7,"end":24.8,"duration":1.1,"description":"waiter, box, clock, glasses, table, lamp, bottle, napkin, plate, cutlery, chandelier, chairs, tablecloth"},{"order":24,"start":24.8,"end":25.8,"duration":1,"description":"chandelier, table, chairs, vase, flowers, candelabra, wall, window, screen, carpet, people, serving cart, plates, glasses, cutlery, decor"}]',
+  24
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DLzaEjFN0IU/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/620272414436291/',
+  1058444,
+  565685,
+  0.5,
+  28047,
+  452,
+  9.7,
+  '[{"order":1,"start":0,"end":0.7,"duration":0.7,"description":"courtyard, tables, chairs, umbrellas, plants, ivy, windows, screen, waitstaff, dishes, glasses, candles, floor, walls, red, light"},{"order":2,"start":0.7,"end":1.9,"duration":1.2,"description":"courtyard, plants, tables, chairs, waiter, sign, poster, people, glasses, plates, umbrellas, windows, walls, vines, light fixtures"},{"order":3,"start":1.9,"end":2.5,"duration":0.6,"description":"courtyard, tables, chairs, plants, vines, umbrellas, screen, guests, lanterns, floor tiles, walls, windows, red awnings, sofas"},{"order":4,"start":2.5,"end":3.2,"duration":0.6,"description":"table, chairs, woman, basket, popcorn, red stripes, screen, plants, windows, people, plates, glasses, patio, lanterns, courtyard"},{"order":5,"start":3.2,"end":3.7,"duration":0.5,"description":"popcorn, containers, basket, hand, grass"},{"order":6,"start":3.7,"end":4.3,"duration":0.6,"description":"table, chairs, glasses, bottle, hat, food, plate, pepper mill, courtyard, plants, walls, windows, people, lights, umbrellas"},{"order":7,"start":4.3,"end":4.9,"duration":0.6,"description":"hat, menu, popcorn, glass, wine, plate, pastry, tablecloth, napkin"},{"order":8,"start":4.9,"end":5.6,"duration":0.6,"description":"table, chairs, waiter, food, drink, glass, hat, screen, plants, windows, people, red, white, courtyard"},{"order":9,"start":5.6,"end":6.2,"duration":0.6,"description":"plate, food, salmon, cracker, pastry, green garnish, glass, red, spoon, table, napkin, salt, pepper, popcorn box"},{"order":10,"start":6.2,"end":6.8,"duration":0.6,"description":"courtyard, screen, chairs, tables, guests, plants, windows, lights, lanterns, vines, red curtains, bottles, glasses, hats"},{"order":11,"start":6.8,"end":7.4,"duration":0.6,"description":"restaurant, tables, chairs, waiter, menu, screen, plants, windows, curtains, guests, floor, walls, lighting"},{"order":12,"start":7.4,"end":8,"duration":0.6,"description":"table, plate, food, glass, wine, popcorn, menu, lamp, candle, hand, napkin, fork, knife, hat, stone"},{"order":13,"start":8,"end":8.6,"duration":0.6,"description":"champagne, glass, table, plate, food, fork, spoon, napkin, hat, popcorn, screen, people, chairs, lantern, wall, plants, light"},{"order":14,"start":8.6,"end":9.7,"duration":1.1,"description":"restaurant, tables, chairs, projector, screen, plants, walls, windows, people, glasses, bottles, hats, lighting, courtyard"}]',
+  14
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DPOdCJhEZsH/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/690430584086037/',
+  1058444,
+  595637,
+  0.6,
+  31902,
+  506,
+  9.1,
+  '[{"order":1,"start":0,"end":9.1,"duration":9.1,"description":"rooftop, chairs, table, flowers, fruit, champagne, Eiffel Tower, plants, sky, cityscape, lights"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'piajauncey',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DMDJSnTTGI-/',
+  'https://www.instagram.com/piajauncey/',
+  'https://www.instagram.com/reels/audio/1771111983007962/',
+  1058444,
+  2131897,
+  2.0,
+  92872,
+  294,
+  30.3,
+  '[{"order":1,"start":0,"end":1.9,"duration":1.9,"description":"lobby, entrance, revolving door, chandelier, floor, carpet, window, light, wall"},{"order":2,"start":1.9,"end":3.1,"duration":1.2,"description":"chandelier, entrance, door, floor, carpet, person"},{"order":3,"start":3.1,"end":4,"duration":0.9,"description":"door, entrance, lobby, people, floor, light, window"},{"order":4,"start":4,"end":6,"duration":2,"description":"I''m sorry, but I can''t assist with that."},{"order":5,"start":6,"end":7,"duration":1.1,"description":"railings, carpet, patterns, floor, wall, light"},{"order":6,"start":7,"end":8.1,"duration":1,"description":"floor, carpet, railing, hand, dress, feet, stairs"},{"order":7,"start":8.1,"end":9.2,"duration":1.1,"description":"staircase, railing, wall, window, light, dress, floor, steps"},{"order":8,"start":9.2,"end":10.6,"duration":1.5,"description":"I don''t know who they are."},{"order":9,"start":10.6,"end":11.6,"duration":1,"description":"crowd, people, red carpet, ropes, street, cars, trees, building, pavement, bags, phones"},{"order":10,"start":11.6,"end":12.3,"duration":0.8,"description":"robe, chair, table, lamp, door, wall, mirror, floor, books, tablet, bottle"},{"order":11,"start":12.3,"end":13.1,"duration":0.8,"description":"lamp, table, chair, robe, mirror, hand, makeup, bag, wall, window, bed, pillow, blanket"},{"order":12,"start":13.1,"end":14.2,"duration":1.1,"description":"window, curtains, bed, robe, hand, table, plant, wall, floor"},{"order":13,"start":14.2,"end":14.9,"duration":0.7,"description":"dress, window, curtain, bed, pillow, room, light"},{"order":14,"start":14.9,"end":16.4,"duration":1.5,"description":"balcony, flowers, railing, windows, building"},{"order":15,"start":16.4,"end":17.6,"duration":1.2,"description":"croissant, pastry, butter, egg, cup, jar, table, window"},{"order":16,"start":17.6,"end":18.6,"duration":1,"description":"rug, staircase, railing, hand, dress, floor, wall, door"},{"order":17,"start":18.6,"end":20.4,"duration":1.8,"description":"I don''t see any property features in the image."},{"order":18,"start":20.4,"end":22,"duration":1.7,"description":"I''m sorry, but I can''t assist with that."},{"order":19,"start":22,"end":23.4,"duration":1.3,"description":"Plaza Athenee, entrance, door, glass, metal, sign, lighting, lobby, floor, plants, people"},{"order":20,"start":23.4,"end":25.1,"duration":1.8,"description":"building, windows, flowers, balconies, street, person, trees, lights, sidewalk, car"},{"order":21,"start":25.1,"end":27.5,"duration":2.3,"description":"building, balconies, flowers, awnings, windows, entrance, lights, woman"},{"order":22,"start":27.5,"end":30.2,"duration":2.8,"description":"Eiffel Tower, flowers, plants, sky, trees, cityscape"}]',
+  22
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DK2P3E9p30K/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/697598333152077/',
+  1058444,
+  610863,
+  0.6,
+  34310,
+  547,
+  13.3,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"Eiffel Tower, flowers, plants, trees, sky, clouds, street, people, lamp, building, red, green, waiter, pot."},{"order":2,"start":0.9,"end":1.9,"duration":1,"description":"entrance, door, sign, flowers, planters, pavement, man, suit, hat, window, awning"},{"order":3,"start":1.9,"end":2.9,"duration":1,"description":"table, flowers, vase, chandelier, mirror, sofa, rug, fireplace, curtains, wall, women, dress, apron"},{"order":4,"start":2.9,"end":3.9,"duration":1,"description":"balcony, table, chairs, flowers, Eiffel Tower, sky, clouds, cityscape, food, drinks"},{"order":5,"start":3.9,"end":4.9,"duration":1,"description":"tables, chairs, red umbrellas, waiter, plates, glasses, cutlery, flowers, street, trees, sky, Eiffel Tower"},{"order":6,"start":4.9,"end":5.9,"duration":1,"description":"table, plates, glasses, drinks, food, salad, tomatoes, bread, utensils, napkin, salt shaker, pepper shaker, menu, sunglasses"},{"order":7,"start":5.9,"end":6.9,"duration":1,"description":"chandelier, window, curtains, table, chairs, carpet, drinks, garden, lamps, furniture"},{"order":8,"start":6.9,"end":7.9,"duration":1,"description":"teapot, cup, chocolate, spoon, plate, dessert, flowers, table, hand, tablecloth"},{"order":9,"start":7.9,"end":8.9,"duration":1,"description":"tables, chairs, umbrellas, plants, red canopies, patio, tiles, building, greenery"},{"order":10,"start":8.9,"end":9.9,"duration":1,"description":"restaurant, tables, chairs, umbrellas, plants, ivy, building, windows, people, dishes, glasses, patio, floor, sky"},{"order":11,"start":9.9,"end":10.8,"duration":1,"description":"table, plates, food, waiter, chairs, umbrellas, plants, windows, courtyard, bottles, glasses, bread, pepper mill, salt shaker, napkins, cutlery"},{"order":12,"start":10.8,"end":11.8,"duration":1,"description":"chandelier, curtains, window, balcony, chairs, table, bed, bedding, floor, wall"},{"order":13,"start":11.8,"end":13.3,"duration":1.5,"description":"Eiffel Tower, buildings, trees, flowers, balcony, sky, sunset, red awning"}]',
+  13
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'jeremyjauncey',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKeNW0jzzXU/',
+  'https://www.instagram.com/jeremyjauncey/',
+  'https://www.instagram.com/reels/audio/1460869935090785/',
+  1058444,
+  919801,
+  0.9,
+  34728,
+  332,
+  6.3,
+  '[{"order":1,"start":0,"end":2.2,"duration":2.2,"description":"balcony, flowers, street, trees, buildings, sky, clouds, Eiffel Tower"},{"order":2,"start":2.2,"end":6.3,"duration":4.2,"description":"Eiffel Tower, street, trees, flowers, balcony, sky, stars, building, person, city, lights."}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKPp7pntIHq/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/1378938763146743/',
+  1058444,
+  1687333,
+  1.6,
+  58245,
+  605,
+  7.9,
+  '[{"order":1,"start":0,"end":1,"duration":1,"description":"door, sofa, chandelier, table, chairs, painting, woman, light, carpet"},{"order":2,"start":1,"end":2.1,"duration":1,"description":"chandelier, sofa, cushions, table, lamp, plant, painting, flowers, glass, door, window, curtain, floor, rug, chair, dining table, chairs"},{"order":3,"start":2.1,"end":3.1,"duration":1,"description":"chandelier, curtains, window, sofa, table, flowers, rug, plant, lamp, chair, wall, artwork"},{"order":4,"start":3.1,"end":4,"duration":0.9,"description":"bed, chandelier, curtains, mirror, door, table, flowers, sofa, pillows, wall, floor"},{"order":5,"start":4,"end":5,"duration":1,"description":"bedroom, bed, chandelier, mirror, sofa, table, flowers, pillows, wall, curtains, light fixtures, floor"},{"order":6,"start":5,"end":6,"duration":1,"description":"chandelier, window, curtains, chair, table, balcony, bed, bedding, floor, wall, person"},{"order":7,"start":6,"end":6.9,"duration":0.9,"description":"balcony, plants, Eiffel Tower, buildings, sky, street, trees, person"},{"order":8,"start":6.9,"end":7.9,"duration":1,"description":"balcony, plants, trees, street, buildings, Eiffel Tower, sky"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DJ6vN_XhwCq/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/1003394561983606/',
+  1058444,
+  1041317,
+  1.0,
+  53486,
+  1036,
+  13.3,
+  '[{"order":1,"start":0,"end":1,"duration":1,"description":"doors, hallway, ceiling, light, furniture, table, chairs, mirror, wall, floor"},{"order":2,"start":1,"end":2,"duration":1,"description":"chandelier, sofa, table, chairs, flowers, mirror, lamps, bed, bedding, artwork, carpet, door, wall, window"},{"order":3,"start":2,"end":3,"duration":1,"description":"bed, pillow, tray, mirror, chair, curtains, chandelier, wall, floor, person"},{"order":4,"start":3,"end":3.9,"duration":0.9,"description":"chandelier, curtains, window, balcony, sofa, chair, table, book, floor, rug, women, dress, light"},{"order":5,"start":3.9,"end":4.9,"duration":1,"description":"chandelier, sofa, table, flowers, window, curtains, painting, balcony, Eiffel Tower, woman"},{"order":6,"start":4.9,"end":5.8,"duration":0.9,"description":"window, Eiffel Tower, sofa, cushion, flowers, balcony, woman, room, wall, frame"},{"order":7,"start":5.8,"end":6.8,"duration":1,"description":"candles, hand, table, flowers, petals, surface"},{"order":8,"start":6.8,"end":7.7,"duration":0.9,"description":"bathtub, water, flowers, petals, faucet"},{"order":9,"start":7.7,"end":8.8,"duration":1,"description":"table, teapot, cup, flowers, pastries, balcony, railing, Eiffel Tower, sky, clouds, plants"},{"order":10,"start":8.8,"end":9.6,"duration":0.9,"description":"door, room, chandelier, sofa, chairs, table, curtains, plant, mirror, fireplace, carpet, wall, artwork, person"},{"order":11,"start":9.6,"end":10.6,"duration":1,"description":"chandelier, window, Eiffel Tower, flowers, vase, table, chairs, candle, wall, mirror, plant, decor"},{"order":12,"start":10.6,"end":13.3,"duration":2.7,"description":"table, chairs, window, Eiffel Tower, waiter, red box, light, napkins, plates, glasses, cutlery"}]',
+  12
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKFoGgltbX4/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/257407749674204/',
+  1058444,
+  1028100,
+  1.0,
+  62103,
+  743,
+  11.1,
+  '[{"order":1,"start":0,"end":2.1,"duration":2.1,"description":"table, chairs, flowers, food, drinks, orange juice, Eiffel Tower, balcony, umbrella, sky, greenery, waiter"},{"order":2,"start":2.1,"end":3.4,"duration":1.2,"description":"Eiffel Tower, flowers, table, croissants, strawberries, coffee pot, plates, eggs, orange juice, glass, cutlery, balcony, railing, trees, sky, buildings"},{"order":3,"start":3.4,"end":4.4,"duration":1.1,"description":"table, pastries, croissants, fruit, strawberries, jam, glass, juice, flowers, vase, plate, fork, knife, hand"},{"order":4,"start":4.4,"end":5.6,"duration":1.2,"description":"table, plates, croissants, pastries, fruit, juice, flowers, balcony, Eiffel Tower, sky, plants, railing, cityscape"},{"order":5,"start":5.6,"end":7,"duration":1.4,"description":"table, bowl, strawberries, croissants, pastries, jam, glass, flowers, hand, plate, fork, sunlight, greenery, balcony"},{"order":6,"start":7,"end":8.4,"duration":1.4,"description":"table, flowers, vase, croissants, fruit, glass, juice, plate, egg, Eiffel Tower, sky, railing, cityscape"},{"order":7,"start":8.4,"end":9.6,"duration":1.2,"description":"table, plate, croissant, pastry, glass, juice, flowers, vase, Eiffel Tower, sky, hand, spoon, napkin, balcony, railing"},{"order":8,"start":9.6,"end":11.1,"duration":1.5,"description":"croissant, pastry, table, flowers, orange juice, cherries, fork, knife, plate, napkin, coffee, sugar, stand"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DIMNqOvMvtR/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/1835568696558246/',
+  1058444,
+  644140,
+  0.6,
+  32472,
+  561,
+  10.7,
+  '[{"order":1,"start":0,"end":0.7,"duration":0.7,"description":"hotel, entrance, bellhop, luggage cart, bags, flowers, plants, awning, door, windows, staff, pavement"},{"order":2,"start":0.7,"end":1.3,"duration":0.6,"description":"lobby, reception desk, staff, guests, flowers, tiles, wall, clock, light fixtures"},{"order":3,"start":1.3,"end":2,"duration":0.7,"description":"lobby, hallway, chandelier, chairs, tables, carpet, flowers, lamps, columns, person"},{"order":4,"start":2,"end":2.7,"duration":0.7,"description":"Eiffel Tower, balcony, table, chairs, flowers, plates, food, drinks, woman, sky, clouds, cityscape, railing, red awning."},{"order":5,"start":2.7,"end":3.4,"duration":0.7,"description":"pancake, strawberries, blueberries, honey, fork, knife, plate, table, glass, orange juice, bowl, granola, flowers, napkin, card"},{"order":6,"start":3.4,"end":4,"duration":0.7,"description":"bed, sheets, pillows, flowers, chandelier, wall, window, women, dress, apron, table, vase, carpet"},{"order":7,"start":4,"end":4.7,"duration":0.7,"description":"sofa, table, flowers, vase, chair, lamp, curtain, window, floor, carpet"},{"order":8,"start":4.7,"end":5.3,"duration":0.6,"description":"bathtub, window, flowers, petals, robe, chair, marble, towel, slippers, balcony, wall"},{"order":9,"start":5.3,"end":6,"duration":0.7,"description":"bathtub, window, balcony, flowers, bottles, marble, petals, sink"},{"order":10,"start":6,"end":6.6,"duration":0.6,"description":"door, hallway, light, ceiling, person, uniform, floor, wall, sign"},{"order":11,"start":6.6,"end":7.3,"duration":0.7,"description":"water, tub, chairs, wall, light, floor, person"},{"order":12,"start":7.3,"end":8,"duration":0.7,"description":"staircase, railing, carpet, flowers, ceiling, walls, tiles, patterns"},{"order":13,"start":8,"end":8.7,"duration":0.7,"description":"bar, bartender, stools, counter, bottles, glasses, lights, wall, ceiling, people"},{"order":14,"start":8.7,"end":9.3,"duration":0.6,"description":"Eiffel Tower, sunset, table, red sofa, flowers, pastries, woman, tray, cityscape, plants, sky"},{"order":15,"start":9.3,"end":10.7,"duration":1.4,"description":"rooftop, sofa, table, flowers, sunset, Eiffel Tower, plants, chairs, cityscape"}]',
+  15
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DHvscVip1oJ/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/1725313618360918/',
+  1058444,
+  935989,
+  0.9,
+  50196,
+  559,
+  6.3,
+  '[{"order":1,"start":0,"end":6.3,"duration":6.3,"description":"table, chairs, plates, glasses, candle, flowers, waiter, balcony, Eiffel Tower, window, night, city lights"},{"order":2,"start":6.3,"end":6.3,"duration":0,"description":"I''m unable to analyze images directly. However, if you describe the video or provide details, I can help you generate a list based on that information."}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'plaza_athenee',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DGVlNRGNaVM/',
+  'https://www.instagram.com/plaza_athenee/',
+  'https://www.instagram.com/reels/audio/614618795805409/',
+  1058444,
+  707609,
+  0.7,
+  41009,
+  678,
+  11.8,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"door, chandelier, table, chairs, flowers, wall, floor, woman"},{"order":2,"start":0.9,"end":1.7,"duration":0.8,"description":"restaurant, table, chairs, flowers, chandelier, wall, window, person, plates, glasses, cutlery, napkins, carpet"},{"order":3,"start":1.7,"end":2.5,"duration":0.8,"description":"restaurant, table, chairs, chandelier, flowers, mirror, wall, light fixtures, woman, plates, glasses, cutlery, carpet"},{"order":4,"start":2.5,"end":3.4,"duration":0.8,"description":"restaurant, table, chairs, chandelier, window, fruit, plates, silverware, teapot, glasses, dessert, flowers, serving tray, waiter"},{"order":5,"start":3.4,"end":4.3,"duration":0.9,"description":"pastries, croissant, bread, apple, plate, teapot, cup, saucer, silverware, tray, napkin"},{"order":6,"start":4.3,"end":5.1,"duration":0.8,"description":"chocolate, cream, bowl, fruit, strawberries, plate, croissant, pastry, coffee, cup, table"},{"order":7,"start":5.1,"end":5.9,"duration":0.8,"description":"teapot, cup, saucer, silver, fruit, pastry, plate, glass, juice, table, napkin, flowers, tablecloth"},{"order":8,"start":5.9,"end":6.7,"duration":0.8,"description":"spoon, hand, plate, dessert, sauce, glass, water, yellow, cake, raspberry, dish, ring"},{"order":9,"start":6.7,"end":7.5,"duration":0.8,"description":"plate, eggs, sauce, glass, wine, water, table, hand, flowers, chandelier, mirror, napkin, fork, knife, spoon"},{"order":10,"start":7.5,"end":8.4,"duration":0.9,"description":"plate, eggs, sauce, salmon, cream, caviar, fork, knife, table, water, dish, tablecloth"},{"order":11,"start":8.4,"end":9.2,"duration":0.8,"description":"table, food, plate, glass, dessert, chair, woman, scarf, restaurant, wall, light, window, decoration"},{"order":12,"start":9.2,"end":10.1,"duration":0.8,"description":"cake, strawberry, plate, sauce, hand, teapot, sugar, dessert, glass, fruit, bowl, water"},{"order":13,"start":10.1,"end":10.9,"duration":0.9,"description":"plate, food, dessert, fruit, glass, drink, spoon, fork, butter, napkin, table, tablecloth, pastry, croissant, cookie, raspberry, mint leaves, syrup, water glass, dish"},{"order":14,"start":10.9,"end":11.8,"duration":0.8,"description":"restaurant, table, chairs, chandelier, flowers, plates, food, drinks, glassware, cutlery, napkins, woman, outfit, wall, window"}]',
+  14
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'voyage_provocateur',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKcB2-yMpPN/',
+  'https://www.instagram.com/voyage_provocateur/',
+  'https://www.instagram.com/reels/audio/582586157282680/',
+  944667,
+  515239,
+  0.5,
+  35182,
+  879,
+  8.5,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"fireplace, painting, table, tablecloth, chair, lamp, floor, wall, marble, man, paper"},{"order":2,"start":0.9,"end":1.9,"duration":0.9,"description":"chandelier, table, chairs, plates, glasses, napkins, wall, artwork, mirror, door, light fixtures, floor, carpet, columns, windows, curtains, shelves, photographs"},{"order":3,"start":1.9,"end":2.7,"duration":0.9,"description":"croissants, plates, marble, chocolate, pastry"},{"order":4,"start":2.7,"end":3.7,"duration":1,"description":"teapot, cup, saucer, plate, croissant, fruit, yogurt, granola, juice, glass, table, chandelier, mirror, chairs, coffee pot, silverware, napkin, bowl, dessert"},{"order":5,"start":3.7,"end":4.7,"duration":1,"description":"table, chairs, lamp, wall, painting, marble, floor, window, door, decor, plate, cup, saucer, tablecloth, chandelier"},{"order":6,"start":4.7,"end":5.6,"duration":0.9,"description":"hand, spoon, plate, dessert, cream, pastry, fruit, table, cup, glass, water, orange juice, croissant, silverware, napkin, chandelier, wall, window, light"},{"order":7,"start":5.6,"end":6.6,"duration":1,"description":"chandelier, tables, chairs, windows, curtains, lamps, wall, artwork, floor, silverware, glasses, plates, fountain, decorations"},{"order":8,"start":6.6,"end":7.6,"duration":1,"description":"chandelier, crystals, ceiling, light fixtures, wall, mirror, artwork, decor, molding"},{"order":9,"start":7.6,"end":8.5,"duration":0.9,"description":"table, chairs, plates, cups, saucers, silverware, croissants, fruit, coffee, teapot, chandelier, mirror, window, lamp, decor, waiter, serving cart"}]',
+  9
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DNpgjWBp29l/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/387831055036136/',
+  944667,
+  552349,
+  0.6,
+  25796,
+  216,
+  11.6,
+  '[{"order":1,"start":0,"end":1.4,"duration":1.4,"description":"door, entrance, lobby, chandelier, floor, tiles, sign, plants, man, suit, handle, light fixtures, windows, wall, decorations"},{"order":2,"start":1.4,"end":2.1,"duration":0.7,"description":"chandelier, window, flowers, table, cart, floor, tiles, hallway, chair, artwork, light, lobby"},{"order":3,"start":2.1,"end":2.8,"duration":0.8,"description":"reception, lobby, chandelier, sofa, table, flowers, artwork, window, curtains, floor, tiles, light fixtures, staff"},{"order":4,"start":2.8,"end":3.6,"duration":0.7,"description":"hotel, windows, shutters, balcony, sign, flag, stone, lanterns, entrance, door"},{"order":5,"start":3.6,"end":4.3,"duration":0.7,"description":"chandelier, window, curtain, table, chairs, food, drink, bed, blanket, floor, wall, door, view, trees, sky"},{"order":6,"start":4.3,"end":5,"duration":0.7,"description":"curtains, window, flowers, table, chair, dress, apron, wall, light, floor"},{"order":7,"start":5,"end":5.7,"duration":0.7,"description":"flower arrangement, vase, man, painting, wall, counter, clock, decor, plants, leaves, shirt, hands"},{"order":8,"start":5.7,"end":6.5,"duration":0.7,"description":"bar, bottles, bartender, chairs, table, lamp, sofa, wall, mirror, ceiling, plants, floor, artwork"},{"order":9,"start":6.5,"end":7.8,"duration":1.4,"description":"restaurant, table, chair, wine glasses, plates, tablecloth, woman, apron, light fixtures, windows, columns, artwork, sofa, cushion, carpet"},{"order":10,"start":7.8,"end":8.6,"duration":0.8,"description":"piano, musician, ceiling, chandelier, curtains, windows, tables, chairs, lamps, flowers, restaurant, bar, wall, artwork, floor, reflection, glass"},{"order":11,"start":8.6,"end":9.4,"duration":0.7,"description":"wine bottles, shelves, man, suit, light fixture, wooden storage, floor"},{"order":12,"start":9.4,"end":10.2,"duration":0.8,"description":"flowers, hands, menu, table, marble, logo, paper"},{"order":13,"start":10.2,"end":11.6,"duration":1.4,"description":"door, number, wall, artwork, floor, carpet, person, uniform"}]',
+  13
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DJzoQesMs15/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/9105272242906092/',
+  944667,
+  524364,
+  0.6,
+  22816,
+  330,
+  9.3,
+  '[{"order":1,"start":0,"end":1.7,"duration":1.7,"description":"restaurant, table, chair, lamp, window, painting, waiter, dishes, glassware, cutlery, bread, tray, floor, wall"},{"order":2,"start":1.7,"end":2.8,"duration":1.1,"description":"table, chairs, tablecloth, plates, glasses, cutlery, teapot, painting, lamp, wall, floor, woman"},{"order":3,"start":2.8,"end":3.8,"duration":1,"description":"table, teapot, glasses, champagne, coffee cup, plates, pastries, fruit, window, chair, hand, cutlery, napkin, tray"},{"order":4,"start":3.8,"end":5.1,"duration":1.3,"description":"table, chairs, coffee, tea, plates, silverware, food, pastries, glass, pitcher, lamp, window, mirror, wall, floor, person"},{"order":5,"start":5.1,"end":6.2,"duration":1,"description":"plate, spoon, hand, dessert, chocolate, fruit, cake, bread, cups, tea, glass, table, napkin, fork, knife, tablecloth, pastries, butter, jam"},{"order":6,"start":6.2,"end":7.2,"duration":1,"description":"table, teapot, glasses, champagne, pastries, plates, chairs, lamps, windows, decor, wall, floor, plants, serving tray"},{"order":7,"start":7.2,"end":8.2,"duration":1,"description":"table, food, pastries, fruit, tea, cups, glasses, champagne, plate, sofa, cushion, artwork, window, curtain"},{"order":8,"start":8.2,"end":9.3,"duration":1.1,"description":"glasses, champagne, hands, teapot, plates, fruit, table, chairs, tablecloth, cutlery, napkins, lamp, decor"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKFpzPlOiZr/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/430493994091859/',
+  944667,
+  484847,
+  0.5,
+  26902,
+  354,
+  10.5,
+  '[{"order":1,"start":0,"end":1.1,"duration":1.1,"description":"door, entrance, lobby, chandelier, plants, sign, pavement, man, suit, windows, light"},{"order":2,"start":1.1,"end":1.7,"duration":0.6,"description":"chandelier, mirror, wall, table, chairs, plates, flowers, carpet, artwork, door, light fixtures, windows, ceiling, decorations"},{"order":3,"start":1.7,"end":2.3,"duration":0.6,"description":"table, chairs, chandelier, wall, mirror, artwork, windows, floor, plants, menu, server, light fixtures, decor"},{"order":4,"start":2.3,"end":2.9,"duration":0.6,"description":"lobby, chandelier, furniture, table, chairs, curtains, floor, cart, man, light fixtures, wall, mirror, plants"},{"order":5,"start":2.9,"end":3.6,"duration":0.6,"description":"lobby, chandelier, floor, tiles, windows, door, cart, flowers, furniture, table, chairs, light"},{"order":6,"start":3.6,"end":4.8,"duration":1.2,"description":"door, room, bed, blanket, person, furniture, window, curtain, chair, floor, carpet, wall, light fixture, plant, dresser"},{"order":7,"start":4.8,"end":5.4,"duration":0.6,"description":"bathtub, mirror, towels, bathrobes, sink, floor tiles, faucet, man, wall, light fixture"},{"order":8,"start":5.4,"end":6.1,"duration":0.6,"description":"bathtub, water, faucet, soap, shampoo, petals"},{"order":9,"start":6.1,"end":6.7,"duration":0.6,"description":"champagne, ice bucket, glasses, table, flowers, vase, dog, cookie, chair"},{"order":10,"start":6.7,"end":7.3,"duration":0.6,"description":"restaurant, table, chairs, woman, menu, glass, plates, cutlery, lamp, window, wall, artwork, sofa, cushion, floor, carpet, light"},{"order":11,"start":7.3,"end":7.9,"duration":0.6,"description":"bowl, soup, liquid, spoon, hand, glass, wine, table, cloth, fork, knife, dish"},{"order":12,"start":7.9,"end":8.6,"duration":0.6,"description":"bar, bartender, bottles, glasses, countertop, chairs, wall, ceiling, light fixtures, mirror"},{"order":13,"start":8.6,"end":9.2,"duration":0.6,"description":"bar, bottles, glasses, flowers, table, chair, lamp, sofa, wall, mirror, floor, man"},{"order":14,"start":9.2,"end":9.8,"duration":0.6,"description":"piano, musician, ceiling, lights, tables, chairs, windows, plants, decor, wall, columns, restaurant"},{"order":15,"start":9.8,"end":10.5,"duration":0.6,"description":"restaurant, tables, chairs, lamps, flowers, mirror, windows, ceiling, artwork, carpet, walls, columns, sofa"}]',
+  15
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DLrY6rLP1Bm/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/976737116537793/',
+  944667,
+  1891313,
+  2.0,
+  87187,
+  740,
+  10.5,
+  '[{"order":1,"start":0,"end":0.7,"duration":0.7,"description":"lobby, mirror, chandelier, door, man, table, carpet, wall, light, artwork, reception"},{"order":2,"start":0.7,"end":1.3,"duration":0.7,"description":"chandelier, tables, chairs, tablecloths, plants, fireplace, artwork, walls, windows, floor, menu boards, person, suit, light fixtures"},{"order":3,"start":1.3,"end":2,"duration":0.7,"description":"ceiling, chandelier, painting, table, chairs, glasses, champagne, tray, bottles, decor, flowers, wall, people, menu, light"},{"order":4,"start":2,"end":2.7,"duration":0.7,"description":"menu, wine glass, table, plate, food, candle, napkin, hand, wood, decor, flowers, vase, background"},{"order":5,"start":2.7,"end":3.4,"duration":0.7,"description":"restaurant, tables, chairs, chandelier, ceiling, windows, walls, decor, plants, plates, cutlery, waiter, food, candle, tablecloth, glass, bar, shelves"},{"order":6,"start":3.4,"end":4.1,"duration":0.7,"description":"lamp, hand, plate, food, glass, wine, table, cloth, vegetables, background"},{"order":7,"start":4.1,"end":4.7,"duration":0.6,"description":"chandelier, table, waiter, gloves, muffins, menu, plants, decor, wall, artwork, light, tray, food, vase, window, ceiling"},{"order":8,"start":4.7,"end":5.3,"duration":0.6,"description":"waiter, tray, food, table, chandelier, mirror, wall, decor, restaurant, chairs, tablecloth, plates, glasses, utensils"},{"order":9,"start":5.3,"end":6,"duration":0.7,"description":"chandelier, table, glasses, wine, plate, food, spoon, napkin, hand, smoke, dessert, chair, wall, window, light"},{"order":10,"start":6,"end":6.6,"duration":0.6,"description":"glass, wine, table, dish, food, steam, candle, light, plate, lemon, bread, cloth"},{"order":11,"start":6.6,"end":7.2,"duration":0.6,"description":"plate, sauce, hand, spoon, food, garnish, bowl, table, napkin, fork"},{"order":12,"start":7.2,"end":7.9,"duration":0.6,"description":"restaurant, table, cheese, glass, chandelier, artwork, people, suit, bow tie, flowers, plate, cup, decor"},{"order":13,"start":7.9,"end":8.5,"duration":0.6,"description":"cheese, knife, hand, glove, cutting board, hay, table, suit, floor"},{"order":14,"start":8.5,"end":9.1,"duration":0.6,"description":"table, coffee maker, flame, glass, plate, food, suit, dress, chandelier, wall, decor, hands"},{"order":15,"start":9.1,"end":9.8,"duration":0.7,"description":"restaurant, table, waiter, glass, bottle, ice bucket, flowers, chandelier, chairs, plates, napkins, lamp, decor, wall, window, floor"},{"order":16,"start":9.8,"end":10.5,"duration":0.7,"description":"glasses, wine, table, light, menu, herbs, hands, chandelier, wall, painting, people"}]',
+  16
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DI4BWOnoTNx/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/1625144304857029/',
+  944667,
+  1533573,
+  1.6,
+  83478,
+  627,
+  9.0,
+  '[{"order":1,"start":0,"end":1.2,"duration":1.2,"description":"door, number, hallway, light, window, furniture, room"},{"order":2,"start":1.2,"end":2.3,"duration":1.1,"description":"room, door, mirror, chandelier, lamp, sofa, table, flowers, bed, window, curtains, wall, floor"},{"order":3,"start":2.3,"end":3.4,"duration":1.1,"description":"bedroom, bed, pillows, mirror, table, chair, window, curtain, floor, rug, door, wall, light, decor, bathroom, sink, towel"},{"order":4,"start":3.4,"end":4.6,"duration":1.2,"description":"table, fruit, flowers, vase, champagne, glasses, mirror, chair, sofa, carpet, wall, window, light fixture, room, door, bed, bedding, artwork"},{"order":5,"start":4.6,"end":5.6,"duration":1,"description":"bed, tray, flowers, teapot, cup, plate, fruit, mirror, robe, bathtub, sink, wall, curtain, window, furniture, vase, teddy bear"},{"order":6,"start":5.6,"end":6.7,"duration":1.1,"description":"bathtub, water, mirror, robe, towels, wall, floor, faucet, woman, sink, cabinet, light, tiles"},{"order":7,"start":6.7,"end":7.9,"duration":1.2,"description":"bathtub, mirror, towels, bathrobes, soap, sink, floor tiles, window, radiator, wall, shelf"},{"order":8,"start":7.9,"end":9,"duration":1.1,"description":"bed, blanket, tray, tea set, flowers, mirror, dresser, curtains, window, wall, door, robe, carpet, vase, teddy bear, light fixture"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DNC9mEosr8g/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/332375873968620/',
+  944667,
+  615746,
+  0.7,
+  27212,
+  246,
+  10.6,
+  '[{"order":1,"start":0,"end":0.7,"duration":0.7,"description":"hotel, windows, balcony, flags, door, cart, person, plants, street, lamp, sign, archway, pavement"},{"order":2,"start":0.7,"end":1.3,"duration":0.6,"description":"hotel, entrance, door, luggage cart, suitcases, man, pavement, logo, plants, light fixtures, steps"},{"order":3,"start":1.3,"end":2,"duration":0.6,"description":"hallway, cart, table, dishes, glass, juice, bread, butter, painting, wall, light, floor"},{"order":4,"start":2,"end":2.7,"duration":0.7,"description":"chandelier, window, curtain, table, chairs, food, drinks, bed, blanket, wall, door, balcony, plants, landscape, sunlight"},{"order":5,"start":2.7,"end":3.3,"duration":0.7,"description":"window, table, chair, plate, glass, juice, fruit, flower, balcony, bed, blanket, person, view, trees, sky"},{"order":6,"start":3.3,"end":4,"duration":0.7,"description":"door, wall, painting, flowers, vase, man, uniform, hallway, orchid"},{"order":7,"start":4,"end":4.7,"duration":0.7,"description":"bed, pillow, blanket, nightstand, flowers, wall, wallpaper, peacock, light switch, door, person, clothing"},{"order":8,"start":4.7,"end":5.3,"duration":0.6,"description":"restaurant, tables, chairs, tablecloths, plates, glasses, cutlery, candles, carpet, walls, ceiling, artwork, columns, windows, staff, sofa, cushions"},{"order":9,"start":5.3,"end":6,"duration":0.7,"description":"restaurant, table, chairs, glassware, plates, napkins, waiter, painting, lamp, column, flowers, candle, wall, mirror, decor"},{"order":10,"start":6,"end":6.6,"duration":0.6,"description":"table, plates, glasses, wine, soup, salad, fish, spoon, fork, napkin, pillow, wall, light, sauce, herbs, decoration"},{"order":11,"start":6.6,"end":7.3,"duration":0.7,"description":"piano, musician, curtains, ceiling, lights, tables, chairs, windows, bar, bottles, floor, artwork, columns"},{"order":12,"start":7.3,"end":8,"duration":0.7,"description":"piano, strings, hammers, lid, frame, keys, wood, metal"},{"order":13,"start":8,"end":8.6,"duration":0.7,"description":"bar, bartender, bottles, glasses, countertop, stools, shelves, ceiling, lights, wall"},{"order":14,"start":8.6,"end":10.6,"duration":2,"description":"bar, bottles, glasses, mirror, flowers, table, lamp, sofa, chair, counter, wall, ceiling, light"}]',
+  14
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DK7tHuCtVRY/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/1860155321383372/',
+  944667,
+  587719,
+  0.6,
+  21977,
+  280,
+  12.3,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"restaurant, tables, chairs, lamps, windows, flowers, ceiling, artwork, carpet, walls, furniture, bar"},{"order":2,"start":0.8,"end":1.8,"duration":1,"description":"piano, stools, lamps, curtains, windows, columns, floor, carpet, walls, musician"},{"order":3,"start":1.8,"end":2.8,"duration":1,"description":"bar, bartender, bottles, glasses, countertop, stools, shelves, wall, ceiling"},{"order":4,"start":2.8,"end":3.9,"duration":1,"description":"bar, bartender, bottles, glasses, chairs, table, tray, food, dessert, wall, painting, light, carpet, sofa, armchair"},{"order":5,"start":3.9,"end":4.9,"duration":1,"description":"door, window, man, terrace, sofa, table, plants, sky, city, furniture, flowers"},{"order":6,"start":4.9,"end":5.9,"duration":1,"description":"table, glasses, champagne, food, flowers, trees, sky, Eiffel Tower, man, suit, plate, cityscape"},{"order":7,"start":5.9,"end":6.9,"duration":1,"description":"lamp, door, hallway, table, chairs, wall, window, light, carpet, person, person, artwork, mirror, reception desk"},{"order":8,"start":6.9,"end":8,"duration":1.1,"description":"chandelier, table, tray, food, staff, wall, decor, mirror, guests, clothing, floor, light"},{"order":9,"start":8,"end":8.9,"duration":0.9,"description":"restaurant, tables, chairs, chandelier, artwork, glasses, wine, server, tray, bottle, floor, walls, ceiling, light fixtures, people"},{"order":10,"start":8.9,"end":10,"duration":1.1,"description":"table, glasses, wine, hand, dish, smoke, flowers, plate, napkin, restaurant, chairs, decor"},{"order":11,"start":10,"end":11.1,"duration":1,"description":"window, sky, clouds, sunset, Eiffel Tower, trees, buildings"},{"order":12,"start":11.1,"end":12.3,"duration":1.3,"description":"Eiffel Tower, lights, sky, buildings, city, night, beam"}]',
+  12
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DK3zr0HNhCX/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/702726325708277/',
+  944667,
+  537459,
+  0.6,
+  38215,
+  508,
+  7.7,
+  '[{"order":1,"start":0,"end":7.7,"duration":7.7,"description":"chandelier, table, chairs, wall, painting, fireplace, window, light fixtures, floor, carpet, decor, shelves, books, plants"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DMnxBG3Mz7H/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/24234185562883501/',
+  944667,
+  556737,
+  0.6,
+  35145,
+  641,
+  7.7,
+  '[{"order":1,"start":0,"end":1.4,"duration":1.4,"description":"chandelier, ceiling, table, chairs, tablecloth, floor, mirror, fireplace, artwork, lamps, wall, windows, serving cart, dishes, cutlery, glassware, carpet"},{"order":2,"start":1.4,"end":3.1,"duration":1.7,"description":"teapot, cup, saucer, plate, croissant, dessert, glass, table, chandelier, chair, tablecloth, spoon, sugar, water"},{"order":3,"start":3.1,"end":4.7,"duration":1.6,"description":"table, chairs, plates, cutlery, glasses, orange juice, coffee, croissants, ham, eggs, menu, artwork, fireplace, wall, lamps, floor, person"},{"order":4,"start":4.7,"end":6.3,"duration":1.6,"description":"table, plate, waffle, syrup, cup, coffee, orange juice, fruit, berries, butter, glass, water, spoon, knife, fork, napkin, chandelier, wall, painting, chair, lamp, window"},{"order":5,"start":6.3,"end":7.7,"duration":1.4,"description":"table, plates, omelette, fruits, coffee, teapot, butter, orange juice, croissant, pastry, glass, water, fork, knife, napkin, fireplace, chairs, artwork, lamps, people"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DGpmySYMFf5/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/1013051360877378/',
+  944667,
+  497057,
+  0.5,
+  12039,
+  223,
+  10.2,
+  '[{"order":1,"start":0,"end":1.2,"duration":1.2,"description":"restaurant, tables, chairs, lamps, windows, mirrors, columns, flowers, artwork, carpet, sofa"},{"order":2,"start":1.2,"end":2.3,"duration":1.2,"description":"table, chairs, plates, glasses, cutlery, napkins, food, drinks, fruit, pastries, waiter, lamps, wall, painting, cushion, columns, floor"},{"order":3,"start":2.3,"end":3.4,"duration":1.1,"description":"table, plates, cutlery, cups, teapot, pastries, fruit, juice, coffee, bowl, berries, pillow, sofa, wall, artwork, gold, decor"},{"order":4,"start":3.4,"end":4.4,"duration":1,"description":"restaurant, waiter, table, plate, food, orange juice, coffee, bread, butter, pastries, glass, cutlery, chairs, window, lamp, columns, carpet"},{"order":5,"start":4.4,"end":5.6,"duration":1.2,"description":"plate, food, shrimp, vegetables, fork, knife, napkin, glass, juice, butter, cup, saucer, table, tablecloth, spoon, bread, basket, teapot"},{"order":6,"start":5.6,"end":6.6,"duration":1,"description":"restaurant, tables, chairs, tablecloths, flowers, lamps, windows, curtains, ceiling, columns, mirrors, artwork"},{"order":7,"start":6.6,"end":7.8,"duration":1.2,"description":"table, chairs, plates, glasses, cutlery, food, fruit, croissants, juice, painting, wall, lamp, cushion, sofa, decor"},{"order":8,"start":7.8,"end":9,"duration":1.2,"description":"breakfast, table, plate, pancakes, raspberries, blueberries, butter, jam, croissants, coffee, tea, juice, glass, spoon, fork, knife, bowl, sugar, cream, napkin, tablecloth, floor"},{"order":9,"start":9,"end":10.2,"duration":1.2,"description":"table, chairs, plates, glasses, cutlery, food, croissants, fruit, juice, coffee, painting, wall, cushion, sofa, decor"}]',
+  9
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lemeuriceparis',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DG1DfILSPsV/',
+  'https://www.instagram.com/lemeuriceparis/',
+  'https://www.instagram.com/reels/audio/994220505958215/',
+  944667,
+  1683086,
+  1.8,
+  88673,
+  559,
+  10.1,
+  '[{"order":1,"start":0,"end":2.2,"duration":2.2,"description":"bathroom, sink, mirror, tiles, windows, light, floor, towels, staff"},{"order":2,"start":2.2,"end":2.9,"duration":0.7,"description":"bathtub, sink, mirror, tiles, windows, plants, floor, person, robe"},{"order":3,"start":2.9,"end":3.6,"duration":0.7,"description":"window, chair, marble, wall, towel, person, uniform, sunlight, hook"},{"order":4,"start":3.6,"end":4.3,"duration":0.7,"description":"slippers, towel, marble, hand, logo"},{"order":5,"start":4.3,"end":5,"duration":0.7,"description":"bathtub, sink, mirror, tiles, window, light fixture, towel, floor, wall, chair, person"},{"order":6,"start":5,"end":5.6,"duration":0.6,"description":"bathtub, sink, mirror, marble, faucet, champagne bucket, glasses, flowers, window, plants, light"},{"order":7,"start":5.6,"end":6.2,"duration":0.6,"description":"bathtub, water, faucet, marble, champagne bucket, glasses, rose petals"},{"order":8,"start":6.2,"end":7,"duration":0.7,"description":"bathtub, faucet, marble, water, hand, towel, window, plant"},{"order":9,"start":7,"end":10.1,"duration":3.1,"description":"bathtub, shower, sink, mirror, tiles, windows, plants, towels, marble, light"}]',
+  9
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DOi-FZLiuTC/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/0/',
+  702118,
+  428932,
+  0.6,
+  13092,
+  55,
+  9.0,
+  '[{"order":1,"start":0,"end":1.6,"duration":1.6,"description":"pool, water, grass, mountains, sky, leaves, person"},{"order":2,"start":1.6,"end":3.8,"duration":2.2,"description":"vine, leaves, window, book, glass, wine, plate, watermelon, pool, grass, landscape, trees, sky"},{"order":3,"start":3.8,"end":6,"duration":2.2,"description":"pool, sun loungers, glass, fruit, mountain, trees, sky"},{"order":4,"start":6,"end":9,"duration":3,"description":"faucet, water, stone, bowl, apples, lemons, oranges, knife, cutting board, countertop, wall, sunlight"}]',
+  4
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DOBUippijQR/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/2608978982784832/',
+  702118,
+  1055785,
+  1.5,
+  55525,
+  127,
+  8.4,
+  '[{"order":1,"start":0,"end":1.2,"duration":1.2,"description":"pool, water, splash, house, trees, chairs, table, grass, mountain"},{"order":2,"start":1.2,"end":3.5,"duration":2.3,"description":"table, glass, wine, lemons, plate, water, pool, chair, stone"},{"order":3,"start":3.5,"end":5.5,"duration":1.9,"description":"window, pool, grass, chairs, robe, stone, hills, sky"},{"order":4,"start":5.5,"end":8.4,"duration":2.9,"description":"pool, chair, water, mountains, sky, clouds, sunset"}]',
+  4
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'mennuccicristiano',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DNnEU72Iood/',
+  'https://www.instagram.com/mennuccicristiano/',
+  'https://www.instagram.com/reels/audio/740695348579380/',
+  702118,
+  453509,
+  0.6,
+  29674,
+  189,
+  18.8,
+  '[{"order":1,"start":0,"end":18.8,"duration":18.8,"description":"villa, pool, jacuzzi, sun loungers, lawn, garden, trees, mountains, sky"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DNao571iuGS/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/2127779914371760/',
+  702118,
+  1436187,
+  2.0,
+  65398,
+  274,
+  8.0,
+  '[{"order":1,"start":0,"end":1.5,"duration":1.5,"description":"table, chairs, plates, glasses, fruit, pool, water, plants, mountains, sky, window, wall, floor, basket, candle, vase"},{"order":2,"start":1.5,"end":2.8,"duration":1.3,"description":"vine leaves, glass, book, pool, grass, plate, watermelon, wine bottle, landscape, trees, sky"},{"order":3,"start":2.8,"end":4.1,"duration":1.3,"description":"table, fruit, watermelon, apples, cantaloupe, orange, lemon, bowl, wall, floor"},{"order":4,"start":4.1,"end":5.4,"duration":1.3,"description":"faucet, water, stone basin, apples, peaches, lemons, oranges, bowls, cutting board, strawberries, countertop, wall, tiles"},{"order":5,"start":5.4,"end":6.7,"duration":1.3,"description":"villa, pool, mountain, trees, grass, chair, table, book, sunlight, sky"},{"order":6,"start":6.7,"end":8,"duration":1.3,"description":"sofa, cushion, lamp, window, shadow, table, book, glass, wine, candles, plate, pitcher"}]',
+  6
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DN53GURCgur/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/0/',
+  702118,
+  644665,
+  0.9,
+  22561,
+  89,
+  7.0,
+  '[{"order":1,"start":0,"end":1.5,"duration":1.5,"description":"pool, grass, mountains, table, chairs, cups, vase, plants, gravel, sofa, canopy, sunlight"},{"order":2,"start":1.5,"end":2.9,"duration":1.4,"description":"pool, water, stone wall, patio, chairs, table, plants, trees, grass, house, door, window, sofa, steps"},{"order":3,"start":2.9,"end":4.2,"duration":1.3,"description":"window, vines, pool, grass, cups, stone, landscape, trees, hills"},{"order":4,"start":4.2,"end":5.6,"duration":1.4,"description":"faucet, water, bowl, plums, lemons, oranges, cutting board, knife, countertop, wall, stone"},{"order":5,"start":5.6,"end":7,"duration":1.4,"description":"pool, water, towel, glass, fruit, table, tree, grass, mountain, sky"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DNI93rzil_r/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/1123850102939109/',
+  702118,
+  1727284,
+  2.5,
+  39275,
+  187,
+  6.0,
+  '[{"order":1,"start":0,"end":6,"duration":6,"description":"pool, chairs, table, glass, house, trees, mountain, grass, sky"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DNsrVqZ1CIW/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/1071320941878088/',
+  702118,
+  606753,
+  0.9,
+  28497,
+  118,
+  6.9,
+  '[{"order":1,"start":0,"end":1.5,"duration":1.5,"description":"fire pit, fire, grass, pool, mountain, sky, sunset, glass, candle, stone, patio"},{"order":2,"start":1.5,"end":2.8,"duration":1.3,"description":"watermelon, cantaloupe, plate, wine, glass, book, table, hand, surface"},{"order":3,"start":2.8,"end":4.2,"duration":1.4,"description":"pool, water, stone house, chairs, table, glass, fruit, mountain, sky, grass, trees, patio"},{"order":4,"start":4.2,"end":5.5,"duration":1.3,"description":"window, pool, sun loungers, orange pillow, fire pit, chairs, glass, landscape, hills, trees, sky"},{"order":5,"start":5.5,"end":6.9,"duration":1.4,"description":"pool, mountain, sky, clouds, sunset, grass, chair, landscape, trees, villa"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DMIl0MgC3x9/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/150596121141284/',
+  702118,
+  371730,
+  0.5,
+  19260,
+  89,
+  10.7,
+  '[{"order":1,"start":0,"end":10.7,"duration":10.7,"description":"pool, water, sun loungers, grass, building, trees, mountains, sky"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DLuy3OPCbdI/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/2020954041491269/',
+  702118,
+  444467,
+  0.6,
+  10156,
+  74,
+  7.0,
+  '[{"order":1,"start":0,"end":1,"duration":1,"description":"villa, pool, glass, stone, floor, light, chairs, table, candles, window, wall, television, sofa, curtain, handle, rocks, water"},{"order":2,"start":1,"end":2,"duration":1,"description":"pool, water, door, stone, ceiling, light"},{"order":3,"start":2,"end":3,"duration":1,"description":"stairs, stone, water, candles, railing"},{"order":4,"start":3,"end":4,"duration":1,"description":"villa, pool, water, trees, grass, stone, patio, chairs, mountain, sky, clouds"},{"order":5,"start":4,"end":5,"duration":1,"description":"shower, water, window, greenery, wall, tiles, light"},{"order":6,"start":5,"end":6,"duration":1,"description":"coffee cup, saucer, spoon, book, pages, table, wood"},{"order":7,"start":6,"end":7,"duration":1,"description":"hot tub, wood, towel, glasses, watermelon, deck, trees, grass, water, plants, sky"}]',
+  7
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DLcaqEiip_-/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/0/',
+  702118,
+  1361123,
+  1.9,
+  110869,
+  321,
+  9.2,
+  '[{"order":1,"start":0,"end":2.1,"duration":2.1,"description":"villa, pool, water, trees, grass, stone, mountain, sky, clouds"},{"order":2,"start":2.1,"end":3.7,"duration":1.6,"description":"hot tub, wood, towel, glasses, watermelon, grass, trees, water, deck, stones, plants"},{"order":3,"start":3.7,"end":5.2,"duration":1.5,"description":"shower, water, window, wall, tiles, greenery, roof"},{"order":4,"start":5.2,"end":7,"duration":1.8,"description":"table, chairs, plates, watermelon, fruit, pastries, coffee pot, waffles, greenery, lantern, wood, gravel"},{"order":5,"start":7,"end":9.2,"duration":2.2,"description":"bedroom, bed, window, curtains, lamp, chair, ottoman, rug, ceiling, walls, floor"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'nichodebiasio',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DK2FfXRIkyO/',
+  'https://www.instagram.com/nichodebiasio/',
+  'https://www.instagram.com/reels/audio/436545318130904/',
+  702118,
+  467433,
+  0.7,
+  23096,
+  174,
+  7.3,
+  '[{"order":1,"start":0,"end":7.3,"duration":7.3,"description":"house, pool, sun loungers, garden, trees, mountains, sky, water"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DKWxsKGijPJ/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/0/',
+  702118,
+  7587221,
+  10.8,
+  487608,
+  505,
+  9.9,
+  '[{"order":1,"start":0,"end":2.7,"duration":2.7,"description":"pool, house, trees, mountain, sky, water, lounge chair, grass, stone"},{"order":2,"start":2.7,"end":3.9,"duration":1.2,"description":"hot tub, wood, towel, shoes, trees, grass, water, plants, pathway"},{"order":3,"start":3.9,"end":5.2,"duration":1.3,"description":"table, book, cup, tea, saucer, pages, sunlight, wood"},{"order":4,"start":5.2,"end":6.5,"duration":1.3,"description":"table, chairs, plates, food, napkins, book, lantern, trees, plants, gravel"},{"order":5,"start":6.5,"end":7.8,"duration":1.4,"description":"house, pool, chairs, trees, grass, stone, mountain, sky, clouds"},{"order":6,"start":7.8,"end":9,"duration":1.1,"description":"shower, glass, window, wall, tiles, faucet, shelf, towels, floor"},{"order":7,"start":9,"end":9.9,"duration":0.9,"description":"trees, grass, plants, garden, landscape, sky"}]',
+  7
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'mennuccicristiano',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DJ9RbwjoXAj/',
+  'https://www.instagram.com/mennuccicristiano/',
+  'https://www.instagram.com/reels/audio/2098204657326272/',
+  702118,
+  714184,
+  1.0,
+  45975,
+  132,
+  16.5,
+  '[{"order":1,"start":0,"end":16.5,"duration":16.5,"description":"tower, pool, water, lawn, trees, hills, sky, person, patio, deck"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'diciassetterosso',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DJymgbGt1o8/',
+  'https://www.instagram.com/diciassetterosso/',
+  'https://www.instagram.com/reels/audio/676152221689706/',
+  702118,
+  533951,
+  0.8,
+  42347,
+  244,
+  26.7,
+  '[{"order":1,"start":0,"end":3.4,"duration":3.4,"description":"pool, lawn, trees, mountains, houses, patio, chairs, table, hedges"},{"order":2,"start":3.4,"end":5.3,"duration":1.9,"description":"pool, house, garden, trees, lake, grass, road, hills, sky"},{"order":3,"start":5.3,"end":6.5,"duration":1.2,"description":"book, coffee cup, hand, stone, grass, water"},{"order":4,"start":6.5,"end":7.6,"duration":1.1,"description":"tree, house, windows, grass, garden, flowers, plants, landscape"},{"order":5,"start":7.6,"end":8.9,"duration":1.3,"description":"stone wall, patio, chairs, table, plants, lawn, trees, sky"},{"order":6,"start":8.9,"end":10.4,"duration":1.6,"description":"mountains, hills, fields, trees, sky, clouds, river, landscape, sunset"},{"order":7,"start":10.4,"end":11.8,"duration":1.4,"description":"pool, grass, chair, mountain, trees, sky"},{"order":8,"start":11.8,"end":13.3,"duration":1.5,"description":"field, trees, path, hills, sky, clouds"},{"order":9,"start":13.3,"end":16.3,"duration":3,"description":"pool, lawn, trees, mountains, house, patio, chairs, table, sky, clouds"},{"order":10,"start":16.3,"end":18.2,"duration":1.8,"description":"house, stone, roof, window, door, lantern, flowers, grass, sky, mountains"},{"order":11,"start":18.2,"end":19.3,"duration":1.2,"description":"tree, grass, stone wall, chair, table, pot, door, landscape, sky"},{"order":12,"start":19.3,"end":20.5,"duration":1.2,"description":"house, sun, mountains, water, lawn, chairs, table, loungers, grass"},{"order":13,"start":20.5,"end":22.3,"duration":1.8,"description":"pool, water, grass, mountain, sky, person"},{"order":14,"start":22.3,"end":26.7,"duration":4.4,"description":"villa, pool, lawn, trees, mountains, pathway, sun loungers, garden"}]',
+  14
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'ilhan1077',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DKE6_9TMz4s/',
+  'https://www.instagram.com/ilhan1077/',
+  'https://www.instagram.com/reels/audio/1041743607478796/',
+  702118,
+  436405,
+  0.6,
+  28736,
+  201,
+  11.6,
+  '[{"order":1,"start":0,"end":11.6,"duration":11.6,"description":"pool, house, lawn, trees, vineyard, hills, pathway, sun loungers, patio, sky"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DIReTA1i7xv/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/3409234269223227/',
+  702118,
+  468692,
+  0.7,
+  16740,
+  88,
+  9.8,
+  '[{"order":1,"start":0,"end":1.4,"duration":1.4,"description":"pool, glass, rocks, light, furniture, table, chairs, wall, floor"},{"order":2,"start":1.4,"end":2.5,"duration":1.1,"description":"pool, stairs, railing, stone, windows, furniture, table, chairs, light"},{"order":3,"start":2.5,"end":3.6,"duration":1.2,"description":"lamp, sofa, cushions, table, window, wall, mirror, stairs, railing, light, room, furniture, decor, ceiling"},{"order":4,"start":3.6,"end":5.8,"duration":2.2,"description":"pool, water, stairs, stone, light"},{"order":5,"start":5.8,"end":6.7,"duration":0.9,"description":"pool, water, steps, stone"},{"order":6,"start":6.7,"end":7.6,"duration":1,"description":"pool, water, window, light, tiles"},{"order":7,"start":7.6,"end":8.7,"duration":1.1,"description":"pool, water, window, wall, stone"},{"order":8,"start":8.7,"end":9.8,"duration":1.1,"description":"water, pool, stone, person, swimming"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DIY4Pp4iC2g/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/1532161034198135/',
+  702118,
+  1496669,
+  2.1,
+  101717,
+  184,
+  9.9,
+  '[{"order":1,"start":0,"end":9.9,"duration":9.9,"description":"tower, pool, grass, mountains, trees, sky"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DH6JlDoCbm6/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/1142792514263051/',
+  702118,
+  695638,
+  1.0,
+  50889,
+  160,
+  11.8,
+  '[{"order":1,"start":0,"end":2.5,"duration":2.5,"description":"pool, sun loungers, trees, garden, patio, table, chairs, house, lawn, sky"},{"order":2,"start":2.5,"end":5.3,"duration":2.8,"description":"table, chairs, patio, grass, plants, flowers, food, drinks, sunlight"},{"order":3,"start":5.3,"end":7.1,"duration":1.8,"description":"house, roof, windows, wall, plants, patio, chairs, table, lawn, garden"},{"order":4,"start":7.1,"end":9.3,"duration":2.1,"description":"pool, deck, lawn, chairs, grass"},{"order":5,"start":9.3,"end":11.8,"duration":2.5,"description":"pool, trees, grass, landscape, hills, sky"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DIoW4tuCOQz/',
+  'https://www.instagram.com/tenutadimurlo/',
+  '',
+  702118,
+  1183979,
+  1.7,
+  72861,
+  176,
+  12.0,
+  '[{"order":1,"start":0,"end":3.5,"duration":3.5,"description":"villa, pool, lawn, trees, garden, mountains, stone building, chairs, patio"},{"order":2,"start":3.5,"end":6.1,"duration":2.6,"description":"pool, sun loungers, mountain, sky, water, grass, trees"},{"order":3,"start":6.1,"end":12,"duration":5.9,"description":"pool, house, chairs, table, trees, grass, mountain, sky"}]',
+  3
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DHJiKB3iKEp/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/601148472562040/',
+  702118,
+  834133,
+  1.2,
+  36943,
+  191,
+  6.9,
+  '[{"order":1,"start":0,"end":6.9,"duration":6.9,"description":"pool, house, trees, mountain, grass, chairs, patio, wall, sky"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DHQw1z0iVlZ/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/1016142193420494/',
+  702118,
+  694860,
+  1.0,
+  31254,
+  104,
+  12.0,
+  '[{"order":1,"start":0,"end":12,"duration":12,"description":"pool, sun loungers, mountains, sunset, water, trees, grass"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DHi4wLsirqd/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/2851442728363641/',
+  702118,
+  1288536,
+  1.8,
+  83665,
+  233,
+  8.3,
+  '[{"order":1,"start":0,"end":2.6,"duration":2.6,"description":"tree, stone wall, chairs, table, book, food, patio, mountain, sky, sunlight"},{"order":2,"start":2.6,"end":4.8,"duration":2.2,"description":"cup, coffee, hand, water, reflection"},{"order":3,"start":4.8,"end":8.3,"duration":3.5,"description":"villa, pool, garden, plants, trees, mountain, stone wall, chairs, grass"},{"order":4,"start":8.3,"end":8.3,"duration":0,"description":"no phones"}]',
+  4
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DG3SqhLiNE8/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/601148472562040/',
+  702118,
+  5538302,
+  7.9,
+  135993,
+  670,
+  7.1,
+  '[{"order":1,"start":0,"end":7.1,"duration":7.1,"description":"pool, grass, mountains, building, trees, sun loungers"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DG-pMtoifSY/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/2752167988283103/',
+  702118,
+  1453899,
+  2.1,
+  102945,
+  263,
+  8.0,
+  '[{"order":1,"start":0,"end":1.6,"duration":1.6,"description":"pool, table, chairs, glasses, landscape, mountains, sky, clouds, grass, patio, stone"},{"order":2,"start":1.6,"end":3.7,"duration":2,"description":"grill, table, glasses, fruit, landscape, mountains, sky, clouds, grass, plants"},{"order":3,"start":3.7,"end":8,"duration":4.3,"description":"table, chairs, pergola, flowers, grass, trees, mountain, sky"},{"order":4,"start":8,"end":8,"duration":0,"description":"text"}]',
+  4
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DMDATmGCJcg/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/0/',
+  702118,
+  456328,
+  0.6,
+  19948,
+  112,
+  11.6,
+  '[{"order":1,"start":0,"end":1.5,"duration":1.5,"description":"pool, water, sun loungers, trees, stone wall, house, patio, grass, sky, clouds, mountain"},{"order":2,"start":1.5,"end":2.8,"duration":1.3,"description":"cup, coffee, spoon, book, pages, table, wood"},{"order":3,"start":2.8,"end":4.3,"duration":1.5,"description":"pool, sun loungers, steps, plants, trees, water, cushions, patio, stone, sky"},{"order":4,"start":4.3,"end":5.7,"duration":1.4,"description":"table, plates, glass, juice, watermelon, pancakes, fruit, bowl, cutlery, pitcher, greenery, chair, hand, food, grass"},{"order":5,"start":5.7,"end":7.1,"duration":1.4,"description":"window, curtain, wall, pool, grass, trees, railing, floor"},{"order":6,"start":7.1,"end":8.6,"duration":1.5,"description":"shower, glass, wall, faucet, tiles, window, wood, bench, towels, floor"},{"order":7,"start":8.6,"end":10.1,"duration":1.5,"description":"pool, water, stones, house, windows, trees, grass, chairs, towels, plants, sky, mountain"},{"order":8,"start":10.1,"end":11.6,"duration":1.5,"description":"pool, water, chair, table, stone wall, window, plants, steps, tiles, sky"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'tenutadimurlo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DKCdY5HidgX/',
+  'https://www.instagram.com/tenutadimurlo/',
+  'https://www.instagram.com/reels/audio/1325252672269965/',
+  702118,
+  1265649,
+  1.8,
+  58468,
+  446,
+  27.9,
+  '[{"order":1,"start":0,"end":2,"duration":2,"description":"pool, house, stone, roof, chimney, plants, patio, water, trees, grass, sky"},{"order":2,"start":2,"end":4,"duration":2,"description":"house, stairs, plants, trees, patio, furniture, table, chairs, gravel, sky, clouds"},{"order":3,"start":4,"end":6,"duration":2,"description":"cottage, pool, sun loungers, grass, mountain, sky, trees, clouds"},{"order":4,"start":6,"end":8,"duration":2,"description":"pool, water, mountains, trees, grass, sky, clouds"},{"order":5,"start":8,"end":10,"duration":2,"description":"shelf, wall, faucet, bowl, fruit, lemons, oranges, plums, countertop, stone, wood"},{"order":6,"start":10,"end":12,"duration":2,"description":"pool, book, cup, grass, stone"},{"order":7,"start":12,"end":14,"duration":1.9,"description":"table, chairs, food, drinks, fruit, mountain, trees, stone wall, window, plants, patio"},{"order":8,"start":14,"end":15.9,"duration":2,"description":"pool, mountains, water, trees, lawn, table, book, cup, chair, sky, clouds"},{"order":9,"start":15.9,"end":17.9,"duration":2,"description":"lamp, chair, table, candle, window, stone wall, plants, ottoman, rug, books, light"},{"order":10,"start":17.9,"end":20,"duration":2.1,"description":"villa, pool, sun loungers, grass, trees, mountain, sky, clouds"},{"order":11,"start":20,"end":22,"duration":2,"description":"window, book, pool, grass, trees, water, pitcher, roof, vines"},{"order":12,"start":22,"end":24,"duration":2,"description":"house, stone, windows, door, trees, grass, mountain, sky"},{"order":13,"start":24,"end":25.9,"duration":1.9,"description":"pool, chairs, tree, grass, building, mountain, sky"},{"order":14,"start":25.9,"end":27.9,"duration":1.9,"description":"window, tree, mountain, grass, candle, glass, wine, landscape"}]',
+  14
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domaines.de.chabran',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DJcBluXtOJm/',
+  'https://www.instagram.com/domaines.de.chabran/',
+  'https://www.instagram.com/reels/audio/1795598264340737/',
+  94405,
+  636876,
+  6.7,
+  28097,
+  165,
+  10.5,
+  '[{"order":1,"start":0,"end":10.5,"duration":10.5,"description":"pool, sun loungers, house, trees, garden, lawn, water"},{"order":2,"start":10.5,"end":10.5,"duration":0,"description":"text"}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domaines.de.chabran',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DOJKz2oDR56/',
+  'https://www.instagram.com/domaines.de.chabran/',
+  'https://www.instagram.com/reels/audio/519453297843728/',
+  94405,
+  329816,
+  3.5,
+  25243,
+  196,
+  8.0,
+  '[{"order":1,"start":0,"end":1.7,"duration":1.7,"description":"tree, house, door, windows, chairs, table, garden, plants, pool, lanterns, gravel, lawn"},{"order":2,"start":1.7,"end":3.3,"duration":1.6,"description":"table, plates, fork, knife, glass, pitcher, fruit, cheese, ham, cucumber, tomatoes, croissants, jar, candle, tablecloth, pathway, plants, trees, grass"},{"order":3,"start":3.3,"end":5.2,"duration":1.9,"description":"window, shutters, door, table, chairs, flowers, candles, fruit, basket, stone, wall, patio, floor"},{"order":4,"start":5.2,"end":8,"duration":2.8,"description":"tree, house, windows, shutters, garden, grass, gravel, bench, candelabra, blanket, person, stone, plants, olive tree"}]',
+  4
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domaines.de.chabran',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DNQfuFKNAo7/',
+  'https://www.instagram.com/domaines.de.chabran/',
+  'https://www.instagram.com/reels/audio/24350513154565348/',
+  94405,
+  1120749,
+  11.9,
+  47618,
+  195,
+  8.9,
+  '[{"order":1,"start":0,"end":2.1,"duration":2.1,"description":"pool, sun loungers, tree, house, patio, chairs, garden, lawn, sky, stone, roof"},{"order":2,"start":2.1,"end":4.1,"duration":2,"description":"house, windows, door, roof, trees, garden, lawn, pathway, stones, lanterns, pots, gravel"},{"order":3,"start":4.1,"end":6.7,"duration":2.6,"description":"table, food, fruit, glass, garden, plants, trees, woman, dress, lawn, sunlight"},{"order":4,"start":6.7,"end":8.9,"duration":2.2,"description":"table, chair, food, fruit, glass, bottle, garden, plants, trees, woman, dress, sunlight"},{"order":5,"start":8.9,"end":8.9,"duration":0,"description":"No visible property features."}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domaines.de.chabran',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DNatqmztMhN/',
+  'https://www.instagram.com/domaines.de.chabran/',
+  'https://www.instagram.com/reels/audio/1771111983007962/',
+  94405,
+  104153,
+  1.1,
+  5365,
+  43,
+  7.9,
+  '[{"order":1,"start":0,"end":7.9,"duration":7.9,"description":"pool, sun loungers, garden, trees, villa, umbrella, person, water, lawn, stone statues, sky"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'voyage_provocateur',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DLKAlrmNinv/',
+  'https://www.instagram.com/voyage_provocateur/',
+  'https://www.instagram.com/reels/audio/1338299433486433/',
+  94405,
+  153871,
+  1.6,
+  6329,
+  130,
+  7.5,
+  '[{"order":1,"start":0,"end":1.3,"duration":1.3,"description":"kitchen, countertop, stove, oven, chair, child, bowl, bread, candles, wall, plates, bottles, cabinet, light fixture, tiles"},{"order":2,"start":1.3,"end":2.4,"duration":1.1,"description":"candles, candelabra, bottles, plate, countertop, croissants, fruit, glass, bowl, artichokes, eggplants, wooden box, stove, kitchen"},{"order":3,"start":2.4,"end":3.5,"duration":1.1,"description":"kitchen, stove, vegetables, bowl, countertop, faucet, cabinet, drawer, wall, floor, child, dress, shoes"},{"order":4,"start":3.5,"end":4.5,"duration":1,"description":"door, window, chairs, baskets, vegetables, stone, wall, garden, grass"},{"order":5,"start":4.5,"end":5.5,"duration":1,"description":"kitchen, stove, oven, pot, plates, wall, countertop, drawer, child, dress, flowers, bottles, tiles"},{"order":6,"start":5.5,"end":6.6,"duration":1.1,"description":"kitchen, cabinets, stove, sink, flowers, vase, plates, wall, wood, floor, child, adult"},{"order":7,"start":6.6,"end":7.5,"duration":0.9,"description":"kitchen, table, flowers, plates, wall, stove, sink, faucet, box, child, wood, beam"}]',
+  7
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'nichodebiasio',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DK93nmBIVhH/',
+  'https://www.instagram.com/nichodebiasio/',
+  'https://www.instagram.com/reels/audio/882204072166441/',
+  94405,
+  245369,
+  2.6,
+  18318,
+  155,
+  6.8,
+  '[{"order":1,"start":0,"end":6.8,"duration":6.8,"description":"pool, house, trees, lawn, sun loungers, patio, people, water, garden"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'chloecleroux',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DMGHCpjsSih/',
+  'https://www.instagram.com/chloecleroux/',
+  'https://www.instagram.com/reels/audio/1852232471747137/',
+  94405,
+  838483,
+  8.9,
+  64159,
+  447,
+  15.0,
+  '[{"order":1,"start":0,"end":1.3,"duration":1.3,"description":"house, door, window, plants, gravel, stone, woman, dress"},{"order":2,"start":1.3,"end":2.1,"duration":0.7,"description":"gate, window, wall, gravel, house, sunlight"},{"order":3,"start":2.1,"end":2.8,"duration":0.8,"description":"tree, house, door, window, chairs, table, gravel, plants, lemons"},{"order":4,"start":2.8,"end":3.6,"duration":0.8,"description":"table, chairs, window, wall, plants, stone, gravel, food, drink, pitcher, glass, fruit, cloth"},{"order":5,"start":3.6,"end":4.4,"duration":0.8,"description":"door, curtains, floor, light, wall, chair, window"},{"order":6,"start":4.4,"end":5.1,"duration":0.7,"description":"window, curtain, wall, painting, chair, table, vase, cup, floor, light, beam"},{"order":7,"start":5.1,"end":5.9,"duration":0.8,"description":"fireplace, chandelier, wooden beams, stone wall, sofa, coffee table, candles, rug, chair, decorative object, window, wall, floor"},{"order":8,"start":5.9,"end":6.6,"duration":0.7,"description":"table, chairs, fireplace, wood beams, floor tiles, basket, flowers"},{"order":9,"start":6.6,"end":7.4,"duration":0.8,"description":"kitchen, island, countertop, fruit, cabinets, stove, backsplash, tiles, ceiling, beams, lights, window, floor"},{"order":10,"start":7.4,"end":8.1,"duration":0.8,"description":"kitchen, stove, countertop, cabinets, tiles, wall, window, floor"},{"order":11,"start":8.1,"end":8.9,"duration":0.8,"description":"bed, pillows, blanket, wall, painting, lamp, nightstand, electrical outlet"},{"order":12,"start":8.9,"end":9.7,"duration":0.8,"description":"bed, blanket, sofa, cushions, lamp, window, curtains, wall, ceiling, beams, floor, tiles, door"},{"order":13,"start":9.7,"end":10.4,"duration":0.8,"description":"house, windows, door, table, chairs, grass, plants, trees, roof"},{"order":14,"start":10.4,"end":11.2,"duration":0.8,"description":"window, pool, bench, garden, plants, trees, patio, tiles"},{"order":15,"start":11.2,"end":11.9,"duration":0.7,"description":"shower, mirror, wall, stone, floor, tiles, chair, window, ceiling, beam, basin, faucet, drain"},{"order":16,"start":11.9,"end":12.7,"duration":0.7,"description":"desk, stool, artwork, sculpture, drawers, floor, wall, door, lanterns"},{"order":17,"start":12.7,"end":13.4,"duration":0.7,"description":"stone wall, mirror, table, faucet, glass, towel, curtain, floor, rug, sculpture"},{"order":18,"start":13.4,"end":14.2,"duration":0.8,"description":"table, chairs, pool, sun loungers, garden, plants, trees, window, curtain, patio"},{"order":19,"start":14.2,"end":14.9,"duration":0.7,"description":"pool, trees, flowers, stone wall, lounge chair, fence, grass"}]',
+  19
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'chloecleroux',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DLP_nGWMMnj/',
+  'https://www.instagram.com/chloecleroux/',
+  'https://www.instagram.com/reels/audio/1264479855234145/',
+  94405,
+  446626,
+  4.7,
+  23711,
+  176,
+  8.8,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"sink, bowl, stone, wall, window, door, light fixture, plants, gravel, woman, dress"},{"order":2,"start":0.8,"end":1.6,"duration":0.8,"description":"door, window, plants, gravel, woman, dress, pot, building, trees, roof"},{"order":3,"start":1.6,"end":2.4,"duration":0.8,"description":"kitchen, cabinets, countertop, stove, sink, window, tiles, floor, woman, dress, beams"},{"order":4,"start":2.4,"end":3.2,"duration":0.8,"description":"pot, water, pasta, hand, stove, tiles, kitchen"},{"order":5,"start":3.2,"end":3.9,"duration":0.8,"description":"table, chairs, plates, glasses, cutlery, food, bottle, bread, tree, plants, gravel, cloth, pattern"},{"order":6,"start":3.9,"end":4.7,"duration":0.8,"description":"pasta, plate, fork, spoon, herbs, table, fabric"},{"order":7,"start":4.7,"end":5.6,"duration":0.9,"description":"tree, table, chairs, gravel, building, window, people, plants, stone wall"},{"order":8,"start":5.6,"end":6.5,"duration":0.9,"description":"table, chairs, women, bowl, bottle, glass, food, wall, window, tree, gravel, house"},{"order":9,"start":6.5,"end":7.5,"duration":0.9,"description":"table, chairs, people, tree, house, window, gravel, plants, garden"},{"order":10,"start":7.5,"end":8.8,"duration":1.3,"description":"table, chairs, tree, candle, plate, food, bottle, gravel, plants, people"}]',
+  10
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'voyage_provocateur',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DMaiPvzNa8S/',
+  'https://www.instagram.com/voyage_provocateur/',
+  'https://www.instagram.com/reels/audio/2275305292484944/',
+  94405,
+  218581,
+  2.3,
+  16226,
+  336,
+  10.7,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"tree, house, table, chairs, flowers, children, woman, stone, lantern, gravel, sky, plants, patio, dishes, glassware"},{"order":2,"start":0.9,"end":1.9,"duration":1,"description":"table, chairs, fruit, bowl, bread, flowers, window, shutters, wall, floor, plate, glass, candle, basket"},{"order":3,"start":1.9,"end":2.9,"duration":1,"description":"tree, table, chairs, people, flowers, patio, grass, building, plants, sunlight"},{"order":4,"start":2.9,"end":3.8,"duration":1,"description":"pool, tree, house, chairs, table, water, float, grass, plants, sky"},{"order":5,"start":3.8,"end":4.7,"duration":0.9,"description":"table, flowers, basket, candle, plate, glass, food, salad, olives, bread, zucchini, tree, lawn, sunlight"},{"order":6,"start":4.7,"end":5.6,"duration":0.9,"description":"kitchen, countertop, fruit, croissants, plate, chair, candles, bottles, candelabra, wall, stove, cabinet, tiles, child"},{"order":7,"start":5.6,"end":6.4,"duration":0.8,"description":"cake, strawberries, blueberries, mint, cream, wooden plate, hand, pink dress, stone surface"},{"order":8,"start":6.4,"end":7.3,"duration":0.9,"description":"table, chairs, flowers, vase, lantern, wall, window, stone, ground, woman, child, pitcher, glasses, tablecloth, candles, plants"},{"order":9,"start":7.3,"end":8.2,"duration":0.9,"description":"kitchen, countertop, candles, candelabra, bottles, plate, pastries, glass, fruit, cheese, cutting board, artichokes, eggplants, stove, drawer, towel"},{"order":10,"start":8.2,"end":9,"duration":0.8,"description":"cake, cherries, apricots, pistachios, cream, spoon, plate, table, lace, hand, bowl, slice"},{"order":11,"start":9,"end":9.9,"duration":0.8,"description":"table, cakes, wall, dress, hair"},{"order":12,"start":9.9,"end":10.7,"duration":0.8,"description":"window, door, table, chairs, tablecloth, flowers, candles, vase, tomatoes, lemons, limes, basket, wall, stone, patio, greenery"}]',
+  12
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'chloecleroux',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DJzNxWJoJX2/',
+  'https://www.instagram.com/chloecleroux/',
+  'https://www.instagram.com/reels/audio/1201674601312059/',
+  94405,
+  268143,
+  2.8,
+  8568,
+  106,
+  14.3,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"apron, shirt, hair, hands, brick wall, oven, countertop, floor, pants, accessories, tools"},{"order":2,"start":0.9,"end":1.8,"duration":0.9,"description":"bakery, countertop, flour, dough, basket, mixer, hands, people, wall, window, brick"},{"order":3,"start":1.8,"end":2.6,"duration":0.9,"description":"dough, flour, table, basket, hands, countertop, cloth, wooden board"},{"order":4,"start":2.6,"end":3.5,"duration":0.9,"description":"bakery, table, dough, flour, brush, people, artwork, wall, window"},{"order":5,"start":3.5,"end":4.4,"duration":0.9,"description":"oven, brick, countertop, baking trays, baskets, floor, tiles, person, apron, gloves, kitchen equipment, shelves, wall, light fixtures"},{"order":6,"start":4.4,"end":5.2,"duration":0.8,"description":"kitchen, countertop, clock, shelves, jars, flour, rolling pin, dough, people, apron, scale, paper, utensils, sink, tiles, wall"},{"order":7,"start":5.2,"end":6.1,"duration":0.9,"description":"kitchen, countertop, table, rolling pin, dough, flour, basket, wall, window, shelves, jars, whiteboard, marker, people"},{"order":8,"start":6.1,"end":6.8,"duration":0.7,"description":"dough, knife, cutting board, flour, hands"},{"order":9,"start":6.8,"end":7.7,"duration":0.9,"description":"dough, hands, table, flour, apron, kitchen, countertop"},{"order":10,"start":7.7,"end":8.5,"duration":0.9,"description":"bakery, countertop, dough, hands, flour, paper, basket"},{"order":11,"start":8.5,"end":9.4,"duration":0.9,"description":"dough, swirl, box, parchment paper, countertop, wood"},{"order":12,"start":9.4,"end":10.3,"duration":0.9,"description":"bakery, table, flour, dough, hands, apron, rolling pin"},{"order":13,"start":10.3,"end":11.2,"duration":0.9,"description":"bakery, countertop, dough, flour, rolling pin, hands, apron, table, shelves, bags, utensils, window, light"},{"order":14,"start":11.2,"end":11.9,"duration":0.7,"description":"dough, hands, table, parchment paper, bakery"},{"order":15,"start":11.9,"end":12.7,"duration":0.8,"description":"rack, bowls, dough, kitchen, hands, apron, counter, wall, shelves"},{"order":16,"start":12.7,"end":13.5,"duration":0.8,"description":"bakery, rack, dough, hand, container"},{"order":17,"start":13.5,"end":14.3,"duration":0.8,"description":"bakery, bread, oven, gloves, countertop, tray"}]',
+  17
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domaines.de.chabran',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKFUeWbt1-E/',
+  'https://www.instagram.com/domaines.de.chabran/',
+  'https://www.instagram.com/reels/audio/754474975848343/',
+  94405,
+  246693,
+  2.6,
+  -1,
+  89,
+  9.6,
+  '[{"order":1,"start":0,"end":4.7,"duration":4.7,"description":"villa, pool, sun loungers, garden, trees, lawn, patio, pathway, roof, windows, walls, sky"},{"order":2,"start":4.7,"end":9.6,"duration":4.9,"description":"villa, pool, garden, trees, lawn, patio, sun loungers, pathway, stone, roof, windows, door, sky"}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'voyage_provocateur',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DK6sz3Ot6Xi/',
+  'https://www.instagram.com/voyage_provocateur/',
+  'https://www.instagram.com/reels/audio/1862422687248837/',
+  94405,
+  170657,
+  1.8,
+  10622,
+  190,
+  7.4,
+  '[{"order":1,"start":0,"end":2.2,"duration":2.2,"description":"tree, path, woman, basket, flowers, car, grass, bushes, sky, sunlight, plants, hedges"},{"order":2,"start":2.2,"end":3.4,"duration":1.3,"description":"tree, car, road, person, bag, grass, plants, sunlight"},{"order":3,"start":3.4,"end":4.7,"duration":1.3,"description":"car, trees, driveway, grass, fence, people, sunlight"},{"order":4,"start":4.7,"end":6.1,"duration":1.4,"description":"car, steering wheel, dashboard, road, trees, greenery, basket, flowers, sunlight"},{"order":5,"start":6.1,"end":7.4,"duration":1.3,"description":"steering wheel, dashboard, gauges, hand, flowers, basket, seat, road, mountains, sky"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domaines.de.chabran',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/C-2S3EcNxF8/',
+  'https://www.instagram.com/domaines.de.chabran/',
+  'https://www.instagram.com/reels/audio/1168195520953121/',
+  94405,
+  347946,
+  3.7,
+  8565,
+  136,
+  13.6,
+  '[{"order":1,"start":0,"end":1.1,"duration":1.1,"description":"trees, water, canal, buildings, shops, tables, chairs, people, sky"},{"order":2,"start":1.1,"end":2.1,"duration":1.1,"description":"porch, chairs, table, plants, trees, artwork, windows, columns, floor, railing"},{"order":3,"start":2.1,"end":3.2,"duration":1,"description":"plates, glasses, vase, flowers, pottery, table, basket, wood, surface, decor"},{"order":4,"start":3.2,"end":4.3,"duration":1.1,"description":"vase, painting, mirror, lamp, furniture, table, chair, bowl, wall, artwork, shelf, decor, light, room, floor"},{"order":5,"start":4.3,"end":5.4,"duration":1.1,"description":"water, building, trees, sky, canal, bridge, grass, walkway, fountain, roof, windows, plants"},{"order":6,"start":5.4,"end":6.5,"duration":1.1,"description":"antiques, sign, table, vases, bottles, clothes, fence, plants, buildings, sky"},{"order":7,"start":6.5,"end":7.7,"duration":1.2,"description":"table, chairs, people, plants, flowers, stone, pavement, building, paintings, easel"},{"order":8,"start":7.7,"end":8.9,"duration":1.2,"description":"table, plates, glasses, sunflowers, vase, wicker lamps, wood, plants, window"},{"order":9,"start":8.9,"end":9.5,"duration":0.6,"description":"dog, table, chairs, lamp, mirror, furniture, wall, floor, plants, decor"},{"order":10,"start":9.5,"end":10,"duration":0.5,"description":"spools, thread, table, fabric, market, sunlight"},{"order":11,"start":10,"end":10.6,"duration":0.7,"description":"table, chairs, plants, flowers, wall, door, window, patio, umbrella"},{"order":12,"start":10.6,"end":11.3,"duration":0.7,"description":"table, silverware, glass, vase, pitcher, cups, plates, decorations, background, buildings, fence, sunlight"},{"order":13,"start":11.3,"end":12,"duration":0.7,"description":"garden, plants, flowers, stone path, chair, table, pot, trees, rocks"},{"order":14,"start":12,"end":12.6,"duration":0.5,"description":"spoons, box, silverware, fork, knife, key, table"},{"order":15,"start":12.6,"end":13.6,"duration":1.1,"description":"table, chairs, plates, glasses, signs, plants, garden, wall, basket, sunlight"}]',
+  15
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DPbeVzxDIk_/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/1334830810538413/',
+  398693,
+  1232967,
+  3.1,
+  57554,
+  233,
+  7.7,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"fire pit, wood, flames, water, deck, book, glass, wine, trees, sky, clouds, mountains, chairs, reflection"},{"order":2,"start":0.9,"end":1.8,"duration":0.8,"description":"pool, water, wooden deck, chairs, trees, grass, cabins, balcony, railing, mountains, sky"},{"order":3,"start":1.8,"end":2.6,"duration":0.8,"description":"pool, water, lights, wood, windows, furniture, lamps, walls, ceiling, reflection"},{"order":4,"start":2.6,"end":3.4,"duration":0.8,"description":"dock, chairs, fire pit, fire, water, trees, sky, clouds, grass, reeds, house"},{"order":5,"start":3.4,"end":4.2,"duration":0.8,"description":"deck, chair, table, grass, cat, trees, sky, wood"},{"order":6,"start":4.2,"end":5.1,"duration":0.9,"description":"sofa, cushions, curtains, table, candle, flowers, book, plate, fruit, coffee cup, wood"},{"order":7,"start":5.1,"end":6,"duration":0.9,"description":"hot tub, glasses, candles, deck, trees, buildings, water, plants, sky"},{"order":8,"start":6,"end":6.8,"duration":0.8,"description":"fireplace, flames, bathtub, wall, window, floor, light, basket"},{"order":9,"start":6.8,"end":7.7,"duration":0.9,"description":"table, chairs, candles, glassware, wine bottles, cabinet, plants, lamp, wood, floor, wall, window"}]',
+  9
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DNDbk6oCkG6/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/1312991006991438/',
+  398693,
+  1571750,
+  3.9,
+  80524,
+  117,
+  7.8,
+  '[{"order":1,"start":0,"end":1.3,"duration":1.3,"description":"wood, ceiling, glass, water, trees, grass, buildings, reflection, floor, pool"},{"order":2,"start":1.3,"end":2.6,"duration":1.3,"description":"bathtub, water, window, candle, towel, wood, trees, railing, floor"},{"order":3,"start":2.6,"end":3.9,"duration":1.3,"description":"window, water, trees, furniture, cushions, table, deck"},{"order":4,"start":3.9,"end":5.2,"duration":1.3,"description":"lamp, wall, artwork, stove, firewood, table, candle, book, rug, floor, curtain, window, door, wood"},{"order":5,"start":5.2,"end":6.5,"duration":1.3,"description":"window, rain, water, grass, trees, deck, chairs, table, plant"},{"order":6,"start":6.5,"end":7.8,"duration":1.3,"description":"bed, blanket, window, lamp, trees, water, jacuzzi, balcony, wall, floor"}]',
+  6
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'culinary.jetsetters',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DMdJfP9ts_E/',
+  'https://www.instagram.com/culinary.jetsetters/',
+  'https://www.instagram.com/reels/audio/604114815239776/',
+  398693,
+  279124,
+  0.7,
+  16897,
+  163,
+  9.5,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"bedroom, bed, pillows, blanket, window, curtains, wall, wood, floor, pictures, landscape, mountains, trees, grass"},{"order":2,"start":0.8,"end":1.4,"duration":0.6,"description":"treehouse, trees, deck, chairs, roof, pathway, grass"},{"order":3,"start":1.4,"end":2.1,"duration":0.7,"description":"water, reflection, trees, building, windows, person, grass, deck"},{"order":4,"start":2.1,"end":2.7,"duration":0.6,"description":"bed, window, balcony, trees, sky, light, table, lamp, blanket, floor, wall, ceiling"},{"order":5,"start":2.7,"end":3.3,"duration":0.6,"description":"treehouse, windows, doors, curtains, chair, floor, wood, mountains, deck, furniture, plants"},{"order":6,"start":3.3,"end":3.9,"duration":0.7,"description":"deck, hot tub, wood, railing, trees, sky, clouds, mountains, floor, post, stools"},{"order":7,"start":3.9,"end":4.6,"duration":0.6,"description":"bed, table, chair, cup, treehouse, balcony, window, wood, plants, deck"},{"order":8,"start":4.6,"end":5.2,"duration":0.6,"description":"treehouse, table, chairs, black tablecloth, plates, cups, coffee pot, orange juice, fruit, glass jars, wooden deck, trees, stairs, railing"},{"order":9,"start":5.2,"end":5.7,"duration":0.6,"description":"treehouse, water, lilies, dock, stairs, trees, sky, grass, chairs, railing"},{"order":10,"start":5.7,"end":6.4,"duration":0.6,"description":"water, pool, person, trees, buildings, deck, grass, sky"},{"order":11,"start":6.4,"end":7,"duration":0.6,"description":"treehouse, trees, deck, chairs, hot tub, road, forest"},{"order":12,"start":7,"end":7.5,"duration":0.6,"description":"bathtub, window, wood, trees, bed, blanket, room, light, view"},{"order":13,"start":7.5,"end":8.2,"duration":0.7,"description":"treehouse, wood, ceiling, light fixtures, curtains, sofa, coffee table, glass, vase, rug, wall, artwork, lamp, floor"},{"order":14,"start":8.2,"end":8.9,"duration":0.6,"description":"bed, pillows, window, balcony, trees, mountains, sky, floor, ceiling, wood"},{"order":15,"start":8.9,"end":9.5,"duration":0.6,"description":"treehouse, wood, ceiling, windows, curtains, television, table, fireplace, rug, floor, plants, light"}]',
+  15
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DLKfBvcCPwG/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/0/',
+  398693,
+  843888,
+  2.1,
+  19813,
+  97,
+  10.0,
+  '[{"order":1,"start":0,"end":1.8,"duration":1.8,"description":"pool, water, wooden beams, glass, balcony, chairs, trees, cabins, reflection, floor"},{"order":2,"start":1.8,"end":3.5,"duration":1.7,"description":"fireplace, wood, water, glass, candle, table, drinks, towel, floor, wall, window, ceiling, beams"},{"order":3,"start":3.5,"end":5.9,"duration":2.5,"description":"pool, water, sun loungers, wooden houses, trees, sky, clouds, grass"},{"order":4,"start":5.9,"end":10,"duration":4,"description":"wood, sauna, rocks, chain, plant, soil, hand, metal, container, floor"}]',
+  4
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DJ1Xl9gi4a3/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/1171038911011423/',
+  398693,
+  224749,
+  0.6,
+  -1,
+  11,
+  11.2,
+  '[{"order":1,"start":0,"end":1.2,"duration":1.2,"description":"pool, water, trees, houses, glass, ceiling, wood, floor, reflection, sky"},{"order":2,"start":1.2,"end":2.2,"duration":1,"description":"pool, water, chairs, umbrellas, trees, grass, buildings, mountains"},{"order":3,"start":2.2,"end":3.2,"duration":1,"description":"window, water, trees, sofa, table, deck"},{"order":4,"start":3.2,"end":4.2,"duration":1,"description":"sofa, coffee table, rug, curtains, window, fireplace, wall, ceiling, floor"},{"order":5,"start":4.2,"end":5.2,"duration":1,"description":"bathtub, candles, window, wood, wall, floor, chair, greenery"},{"order":6,"start":5.2,"end":6.2,"duration":1,"description":"tree, cabin, wood, ground, moss, animal, leaves, sunlight, shadows"},{"order":7,"start":6.2,"end":7.2,"duration":1,"description":"wood, cabin, deck, hot tub, trees, windows, door, light, pathway"},{"order":8,"start":7.2,"end":8.2,"duration":1,"description":"wood, windows, trees, bucket, bench, floor, wall, light"},{"order":9,"start":8.2,"end":9.2,"duration":1,"description":"tree, cabin, roof, window, wood, forest"},{"order":10,"start":9.2,"end":10.2,"duration":1,"description":"fireplace, fire, wood, chair, sofa, table, candle, wall, antlers, floor, books, window, ceiling, light"},{"order":11,"start":10.2,"end":11.2,"duration":1,"description":"table, chair, sofa, window, trees, grass, floor, lamp, wall, ceiling"}]',
+  11
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DMScnstivNe/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/0/',
+  398693,
+  243822,
+  0.6,
+  9197,
+  42,
+  15.1,
+  '[{"order":1,"start":0,"end":2.5,"duration":2.5,"description":"lake, dock, paddleboard, trees, mountains, sky, clouds, grass, boats, water"},{"order":2,"start":2.5,"end":5,"duration":2.5,"description":"bedroom, bed, lamps, window, door, floor, table, candle, book, wall, ceiling, wood"},{"order":3,"start":5,"end":7.5,"duration":2.5,"description":"fire pit, wood, water, reflection, trees, cabins, sky, moon, deck, grass"},{"order":4,"start":7.5,"end":10,"duration":2.5,"description":"pool, water, glass, wood, ceiling, beams, sofa, chairs, balcony, trees, landscape, sunlight"},{"order":5,"start":10,"end":12.5,"duration":2.5,"description":"jacuzzi, water, plants, trees, mountain, sky, wooden deck, cabins"},{"order":6,"start":12.5,"end":15.1,"duration":2.6,"description":"hotel, water, swimmer, deck, trees, building, balcony, chairs, table, grass"}]',
+  6
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DIq-7SLi8hZ/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/601148472562040/',
+  398693,
+  210988,
+  0.5,
+  -1,
+  16,
+  12.9,
+  '[{"order":1,"start":0,"end":12.9,"duration":12.9,"description":"fire, chairs, dock, water, trees, buildings, sky, clouds, sunset"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DJMiF0zCJP9/',
+  'https://www.instagram.com/sanluislodges/',
+  '',
+  398693,
+  221071,
+  0.6,
+  -1,
+  38,
+  6.4,
+  '[{"order":1,"start":0,"end":1.6,"duration":1.6,"description":"pool, water, wooden beams, chairs, windows, trees, buildings, reflection, floor"},{"order":2,"start":1.6,"end":2.6,"duration":1,"description":"pool, water, wooden beams, fireplace, stairs, windows, walls, floor, person"},{"order":3,"start":2.6,"end":3.6,"duration":1,"description":"water, pool, glass, trees, building, person, reflection, floor"},{"order":4,"start":3.6,"end":6.4,"duration":2.8,"description":"cabins, trees, water, dock, boats, lawn, pathway, roof, patio, deck, grass, forest"}]',
+  4
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'culinary.jetsetters',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DFLLyTrs6BR/',
+  'https://www.instagram.com/culinary.jetsetters/',
+  'https://www.instagram.com/reels/audio/398994250578475/',
+  398693,
+  235807,
+  0.6,
+  12922,
+  107,
+  9.1,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"bedroom, bed, pillows, nightstands, lamps, window, curtains, wooden ceiling, table, plates, cups, glasses, food, utensils, floor"},{"order":2,"start":0.8,"end":1.6,"duration":0.8,"description":"chairs, tables, lamps, windows, wood, ceiling, floor, snow, trees, cabins, light"},{"order":3,"start":1.6,"end":2.5,"duration":0.9,"description":"fireplace, wood, water, ceiling, beams, balcony, walls, lights, floor"},{"order":4,"start":2.5,"end":3.3,"duration":0.8,"description":"sofa, coffee table, glasses, orange juice, carpet, curtains, window, lamp, wall, wood, floor"},{"order":5,"start":3.3,"end":4,"duration":0.7,"description":"pool, water, wooden beams, chairs, tables, lamps, balcony, windows, walls, floor, stairs, landscape, trees"},{"order":6,"start":4,"end":4.8,"duration":0.8,"description":"cabins, trees, snow, road, pool, rooftops, landscape"},{"order":7,"start":4.8,"end":5.6,"duration":0.8,"description":"fireplace, wood, logs, shelf, bottles, chair, table, plate, glass, wall, floor, ceiling"},{"order":8,"start":5.6,"end":6.4,"duration":0.8,"description":"chairs, table, candle, window, trees, houses, snow, mountain, roof, glass, light"},{"order":9,"start":6.4,"end":7.1,"duration":0.7,"description":"table, chairs, lamp, window, flowers, candle, wall, wood"},{"order":10,"start":7.1,"end":7.8,"duration":0.7,"description":"bed, bedding, lamp, nightstand, wall, artwork, window, curtains, wood, floor"},{"order":11,"start":7.8,"end":8.5,"duration":0.7,"description":"window, curtains, table, bottles, glasses, plates, television, sofa, snow, chairs, buildings, trees, floor, wall, light"},{"order":12,"start":8.5,"end":9.1,"duration":0.6,"description":"tables, chairs, lamps, windows, candles, floor, walls, wood, light"}]',
+  12
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'culinary.jetsetters',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DE0BDqkRgSH/',
+  'https://www.instagram.com/culinary.jetsetters/',
+  'https://www.instagram.com/reels/audio/170283575935417/',
+  398693,
+  691974,
+  1.7,
+  38300,
+  207,
+  9.9,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"bedroom, bed, window, curtains, wall, artwork, bathtub, floor, ceiling, lamp, radiator, snow"},{"order":2,"start":0.9,"end":1.7,"duration":0.8,"description":"cabins, snow, trees, mountains, road, landscape, forest"},{"order":3,"start":1.7,"end":2.4,"duration":0.7,"description":"pool, fireplace, wood, ceiling, stairs, stone, glass, walls, beams, water"},{"order":4,"start":2.4,"end":3.1,"duration":0.7,"description":"sofa, table, lamp, window, curtains, wall, floor, rug, drinks, wood, door, ceiling"},{"order":5,"start":3.1,"end":3.7,"duration":0.6,"description":"coffee, plate, fork, knife, spoon, tomato, salad, ham, cheese, dessert, glass, table, hand, napkin, wood"},{"order":6,"start":3.7,"end":4.4,"duration":0.7,"description":"table, chairs, windows, light, walls, floor, ceiling, lamps, view, water"},{"order":7,"start":4.4,"end":5.2,"duration":0.8,"description":"cabin, trees, snow, roof, windows, deck, water, mountains"},{"order":8,"start":5.2,"end":6.1,"duration":0.9,"description":"mountains, trees, snow, buildings, rooftops, sky"},{"order":9,"start":6.1,"end":6.9,"duration":0.9,"description":"pool, water, wooden beams, windows, trees, cabins, balcony, person"},{"order":10,"start":6.9,"end":7.7,"duration":0.7,"description":"window, chairs, table, pool, mountains, trees, light fixtures, balcony, floor, walls, reflection"},{"order":11,"start":7.7,"end":8.5,"duration":0.8,"description":"restaurant, tables, chairs, windows, lamps, candles, glasses, plates, cutlery, wood, walls, floor, plants, sofa"},{"order":12,"start":8.5,"end":9.1,"duration":0.6,"description":"bed, blanket, lamp, window, curtains, wall, wood, snow, furniture, floor"},{"order":13,"start":9.1,"end":9.9,"duration":0.8,"description":"cabins, trees, snow, ice, sky, mountains, deck, hot tub"}]',
+  13
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DFAcUR-izIU/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/345236982008363/',
+  398693,
+  585623,
+  1.5,
+  31485,
+  114,
+  9.4,
+  '[{"order":1,"start":0,"end":2.3,"duration":2.3,"description":"door, wall, wood, bedroom, bed, pillows, window, curtains, frames, floor, light"},{"order":2,"start":2.3,"end":3.2,"duration":0.9,"description":"bed, blanket, lamp, window, curtains, wall, wood, floor, snow"},{"order":3,"start":3.2,"end":4.1,"duration":0.8,"description":"bathtub, bed, pillows, window, curtains, door, wall, artwork, floor, lamp, wood"},{"order":4,"start":4.1,"end":5,"duration":0.9,"description":"sofa, table, window, curtains, lamp, wood, floor, light"},{"order":5,"start":5,"end":6,"duration":1,"description":"deck, chairs, trees, snow, wall, window, door, sunlight"},{"order":6,"start":6,"end":7,"duration":1,"description":"bedroom, bed, window, curtains, floor, ceiling, furniture, light"},{"order":7,"start":7,"end":8.2,"duration":1.2,"description":"bed, bedroom, window, curtains, bathtub, sheets, pillows, wood, furniture, mirror, light, door"},{"order":8,"start":8.2,"end":9.4,"duration":1.2,"description":"hot tub, sun loungers, wooden deck, trees, buildings, sky, snow"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'sanluislodges',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DDCSsG8iLWp/',
+  'https://www.instagram.com/sanluislodges/',
+  'https://www.instagram.com/reels/audio/2775697055921731/',
+  398693,
+  1864443,
+  4.7,
+  41554,
+  304,
+  16.3,
+  '[{"order":1,"start":0,"end":1.7,"duration":1.7,"description":"cabins, trees, snow, water, sky, clouds, mountains"},{"order":2,"start":1.7,"end":3.4,"duration":1.7,"description":"sofa, fireplace, fire, candle, table, book, window, wall, floor, light, stone, wood, chair, outdoor furniture, snow"},{"order":3,"start":3.4,"end":4.9,"duration":1.6,"description":"pool, water, wood, ceiling, windows, chairs, fireplace, stone, beams, floor"},{"order":4,"start":4.9,"end":6.5,"duration":1.6,"description":"pool, water, wood, windows, snow, cabin, railing, person"},{"order":5,"start":6.5,"end":8,"duration":1.5,"description":"wood, ceiling, fireplace, light, chair, table, glass, window, floor, wall, outdoor, pool, plants"},{"order":6,"start":8,"end":9.6,"duration":1.6,"description":"wood, ceiling, benches, tables, candles, floor, lighting, walls, corridor"},{"order":7,"start":9.6,"end":11.2,"duration":1.6,"description":"bed, bedspread, window, curtains, fireplace, chair, wood, bathtub, floor, snow, trees, mountain, wall, ceiling"},{"order":8,"start":11.2,"end":12.8,"duration":1.6,"description":"cabins, snow, mountains, trees, sky"},{"order":9,"start":12.8,"end":14.4,"duration":1.6,"description":"fireplace, fire, wood, wall, shelf, bottles, table, chair, floor, ceiling"},{"order":10,"start":14.4,"end":16.3,"duration":1.8,"description":"pool, water, wooden beams, chairs, windows, person, child, floor, reflection, landscape"}]',
+  10
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'passalacqualakecomo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DIUCqS6qqT9/',
+  'https://www.instagram.com/passalacqualakecomo/',
+  'https://www.instagram.com/reels/audio/3750511528586140/',
+  256110,
+  224874,
+  0.9,
+  15274,
+  227,
+  36.6,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"lake, trees, palm trees, steps, orange car, man, stone, grass, sky"},{"order":2,"start":0.8,"end":2.3,"duration":1.5,"description":"car, man, trees, mountains, lake, sky, path, grass, stone"},{"order":3,"start":2.3,"end":3.4,"duration":1.1,"description":"chair, steering wheel, canopy, plants, cars, grass"},{"order":4,"start":3.4,"end":4.7,"duration":1.3,"description":"steering wheel, dashboard, seats, seat covers, windshield, roof, stripes, garden, plants, sunlight"},{"order":5,"start":4.7,"end":6.9,"duration":2.2,"description":"car, steering wheel, dashboard, seat, window, stripes, trees, grass"},{"order":6,"start":6.9,"end":9.3,"duration":2.4,"description":"cart, seat, canopy, path, grass, hedge, building, door, stone, sunlight"},{"order":7,"start":9.3,"end":10,"duration":0.7,"description":"fountain, stairs, garden, plants, flowers, building, windows, awning, railing, stone, pathway, shrubs"},{"order":8,"start":10,"end":11.1,"duration":1.1,"description":"fountain, garden, palm trees, bushes, mountains, umbrellas, lawn, flowers, sky"},{"order":9,"start":11.1,"end":11.9,"duration":0.8,"description":"fountain, pool, sun loungers, umbrellas, garden, hedges, trees, statue, grass"},{"order":10,"start":11.9,"end":13.8,"duration":1.9,"description":"car, steering wheel, dashboard, seat, man, road, grass, trees, canopy, stripes"},{"order":11,"start":13.8,"end":14.7,"duration":0.9,"description":"steering wheel, hand, dashboard, seat, fabric, stripes, road, trees, plants, sunlight, windshield"},{"order":12,"start":14.7,"end":17,"duration":2.3,"description":"pathway, trees, plants, sky, water, garden, lawn, stones, clouds"},{"order":13,"start":17,"end":18.5,"duration":1.5,"description":"boat, water, trees, leaves, sky"},{"order":14,"start":18.5,"end":19.7,"duration":1.2,"description":"trees, water, mountains, rooftops, sky, plants, flowers, chimney, railing"},{"order":15,"start":19.7,"end":20.9,"duration":1.2,"description":"car, steering wheel, dashboard, seat, person, trees, road, sunlight, fabric, stripes"},{"order":16,"start":20.9,"end":21.8,"duration":0.9,"description":"steering wheel, dashboard, seats, seat covers, windshield, sunshade, road, plants, trees, person"},{"order":17,"start":21.8,"end":23,"duration":1.2,"description":"seat, arm, hand, fabric, canopy, trees, path, sunlight, vehicle, wheels"},{"order":18,"start":23,"end":25,"duration":2,"description":"man, suit, tie, orange car, palm trees, plants, gravel, stone path, building, sky"},{"order":19,"start":25,"end":26.4,"duration":1.4,"description":"dock, water, mountains, sky, person, chairs, boat, wood"},{"order":20,"start":26.4,"end":28,"duration":1.7,"description":"boat, water, mountains, sky, person, seat, dashboard, wood, dock"},{"order":21,"start":28,"end":30,"duration":2,"description":"boat, water, mountains, sky, person, hand, steering wheel, seat, cushions, shoreline, buoys"},{"order":22,"start":30,"end":31.8,"duration":1.8,"description":"boat, water, mountains, sky, person, steering wheel, seat"},{"order":23,"start":31.8,"end":33,"duration":1.2,"description":"boat, water, dock, wood, ropes, reflections"},{"order":24,"start":33,"end":34.4,"duration":1.4,"description":"boat, water, name, seat, rope"},{"order":25,"start":34.4,"end":36.6,"duration":2.2,"description":"boat, water, waves, person, mountains, sky"}]',
+  25
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'passalacqualakecomo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DJcEfQrK9o5/',
+  'https://www.instagram.com/passalacqualakecomo/',
+  'https://www.instagram.com/reels/audio/924408146377647/',
+  256110,
+  243146,
+  0.9,
+  9997,
+  203,
+  33.6,
+  '[{"order":1,"start":0,"end":8.5,"duration":8.5,"description":"baker, tray, brioche, table, chairs, piano, chandelier, wall, window, floor, carpet, light, decor"},{"order":2,"start":8.5,"end":9.7,"duration":1.2,"description":"kitchen, table, plate, brioche, fork, knife, chandelier, artwork, chairs, counter, person"},{"order":3,"start":9.7,"end":12,"duration":2.3,"description":"plate, spoon, dessert, cake, table, fork, bowl, silverware, hand"},{"order":4,"start":12,"end":15.2,"duration":3.2,"description":"chandelier, table, woman, suit, bow tie, plates, silverware, piano, furniture, wall, painting, plants"},{"order":5,"start":15.2,"end":17.5,"duration":2.3,"description":"pot, plate, food, hand, table, spoon, piece, decoration"},{"order":6,"start":17.5,"end":19.6,"duration":2,"description":"copper pot, plate, dessert, table, chair, suit, bow tie, chandelier, painting, window, curtain, floor, tablecloth"},{"order":7,"start":19.6,"end":21.7,"duration":2.1,"description":"plate, spoon, egg, pot, hand, table, chair, food, gold trim"},{"order":8,"start":21.7,"end":23.6,"duration":1.9,"description":"woman, table, spoon, plate, bowl, kitchen, suit, chandelier, artwork, chairs, dining room, window"},{"order":9,"start":23.6,"end":26.4,"duration":2.8,"description":"plate, dessert, spoon, hand, table, bowl, sauce, chair, countertop, watch"},{"order":10,"start":26.4,"end":30.7,"duration":4.3,"description":"tray, food, woman, suit, table, chairs, chandelier, piano, window, wall, floor, artwork, room"},{"order":11,"start":30.7,"end":33.6,"duration":2.9,"description":"plate, dessert, dough, cream, sauce, powder, gold, decoration"}]',
+  11
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'passalacqualakecomo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/C5WHiH1NpR6/',
+  'https://www.instagram.com/passalacqualakecomo/',
+  'https://www.instagram.com/reels/audio/7380111615414470/',
+  256110,
+  172357,
+  0.7,
+  5345,
+  85,
+  20.6,
+  '[{"order":1,"start":0,"end":20.6,"duration":20.6,"description":"window, curtains, wall, floor, lake, mountains, trees, plants, basket"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'andreavetrano',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/C5lI_pQoMT9/',
+  'https://www.instagram.com/andreavetrano/',
+  'https://www.instagram.com/reels/audio/294681030011713/',
+  256110,
+  2157436,
+  8.4,
+  221298,
+  862,
+  20.6,
+  '[{"order":1,"start":0,"end":2.2,"duration":2.2,"description":"window, hand, mountains, trees, water, car, grass, plants, sky"},{"order":2,"start":2.2,"end":4.4,"duration":2.2,"description":"bedroom, bed, chandelier, ceiling, window, curtains, lamp, mirror, furniture, dresser, suitcase, rug, wall, chair, table, flowers"},{"order":3,"start":4.4,"end":6.6,"duration":2.2,"description":"pool, umbrella, chairs, table, plants, mountains, water, fence"},{"order":4,"start":6.6,"end":8.6,"duration":2,"description":"chandelier, painting, sofa, cushions, coffee table, books, rug, curtains, window, wall, fireplace, chair, table, floor"},{"order":5,"start":8.6,"end":10.8,"duration":2.2,"description":"mountains, trees, water, sky, steps, car, stone, plants, flowers, lawn, sun loungers"},{"order":6,"start":10.8,"end":13,"duration":2.2,"description":"window, curtain, mountain, chair, table, plates, cups, food, lamp, floor, vase, wall, artwork, light, tray, glass, sofa"},{"order":7,"start":13,"end":14.7,"duration":1.6,"description":"trees, sky, water, garden, lawn, pathway, tables, chairs, fountain, hedges"},{"order":8,"start":14.7,"end":16.6,"duration":2,"description":"hallway, chandelier, door, window, furniture, vase, floor, artwork, mirror, light"},{"order":9,"start":16.6,"end":18.2,"duration":1.6,"description":"boat, water, waves, mountain, sky, clouds, buildings, clock tower, trees, shoreline"},{"order":10,"start":18.2,"end":20.6,"duration":2.4,"description":"lake, mountains, sun loungers, umbrellas, pool, fountain, grass, plants, trees, sky"}]',
+  10
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'passalacqualakecomo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/CtJ38HcsX_y/',
+  'https://www.instagram.com/passalacqualakecomo/',
+  'https://www.instagram.com/reels/audio/963102184882214/',
+  256110,
+  173237,
+  0.7,
+  8791,
+  103,
+  34.0,
+  '[{"order":1,"start":0,"end":2.9,"duration":2.9,"description":"mountains, lake, trees, garden, pathway, steps, vehicle, grass, plants, sky"},{"order":2,"start":2.9,"end":5,"duration":2.1,"description":"door, entrance, columns, person, suit, pot, wall, window, canopy, shadow"},{"order":3,"start":5,"end":7,"duration":2,"description":"window, curtains, table, chairs, floor, ceiling, door, garden, gazebo, mountains, water"},{"order":4,"start":7,"end":9,"duration":2,"description":"pool, umbrellas, sun loungers, lawn, trees, water, stone patio, plants, mountain, sky"},{"order":5,"start":9,"end":10.7,"duration":1.7,"description":"chandelier, ceiling, door, hallway, windows, light, carpet, furniture, table, chair, bookshelf, wall, floor, reflection"},{"order":6,"start":10.7,"end":12.2,"duration":1.5,"description":"stairs, carpet, chandelier, window, plants, wall, artwork, clock, furniture, vase, railing"},{"order":7,"start":12.2,"end":14.2,"duration":2,"description":"window, lake, mountains, sky, trees, house, water, boat"},{"order":8,"start":14.2,"end":16,"duration":1.8,"description":"chairs, table, umbrella, grass, lake, mountains, trees, fence, plants"},{"order":9,"start":16,"end":18,"duration":2,"description":"bed, pillows, window, curtain, lamp, wall, mirror, furniture, radiator, landscape"},{"order":10,"start":18,"end":19.9,"duration":2,"description":"bathroom, bathtub, window, curtains, chandelier, floor, chair, wall, mountain, water"},{"order":11,"start":19.9,"end":22,"duration":2.1,"description":"lake, mountains, trees, garden, grass, tables, chairs, umbrellas, pathways, fence, buildings"},{"order":12,"start":22,"end":23.4,"duration":1.4,"description":"lamp, chandelier, table, chairs, flowers, glass, mirror, wall, artwork, window, curtain, floor, carpet, vase, plate, silverware, room, arch"},{"order":13,"start":23.4,"end":25.5,"duration":2.1,"description":"fountain, water, statue, pond, lilies, palm trees, mountain, sky, sun"},{"order":14,"start":25.5,"end":27,"duration":1.5,"description":"water, lily pads, leaves, rain, ripples, stems"},{"order":15,"start":27,"end":29.6,"duration":2.6,"description":"garden, mountain, sky, fountain, chairs, tables, hedges, gravel, plants, trees"},{"order":16,"start":29.6,"end":32.8,"duration":3.2,"description":"hotel, building, mountains, sky, trees, garden, lawn, stairs, flowers, palm trees, pathway, windows, door, terrace, chairs, table, umbrella"},{"order":17,"start":32.8,"end":34,"duration":1.2,"description":"I''m unable to analyze images directly. However, if you describe the content of the video or provide specific details, I can help you generate a list of concrete keywords based on that information."}]',
+  17
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'passalacqualakecomo',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/CyQ9QucNwJA/',
+  'https://www.instagram.com/passalacqualakecomo/',
+  'https://www.instagram.com/reels/audio/698538778817183/',
+  256110,
+  134067,
+  0.5,
+  4794,
+  30,
+  15.4,
+  '[{"order":1,"start":0,"end":15.4,"duration":15.4,"description":"restaurant, tables, chairs, umbrellas, water, hills, trees, bushes, lawn, people, railing"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/Cv_4OCvsCTt/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/886288195800194/',
+  293391,
+  2717591,
+  9.3,
+  113670,
+  538,
+  9.3,
+  '[{"order":1,"start":0,"end":9.3,"duration":9.3,"description":"table, chairs, plates, glasses, cutlery, food, bread, fruit, cheese, meat, plants, door, window, stone wall, light fixture, serving tray, candle, tablecloth, napkins, pitcher, man, apron"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/CqaDZ3RDI7I/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/737945701274765/',
+  293391,
+  1246132,
+  4.2,
+  121588,
+  609,
+  17.2,
+  '[{"order":1,"start":0,"end":17.2,"duration":17.2,"description":"table, chairs, vase, flowers, candles, plates, cups, teapot, orange juice, croissant, linen, window, door, stone wall, shelves, basket, sunlight, curtain, floor, rug"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/C63XpMmsZHU/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/2097881933916480/',
+  293391,
+  2427548,
+  8.3,
+  59492,
+  605,
+  19.0,
+  '[{"order":1,"start":0,"end":19,"duration":19,"description":"table, chairs, flowers, fruit, plates, bowls, bread, eggs, orange juice, glass, coffee cup, spoon, napkin, wall, window, shelf, books, stone, stove, basket, candle, pepper mill, oil bottle, plant, cloth"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DJycf40MBS3/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1357915038814357/',
+  293391,
+  190288,
+  0.6,
+  2338,
+  26,
+  9.6,
+  '[{"order":1,"start":0,"end":3.9,"duration":3.9,"description":"garden, flowers, chairs, table, food, bread, salad, glass, bottle, path, trees, sky, sunlight, stone wall"},{"order":2,"start":3.9,"end":9.6,"duration":5.7,"description":"glasses, wine, hands, salad, tomatoes, cucumber, bread, tablecloth, greenery"}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKKPiCFMt5j/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1457059008787904/',
+  293391,
+  558649,
+  1.9,
+  2472,
+  31,
+  7.9,
+  '[{"order":1,"start":0,"end":7.9,"duration":7.9,"description":"table, chairs, plates, food, glasses, plants, flowers, wall, roof, sunlight, stones"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DM2F19JM25X/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1262374982096322/',
+  293391,
+  340937,
+  1.2,
+  12796,
+  109,
+  11.7,
+  '[{"order":1,"start":0,"end":3,"duration":3,"description":"table, chairs, plates, glasses, food, drinks, cutlery, napkins, tablecloth, plants, trees, sunlight, woman, serving tray, bread, dessert, flowers"},{"order":2,"start":3,"end":5.7,"duration":2.6,"description":"table, chairs, plates, glasses, juice, bread, pastries, fruit, vase, flowers, stone wall, clock, light fixture, leaves, patio"},{"order":3,"start":5.7,"end":8.7,"duration":3,"description":"table, chairs, plates, utensils, glasses, juice, fruit, basket, tablecloth, plants, flowers, hills, trees, woman, apron"},{"order":4,"start":8.7,"end":10.2,"duration":1.5,"description":"table, chairs, tablecloth, plates, cups, cutlery, croissants, fruit, glass, bottle, basket, window, door, stone wall, plants, light fixture, apron, person"},{"order":5,"start":10.2,"end":11.7,"duration":1.5,"description":"table, chairs, plates, glasses, cutlery, food, drinks, flowers, leaves, stone wall, clock, door, window, woman, floor, fabric, light fixture"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKHEsiXsner/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1148696193609658/',
+  293391,
+  516159,
+  1.8,
+  22988,
+  161,
+  24.8,
+  '[{"order":1,"start":0,"end":24.8,"duration":24.8,"description":"table, chairs, plates, glasses, cutlery, flowers, window, curtains, food, croissants, juice, sofa, cushions, wall, plants, light, basket"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DKCP7UAsthV/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/716665027607401/',
+  293391,
+  592613,
+  2.0,
+  4821,
+  48,
+  8.9,
+  '[{"order":1,"start":0,"end":8.9,"duration":8.9,"description":"flowers, table, chairs, plates, glasses, cutlery, bottle, food, mirror, wall, plants, pool"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DJRceC2Mke_/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1279722303580991/',
+  293391,
+  228953,
+  0.8,
+  1850,
+  31,
+  15.6,
+  '[{"order":1,"start":0,"end":15.6,"duration":15.6,"description":"table, chairs, man, apron, food, fruit, croissants, coffee, wine glasses, candle, plate, checkered cloth, stone wall, shelves, basket, greenery, dessert"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DJdrG-osodR/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1420134902319086/',
+  293391,
+  306950,
+  1.0,
+  2407,
+  29,
+  7.8,
+  '[{"order":1,"start":0,"end":7.8,"duration":7.8,"description":"table, chairs, cushions, plate, food, glass, bottle, flowers, plants, canopy, ground"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DIWcPQ6sxX2/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1412787789709689/',
+  293391,
+  489169,
+  1.7,
+  11785,
+  83,
+  11.4,
+  '[{"order":1,"start":0,"end":11.4,"duration":11.4,"description":"table, chairs, tablecloth, flowers, tree, stone, house, window, door, greenery, sky, patio"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DIIuzDrsI80/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/619764161055886/',
+  293391,
+  624630,
+  2.1,
+  15961,
+  221,
+  25.5,
+  '[{"order":1,"start":0,"end":25.5,"duration":25.5,"description":"table, chairs, candles, plates, glasses, flowers, window, wall, shelves, stone, ceiling, beams, person, tablecloth, food, sunlight"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DIdr8aeMkky/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/3949366601868582/',
+  293391,
+  418528,
+  1.4,
+  15536,
+  103,
+  15.0,
+  '[{"order":1,"start":0,"end":5.5,"duration":5.5,"description":"table, chairs, tablecloth, plates, cutlery, glasses, water pitcher, food, flowers, tree, leaves, landscape, grass, hills, sky, sunlight"},{"order":2,"start":5.5,"end":7,"duration":1.6,"description":"tree, flowers, hat, chair, stone, grass, plants, landscape, hills, sky"},{"order":3,"start":7,"end":15,"duration":7.9,"description":"table, chairs, plates, food, glasses, bottle, vase, flowers, napkins, hat, tree, plants, stone, landscape, grass, sunlight"}]',
+  3
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DHaask_M7b6/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1196855765470456/',
+  293391,
+  236409,
+  0.8,
+  3822,
+  25,
+  16.6,
+  '[{"order":1,"start":0,"end":7.9,"duration":7.9,"description":"table, chairs, flowers, glass, plate, food, plants, trees, mountain, patio, sofa, stone, sunlight"},{"order":2,"start":7.9,"end":16.6,"duration":8.7,"description":"table, chairs, flowers, glass, plate, food, pitcher, cat, bench, plants, stone, trees, mountain, sky"}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DHqXdmXMblS/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1195014212239650/',
+  293391,
+  308647,
+  1.1,
+  1624,
+  16,
+  7.7,
+  '[{"order":1,"start":0,"end":3.5,"duration":3.5,"description":"window, shutters, stone wall, plants, chair, table, sky, tree, roof"},{"order":2,"start":3.5,"end":7.7,"duration":4.2,"description":"table, chairs, glasses, plate, food, flowers, window, stone wall, shutters, mat, patio"}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DHNwX_8sqBw/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/2274375496346483/',
+  293391,
+  181936,
+  0.6,
+  1751,
+  17,
+  9.8,
+  '[{"order":1,"start":0,"end":4.9,"duration":4.9,"description":"table, chairs, flowers, glass, door, window, stone wall, gravel, plants, umbrella"},{"order":2,"start":4.9,"end":9.8,"duration":4.9,"description":"cottage, stone, door, window, patio, table, chairs, plants, garden, trees, sky"}]',
+  2
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DIwPqybsuRt/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/926021142333528/',
+  293391,
+  370140,
+  1.3,
+  4194,
+  44,
+  31.0,
+  '[{"order":1,"start":0,"end":4.3,"duration":4.3,"description":"door, basket, woman, chair, table, flowers, window, wall, stone, plants, floor"},{"order":2,"start":4.3,"end":10,"duration":5.7,"description":"table, cloth, hands, napkins, plate, chair, window, flowers"},{"order":3,"start":10,"end":15.7,"duration":5.7,"description":"table, chairs, flowers, glassware, napkins, window, sunlight, mirror, ceiling, wood, decor"},{"order":4,"start":15.7,"end":20.8,"duration":5.2,"description":"table, chairs, flowers, candles, chandelier, window, sofa, wall, stone, plate, napkin, glass, decor, landscape"},{"order":5,"start":20.8,"end":31,"duration":10.2,"description":"table, flowers, vases, candles, chandelier, sofa, cushions, window, wall, stone, floor, plates, cutlery, napkins, glass"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DGAalB0sszr/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1143499787216111/',
+  293391,
+  562235,
+  1.9,
+  12291,
+  100,
+  13.1,
+  '[{"order":1,"start":0,"end":13.1,"duration":13.1,"description":"table, chairs, food, pastries, fruit, juice, cups, plates, napkins, window, plants, sofa, rug, wall, light, decor"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DErevNEMBUo/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/256702054104236/',
+  293391,
+  492048,
+  1.7,
+  10938,
+  86,
+  14.7,
+  '[{"order":1,"start":0,"end":14.7,"duration":14.7,"description":"table, chairs, window, plants, stone wall, water bottle, glass, orange juice, coffee cup, plate, croissant, jam, spoon, napkin, linen, fork, knife, person"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DGqkFeqssh-/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/580460951716123/',
+  293391,
+  222198,
+  0.8,
+  1938,
+  18,
+  13.8,
+  '[{"order":1,"start":0,"end":2.3,"duration":2.3,"description":"table, chairs, plates, glasses, bottle, flowers, napkins, stone wall, plants, fence, canopy"},{"order":2,"start":2.3,"end":4.6,"duration":2.3,"description":"table, chairs, glass, flowers, tree, stone, landscape, hills, fence, sunlight"},{"order":3,"start":4.6,"end":6.8,"duration":2.2,"description":"flowers, leaves, sky"},{"order":4,"start":6.8,"end":9.1,"duration":2.3,"description":"chair, table, plate, food, wine bottle, glass, flowers, plants, fence, ground, shade, stone"},{"order":5,"start":9.1,"end":11.4,"duration":2.3,"description":"wisteria, tree, house, door, window, chairs, table, plants, flowers, stone, patio, sunlight"},{"order":6,"start":11.4,"end":13.8,"duration":2.3,"description":"chairs, table, wine bottle, glasses, plate, food, cat, flowers, plants, canopy"}]',
+  6
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DFSsczFsUEg/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/854987229974305/',
+  293391,
+  297639,
+  1.0,
+  2684,
+  21,
+  6.3,
+  '[{"order":1,"start":0,"end":6.3,"duration":6.3,"description":"cottage, door, windows, table, chairs, plants, garden, stone, roof, trees, pathway, light, sign"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DGX0Pc1Mf97/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1173159827280474/',
+  293391,
+  417846,
+  1.4,
+  4292,
+  60,
+  17.3,
+  '[{"order":1,"start":0,"end":17.3,"duration":17.3,"description":"table, chairs, window, curtain, plants, dishes, cups, countertop, wall, light fixture, floor, door, view"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DDZJ4ars8zQ/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/2028598843882418/',
+  293391,
+  172786,
+  0.6,
+  1293,
+  13,
+  6.7,
+  '[{"order":1,"start":0,"end":6.7,"duration":6.7,"description":"stone wall, window, shelf, plants, lights, chair, table, glass, candle, door, patio, trees"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DEQeptoMig7/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1159806895668911/',
+  293391,
+  167485,
+  0.6,
+  2459,
+  27,
+  20.0,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"table, chairs, plates, food, trees, hills, sky, car, stone wall, blanket, cushion, sunlight"},{"order":2,"start":0.9,"end":1.6,"duration":0.7,"description":"table, chairs, plates, cups, utensils, food, drinks, flowers, door, stone, plants, wall, window, patio, floor"},{"order":3,"start":1.6,"end":3,"duration":1.4,"description":"table, chairs, plate, glass, bottle, flowers, food, croissants, landscape, trees, stone, patio"},{"order":4,"start":3,"end":3.7,"duration":0.7,"description":"table, chairs, plates, food, fruit, croissants, glass, juice, cutlery, napkins, view, trees, plants, stone, floor"},{"order":5,"start":3.7,"end":4.4,"duration":0.7,"description":"table, chair, glass, flowers, plants, stone, gravel, fence, sunlight, woman, robe, food"},{"order":6,"start":4.4,"end":5.1,"duration":0.7,"description":"table, chairs, plates, cups, coffee pot, flowers, stone wall, door, plants, patio, sunlight"},{"order":7,"start":5.1,"end":6.5,"duration":1.4,"description":"table, chairs, dishes, cups, coffee pot, fruit, flowers, stone wall, door, plants, clock, stairs, patio, leaves"},{"order":8,"start":6.5,"end":7.6,"duration":1.1,"description":"pool, sun loungers, umbrellas, flowers, plants, fence, trees, sky, mountain"},{"order":9,"start":7.6,"end":8.3,"duration":0.7,"description":"door, flowers, table, chairs, sun loungers, umbrellas, plants, fence, patio, tiles"},{"order":10,"start":8.3,"end":9.1,"duration":0.8,"description":"table, chairs, countertop, mirror, plants, flowers, wall, roof, sky, tiles, outdoor"},{"order":11,"start":9.1,"end":9.7,"duration":0.6,"description":"pool, sun loungers, umbrellas, flowers, trees, sky, fence"},{"order":12,"start":9.7,"end":10.2,"duration":0.5,"description":"table, chairs, dishes, cups, utensils, food, glass, basket, shelf, books, window, wall, stone, plant, fireplace, rug, light, chair"},{"order":13,"start":10.2,"end":10.7,"duration":0.5,"description":"table, chairs, wine bottle, glasses, lemon, red object, cloth, dog, plants, flowers, canopy"},{"order":14,"start":10.7,"end":12.3,"duration":1.6,"description":"chair, table, plate, wine bottle, grass, flowers, fence, trees, stone, shade"},{"order":15,"start":12.3,"end":13.2,"duration":0.9,"description":"table, chairs, flowers, tree, patio, stone, plants, landscape, hills"},{"order":16,"start":13.2,"end":13.9,"duration":0.7,"description":"bed, blanket, window, shelf, wall, floor, door, plant"},{"order":17,"start":13.9,"end":14.4,"duration":0.5,"description":"stone wall, window, shutters, table, chairs, flowers, tree, sky, clouds"},{"order":18,"start":14.4,"end":15.3,"duration":0.9,"description":"chickens, feeder, food, coop, door, grass, rocks, trees, dirt"},{"order":19,"start":15.3,"end":16,"duration":0.7,"description":"table, flowers, cat, stone wall, window, door, chair, plant, sunlight"},{"order":20,"start":16,"end":16.6,"duration":0.6,"description":"flowers, table, vase, water bottle, plate, bread, chair, path, trees, stone wall"},{"order":21,"start":16.6,"end":17.1,"duration":0.5,"description":"table, chairs, tablecloth, plates, bowls, utensils, glasses, bottle, water, flowers, pot, window, stone, plants, gravel"},{"order":22,"start":17.1,"end":17.6,"duration":0.5,"description":"window, shutters, stone wall, table, plant, basket, blanket, gravel, woman, dress, greenery"},{"order":23,"start":17.6,"end":18.2,"duration":0.5,"description":"table, chairs, glasses, plates, food, vase, flowers, stone, plants, trees, sky, view"},{"order":24,"start":18.2,"end":19.1,"duration":1,"description":"table, chairs, plates, food, drinks, glass, napkins, door, plants, stone, wall, floor, window, tablecloth, vase, flowers"},{"order":25,"start":19.1,"end":20,"duration":0.9,"description":"glass, wine, hand, foliage, sunlight, hills, plants, sky, landscape"}]',
+  25
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DEC3hwpMLmr/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/174825586518787/',
+  293391,
+  291695,
+  1.0,
+  5697,
+  31,
+  14.0,
+  '[{"order":1,"start":0,"end":14,"duration":14,"description":"chandelier, candles, table, chairs, window, plants, artwork, curtains, tablecloth, glassware, napkins, wood, wall, light fixture, greenery, decoration"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DC3kZG8s-vn/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1488810138542782/',
+  293391,
+  219550,
+  0.7,
+  2569,
+  11,
+  9.0,
+  '[{"order":1,"start":0,"end":9,"duration":9,"description":"table, chairs, window, door, plants, flowers, bread, butter, fruit, candle, glass, plate, napkin, cloth, wall, floor, light, sofa, basket"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DAeB4wqsS_q/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/823341539498085/',
+  293391,
+  561234,
+  1.9,
+  7069,
+  56,
+  11.1,
+  '[{"order":1,"start":0,"end":11.1,"duration":11.1,"description":"table, chairs, plates, pastries, croissants, fruit, juice, coffee, napkins, window, plants, floor, rug, sunlight"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DALEXkJM8GY/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/514623011134318/',
+  293391,
+  380892,
+  1.3,
+  5824,
+  66,
+  6.2,
+  '[{"order":1,"start":0,"end":6.2,"duration":6.2,"description":"table, chairs, tablecloth, plates, glasses, cutlery, plants, leaves, light fixture, stone floor, garden, trees, bushes, flowers"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DClQP59sdb7/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1205127744253732/',
+  293391,
+  238841,
+  0.8,
+  4184,
+  28,
+  10.0,
+  '[{"order":1,"start":0,"end":10,"duration":10,"description":"table, chairs, plates, glasses, bottle, food, leaves, plants, stone wall, door, cushion, basket, wood, sunlight"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DAGDORasB5D/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/2542623622555741/',
+  293391,
+  249196,
+  0.8,
+  2911,
+  24,
+  10.2,
+  '[{"order":1,"start":0,"end":10.2,"duration":10.2,"description":"table, chairs, patio, house, door, window, plants, trees, garden, lavender, woman, umbrella, stone"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DANru1HMRoh/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/1044306845758703/',
+  293391,
+  253338,
+  0.9,
+  6828,
+  44,
+  8.7,
+  '[{"order":1,"start":0,"end":8.7,"duration":8.7,"description":"table, chairs, glass, plate, food, fruit, bread, juice, candle, window, door, plants, sofa, garden, stone, wall, fabric, bowl, dish, herbs"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/C_IHMfwM_aH/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/3827479227470950/',
+  293391,
+  185070,
+  0.6,
+  4970,
+  41,
+  7.7,
+  '[{"order":1,"start":0,"end":7.7,"duration":7.7,"description":"table, chairs, plates, cutlery, glass, juice, croissants, bread, fruit, plants, trees, landscape, hills, sunlight"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'lesoliviersdutaulisson',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DCPZV9AMloU/',
+  'https://www.instagram.com/lesoliviersdutaulisson/',
+  'https://www.instagram.com/reels/audio/378169108549373/',
+  293391,
+  991026,
+  3.4,
+  58167,
+  325,
+  14.2,
+  '[{"order":1,"start":0,"end":14.2,"duration":14.2,"description":"table, chairs, vase, flowers, stone, grass, trees, mountains, sky, cat, patio, sunlight, plants, bench"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DGgKeb1CcRU/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/9307461399338078/',
+  131773,
+  181871,
+  1.4,
+  1102,
+  21,
+  47.2,
+  '[{"order":1,"start":0,"end":2.4,"duration":2.4,"description":"ocean, mountains, trees, landscape, sky"},{"order":2,"start":2.4,"end":6.5,"duration":4.2,"description":"Pilates club, people, mats, windows, trees, floor, light, plants, cushions"},{"order":3,"start":6.5,"end":19.3,"duration":12.7,"description":"yoga, silhouette, sunset, sky"},{"order":4,"start":19.3,"end":20.2,"duration":1,"description":"ocean, beach, sand, mountain, sky, water, coastline"},{"order":5,"start":20.2,"end":24.2,"duration":3.9,"description":"ocean, waves, beach, sand, shoreline"},{"order":6,"start":24.2,"end":24.8,"duration":0.6,"description":"landscape, ocean, fields, trees, pool, building, roof, sky"},{"order":7,"start":24.8,"end":25.6,"duration":0.9,"description":"plate, bowl, liquid, kitchen, countertop"},{"order":8,"start":25.6,"end":27.4,"duration":1.7,"description":"soup, plate, spoon, bowl, countertop"},{"order":9,"start":27.4,"end":29.1,"duration":1.7,"description":"house, trees, mountains, sky, grass, roof, stone, landscape"},{"order":10,"start":29.1,"end":32,"duration":2.9,"description":"bed, blanket, person, room, window, furniture, wall, light"},{"order":11,"start":32,"end":34.6,"duration":2.6,"description":"massage, hands, skin"},{"order":12,"start":34.6,"end":36.3,"duration":1.7,"description":"massage, therapist, table, oil, skin"},{"order":13,"start":36.3,"end":37.5,"duration":1.2,"description":"ocean, sky, clouds, horizon, coastline, water"},{"order":14,"start":37.5,"end":39.4,"duration":1.9,"description":"tree, sunlight, leaves"},{"order":15,"start":39.4,"end":44.3,"duration":4.9,"description":"yoga mats, ocean, sky, clouds, sand, people"},{"order":16,"start":44.3,"end":47.2,"duration":2.9,"description":"beach, water, waves, sand, rocks, sky, horizon"}]',
+  16
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'theo.fp',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DGdsCaas5Fw/',
+  'https://www.instagram.com/theo.fp/',
+  'https://www.instagram.com/reels/audio/2731845323770349/',
+  131773,
+  150997,
+  1.1,
+  6072,
+  51,
+  16.7,
+  '[{"order":1,"start":0,"end":3,"duration":3,"description":"villa, pool, garden, trees, mountains, sky, pathway, roof, stone, landscape"},{"order":2,"start":3,"end":4.7,"duration":1.7,"description":"villa, pool, sun loungers, lawn, trees, mountains, sky"},{"order":3,"start":4.7,"end":6.2,"duration":1.5,"description":"pool, sun loungers, grass, rocks, plants, trees"},{"order":4,"start":6.2,"end":7.9,"duration":1.7,"description":"pool, water, deck, rocks, trees, plants, grass, fence"},{"order":5,"start":7.9,"end":9.7,"duration":1.8,"description":"rocks, stairs, tables, chairs, plants, pathway, railing, outdoor seating, landscape"},{"order":6,"start":9.7,"end":11.1,"duration":1.4,"description":"stairs, candles, stone wall, table, chairs, glassware, plates, cutlery, plants, shelf, light fixtures"},{"order":7,"start":11.1,"end":12.9,"duration":1.8,"description":"pool, water, sun loungers, chairs, tables, plants, mountains, sky, clouds"},{"order":8,"start":12.9,"end":15.2,"duration":2.3,"description":"beach, ocean, boats, sand, lights, trees, shoreline, water, hills, sky"},{"order":9,"start":15.2,"end":16.7,"duration":1.6,"description":"candles, lights, ground, trees, sky, horizon, building, path"}]',
+  9
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DOoPqokDxQD/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/1474929980483823/',
+  131773,
+  107367,
+  0.8,
+  1532,
+  15,
+  45.6,
+  '[{"order":1,"start":0,"end":2.7,"duration":2.7,"description":"landscape, mountains, fields, trees, path, water, sky, clouds, sand, vegetation"},{"order":2,"start":2.7,"end":4.3,"duration":1.6,"description":"sun, water, reflection, field, hills, sky, trees, fence, grass"},{"order":3,"start":4.3,"end":6.1,"duration":1.8,"description":"rocks, ocean, beach, boat, coastline, sky, clouds, land, vegetation, hills"},{"order":4,"start":6.1,"end":7.8,"duration":1.6,"description":"glasses, wine, men, berets, hands, wall, light fixture"},{"order":5,"start":7.8,"end":9.2,"duration":1.5,"description":"rocks, plants, stones, path, sky, branches, greenery"},{"order":6,"start":9.2,"end":10.3,"duration":1,"description":"table, bench, candles, wall, door, man, floor, wood, light, window, stone"},{"order":7,"start":10.3,"end":11.6,"duration":1.3,"description":"candles, candelabra, flames, wax, table, bottles, shelves, stone, light"},{"order":8,"start":11.6,"end":13.4,"duration":1.8,"description":"candle, flame, glasses, beret, face, fireplace, logs, smoke, shadows"},{"order":9,"start":13.4,"end":14.3,"duration":0.9,"description":"fire, flames, smoke, ashes, wood"},{"order":10,"start":14.3,"end":15,"duration":0.7,"description":"meat, herbs, plate, wood"},{"order":11,"start":15,"end":16.3,"duration":1.4,"description":"meat, herbs, greens, plate, slices"},{"order":12,"start":16.3,"end":17.2,"duration":0.9,"description":"candle, flame, stone, wall, light, darkness, rocks"},{"order":13,"start":17.2,"end":18,"duration":0.8,"description":"stairs, railing, rocks, plants, table, chairs, stone wall, wooden deck, lanterns"},{"order":14,"start":18,"end":20,"duration":2,"description":"slicer, ham, slices, wood, countertop, purple, blade"},{"order":15,"start":20,"end":21,"duration":1,"description":"bowl, food, plate, bread, knife, hand, table"},{"order":16,"start":21,"end":21.7,"duration":0.7,"description":"man, beret, glasses, mouth, hand, food, bite, sweater, jacket, background"},{"order":17,"start":21.7,"end":24.5,"duration":2.8,"description":"chef, gloves, food, tray, mushrooms, smoke, apron, hand"},{"order":18,"start":24.5,"end":25.4,"duration":0.8,"description":"chefs, table, food, meat, vegetables, plates, bowls, rocks, apron, kitchen tools"},{"order":19,"start":25.4,"end":26.1,"duration":0.7,"description":"man, beret, shirt, food, hand, mouth, background, trees, sky"},{"order":20,"start":26.1,"end":26.8,"duration":0.7,"description":"grill, fire, meat, vegetables, smoke, men, apron, plate, outdoor, landscape"},{"order":21,"start":26.8,"end":27.7,"duration":0.9,"description":"golf course, grass, trees, hills, sky, clouds, building, roof, pathway, sand trap, water hazard"},{"order":22,"start":27.7,"end":29.2,"duration":1.5,"description":"pergola, windows, cushions, sofa, plants, sky, wood, stone, grass"},{"order":23,"start":29.2,"end":30.5,"duration":1.2,"description":"I don''t know who they are."},{"order":24,"start":30.5,"end":31.5,"duration":1,"description":"chandeliers, window, table, chairs, vase, flowers, wall, brick, light, wood, floor, curtain, decoration"},{"order":25,"start":31.5,"end":32.1,"duration":0.6,"description":"glasses, table, hands, people, bar, light, background"},{"order":26,"start":32.1,"end":35.5,"duration":3.4,"description":"table, glasses, wine, bread, plate, napkin, menu, people, shirt, suit, hands, food"},{"order":27,"start":35.5,"end":36.3,"duration":0.8,"description":"plate, food, sauce, meat, hand, crumbs"},{"order":28,"start":36.3,"end":36.9,"duration":0.6,"description":"cake, chocolate, sauce, plate"},{"order":29,"start":36.9,"end":37.6,"duration":0.7,"description":"band, microphone, guitar, drums, mirror, couch, table, glass, people, lighting, wall, floor"},{"order":30,"start":37.6,"end":41.2,"duration":3.6,"description":"cigar, hand, hat, glasses, face, beard, background, light, wood"}]',
+  30
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'julientruchonceramics',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/C_0iK_jsNxX/',
+  'https://www.instagram.com/julientruchonceramics/',
+  'https://www.instagram.com/reels/audio/0/',
+  131773,
+  200842,
+  1.5,
+  9636,
+  222,
+  34.4,
+  '[{"order":1,"start":0,"end":1.7,"duration":1.7,"description":"wood, ceiling, beams, chairs, table, rug, bookshelf, plants, bar, counter, floor"},{"order":2,"start":1.7,"end":3.5,"duration":1.8,"description":"leaves, ceiling, wood, light fixtures, wall, brick, furniture, mirror, shelf"},{"order":3,"start":3.5,"end":4.8,"duration":1.2,"description":"table, towels, wall, window, chair, person, countertop, fabric, light"},{"order":4,"start":4.8,"end":5.4,"duration":0.6,"description":"clay, table, hand, tool, workspace, shelves, containers, pottery, surface, paper"},{"order":5,"start":5.4,"end":6.1,"duration":0.7,"description":"table, dough, surface, paper"},{"order":6,"start":6.1,"end":7,"duration":1,"description":"workbench, tool, hand, paper, window, light, surface, cabinet, floor, trash can"},{"order":7,"start":7,"end":7.6,"duration":0.6,"description":"table, paper, hand, dough, surface, kitchen, tool, background"},{"order":8,"start":7.6,"end":8.3,"duration":0.7,"description":"table, man, dough, hands, kitchen, tools, shelves, pottery, ceramics, wall, light"},{"order":9,"start":8.3,"end":9.9,"duration":1.5,"description":"bar, shelves, bottles, chairs, sofa, table, rug, ceiling, wood, plants, light fixtures, wall, window, person"},{"order":10,"start":9.9,"end":10.8,"duration":0.9,"description":"knife, hand, cutting board, food, plate"},{"order":11,"start":10.8,"end":11.7,"duration":0.9,"description":"hands, tile, knife, surface, grout"},{"order":12,"start":11.7,"end":12.3,"duration":0.6,"description":"hand, paper, marker, leaf shape, writing, table, water"},{"order":13,"start":12.3,"end":13.7,"duration":1.4,"description":"hand, tool, leaf, surface, clay"},{"order":14,"start":13.7,"end":14.9,"duration":1.1,"description":"hands, clay, leaf shape, table, tools, background"},{"order":15,"start":14.9,"end":15.5,"duration":0.7,"description":"hands, clay, pottery, table, tools, pieces, surface"},{"order":16,"start":15.5,"end":16.7,"duration":1.1,"description":"shelves, clay, tools, window, table, workspace, hands, light, plants, surface"},{"order":17,"start":16.7,"end":18,"duration":1.3,"description":"ceiling, leaves, man, ladder, mirror, wall, furniture, lamp, table, chair, floor, wood"},{"order":18,"start":18,"end":19.5,"duration":1.6,"description":"leaves, ceiling, wood, stone, mirror, frame"},{"order":19,"start":19.5,"end":22.2,"duration":2.7,"description":"bucket, liquid, spoon, hand, wall, container, stick, surface"},{"order":20,"start":22.2,"end":24.1,"duration":1.9,"description":"ceiling, wood, beams, leaves, wall, light fixture, stone"},{"order":21,"start":24.1,"end":25.1,"duration":1,"description":"table, cigar, glass, drink, chair, sofa, rug, bar, shelves, light fixtures, ceiling, wood, plants, wall, window"},{"order":22,"start":25.1,"end":27.2,"duration":2.1,"description":"sofa, chairs, table, bar, bottles, mirror, ceiling, wood, leaves, rug, floor"},{"order":23,"start":27.2,"end":28.9,"duration":1.7,"description":"leaves, ceiling, wood, beams, bar, mirror, lights, shelves, bottles, glasses, chairs, wall, bricks, counter"},{"order":24,"start":28.9,"end":31,"duration":2.1,"description":"ceiling, leaves, wood, shelves, bottles, chairs, table, door, window, wall, rug, artwork, light"},{"order":25,"start":31,"end":32.9,"duration":1.9,"description":"leaves, ceiling, wood, beams"},{"order":26,"start":32.9,"end":34.4,"duration":1.5,"description":"sofa, chairs, table, bar, shelves, bottles, plants, ceiling, lights, floor, rug, wall, window, wood"}]',
+  26
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/C48k7Fzrpy4/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/1132345531133457/',
+  131773,
+  109909,
+  0.8,
+  3021,
+  34,
+  33.6,
+  '[{"order":1,"start":0,"end":1.9,"duration":1.9,"description":"gate, pathway, stones, grass, trees, sky, clouds, lights, flowers"},{"order":2,"start":1.9,"end":3,"duration":1.1,"description":"pool, water, mountains, beach, ocean, sky, landscape, plants, grass"},{"order":3,"start":3,"end":3.9,"duration":0.9,"description":"table, chairs, patio, tiles, door, chandelier, plants, sunlight"},{"order":4,"start":3.9,"end":5.1,"duration":1.2,"description":"bed, pillows, blanket, lamp, ceiling, wood, wall, mirror, stone, floor, furniture, window, light"},{"order":5,"start":5.1,"end":9.2,"duration":4.1,"description":"roof, tiles, stone, windows, grass, trees, hillside, landscape"},{"order":6,"start":9.2,"end":10.9,"duration":1.7,"description":"bathtub, faucet, tiles, wall, wood, light, shelf, floor"},{"order":7,"start":10.9,"end":12.4,"duration":1.5,"description":"faucet, showerhead, bathtub, tiles, wall, handle, hose, drain"},{"order":8,"start":12.4,"end":13.9,"duration":1.5,"description":"pool, water, trees, deck, sky, landscape"},{"order":9,"start":13.9,"end":15.2,"duration":1.3,"description":"bed, window, door, curtain, wall, stone, blanket, sunlight, floor"},{"order":10,"start":15.2,"end":17.2,"duration":2.1,"description":"chandelier, fireplace, wood, brick, table, sofa, wall, mirror, stairs, railing, plant, decor, documents"},{"order":11,"start":17.2,"end":18.7,"duration":1.5,"description":"stairs, stone, railing, wall, window, roof, shadow, plants, pot"},{"order":12,"start":18.7,"end":20.1,"duration":1.4,"description":"chandelier, crystals, light bulbs, ceiling, metal, fixture"},{"order":13,"start":20.1,"end":22.3,"duration":2.2,"description":"bedroom, bed, pillows, mirror, light fixture, wall, furniture, radiator"},{"order":14,"start":22.3,"end":23,"duration":0.8,"description":"table, drinks, cocktail, glass, coaster, apple, bowl, wood, plants, surface"},{"order":15,"start":23,"end":25.9,"duration":2.8,"description":"plate, cheese, herbs, bowl, sauce, glass, table, napkin, fork, knife, food, garnish"},{"order":16,"start":25.9,"end":29.4,"duration":3.5,"description":"bathroom, shower, window, tiles, sink, mirror, towel, light fixture, staircase, railing, floor"},{"order":17,"start":29.4,"end":30,"duration":0.6,"description":"bathtub, faucet, wall, tiles, pictures, light fixtures, ceiling, floor, chair, rug"},{"order":18,"start":30,"end":31,"duration":1,"description":"window, bed, cushions, floor, stairs, wall"},{"order":19,"start":31,"end":31.7,"duration":0.7,"description":"bathtub, sink, mirror, towels, brick wall, wooden floor, door, window, curtain, bottle, rug"},{"order":20,"start":31.7,"end":33.6,"duration":1.9,"description":"sun, sky, grass, tree, hill, landscape"}]',
+  20
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/CyGNTKBMVeU/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/455496328230096/',
+  131773,
+  473526,
+  3.6,
+  12868,
+  103,
+  39.1,
+  '[{"order":1,"start":0,"end":2.6,"duration":2.6,"description":"house, roof, tree, grass, stone wall, sky, clouds, mountains"},{"order":2,"start":2.6,"end":6.4,"duration":3.8,"description":"cabin, roof, grass, pool, stones, trees, plants, table, chairs, pathway"},{"order":3,"start":6.4,"end":9.7,"duration":3.3,"description":"house, pool, garden, trees, grass, stone wall, patio, table, chairs, roof, landscape, hills"},{"order":4,"start":9.7,"end":12.7,"duration":3,"description":"pool, house, roof, trees, grass, stone wall, landscape, hills, golf course"},{"order":5,"start":12.7,"end":15.6,"duration":2.9,"description":"grass, stone wall, pathway, trees, shrubs, pool, sky, clouds, mountains"},{"order":6,"start":15.6,"end":18.5,"duration":2.9,"description":"house, stone, roof, grass, tree, sky, clouds, fence"},{"order":7,"start":18.5,"end":19.7,"duration":1.1,"description":"bed, lamp, nightstand, cabinet, door, window, wall, floor, sheets, pillows, glassware, plates"},{"order":8,"start":19.7,"end":22.6,"duration":3,"description":"kitchen, stove, oven, cabinets, countertop, sink, towels, table, chair, floor tiles, wall tiles, utensils, basket, herbs, menu"},{"order":9,"start":22.6,"end":24.1,"duration":1.4,"description":"table, vase, plant, stone wall, ceiling, light fixture, kitchen, bowl, tray, towels, chair, countertop, cabinet, floor"},{"order":10,"start":24.1,"end":26.2,"duration":2.1,"description":"kitchen, stove, oven, sink, countertop, towels, wall, tiles, bricks, ceiling, beams, floor"},{"order":11,"start":26.2,"end":27.9,"duration":1.7,"description":"sink, faucet, light, ceiling, wood, window, landscape, plants, stone wall, grass, ocean, sky"},{"order":12,"start":27.9,"end":29.4,"duration":1.5,"description":"sun loungers, pergola, grass, trees, stone wall, sky, clouds"},{"order":13,"start":29.4,"end":30.5,"duration":1.1,"description":"pergola, grass, sun loungers, trees, pool, stone wall, mountains, sky, clouds"},{"order":14,"start":30.5,"end":33.1,"duration":2.6,"description":"stone wall, roof, grass, trees, clouds, gate, pathway, table, chairs, landscape"},{"order":15,"start":33.1,"end":39.1,"duration":6,"description":"house, pool, trees, grass, landscape, pathway"},{"order":16,"start":39.1,"end":39.1,"duration":0,"description":"Domaine de Murtoli, logo"}]',
+  16
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/C0ExBTrI02r/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/997508674672914/',
+  131773,
+  735954,
+  5.6,
+  7573,
+  6293,
+  16.6,
+  '[{"order":1,"start":0,"end":0.7,"duration":0.7,"description":"gates, sky, clouds, mountains, trees, road, stone walls, vehicle"},{"order":2,"start":0.7,"end":1.8,"duration":1.1,"description":"bathtub, chair, mirror, sink, faucet, wall, light fixture, pictures, window, tiles"},{"order":3,"start":1.8,"end":2.9,"duration":1.1,"description":"chandelier, door, wall, shelf, vase, flowers, bricks, floor, basket, logs, hallway, light, ceiling"},{"order":4,"start":2.9,"end":3.9,"duration":1.1,"description":"balcony, table, chairs, railing, sky, clouds, mountains, trees, buildings, patio, stone"},{"order":5,"start":3.9,"end":5,"duration":1.1,"description":"bar, shelves, bottles, mirror, chairs, tables, sofa, wood, floor, ceiling, light, lamp, brick, wall, rug, person"},{"order":6,"start":5,"end":6.1,"duration":1.1,"description":"fireplace, fire, logs, stone, metal, bricks, sofa, cushion, floor, wall, room"},{"order":7,"start":6.1,"end":7.2,"duration":1.1,"description":"sofa, tables, lantern, window, curtains, balcony, railing, chairs, carpet, plants, light fixtures, wall, ceiling, floor, books, decor"},{"order":8,"start":7.2,"end":8.2,"duration":1.1,"description":"gate, tree, grass, hill, sky"},{"order":9,"start":8.2,"end":9.3,"duration":1.1,"description":"pool, drinks, glasses, wood, stone, plants, sky"},{"order":10,"start":9.3,"end":10.4,"duration":1.1,"description":"pool, water, person, mountains, plants, sky, clouds, sun loungers, pots"},{"order":11,"start":10.4,"end":11.4,"duration":1.1,"description":"bathtub, faucet, wall, tiles, photographs, shelf, bottles, rug, floor"},{"order":12,"start":11.4,"end":12.5,"duration":1.1,"description":"bed, feet, fireplace, chair, wall, wood, light, logs, blanket"},{"order":13,"start":12.5,"end":13.6,"duration":1.1,"description":"fireplace, flames, wood, plates, bowls, shrimp, sauce, soup, cheese, herbs, table, utensils, napkin, glass"},{"order":14,"start":13.6,"end":14.6,"duration":1.1,"description":"wine bottles, wine racks, glasses, table, floor, wood, wall"},{"order":15,"start":14.6,"end":15.7,"duration":1.1,"description":"table, bread, butter, jam, honey, bacon, toast, egg, coffee, orange juice, napkin, plate, knife, glass, tree, leaves"},{"order":16,"start":15.7,"end":16.6,"duration":0.9,"description":"pool, sun loungers, plants, cocktail, table, sky, hills, water"}]',
+  16
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/CuzisGMIGsT/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/817665606600189/',
+  131773,
+  557097,
+  4.2,
+  23641,
+  127,
+  67.3,
+  '[{"order":1,"start":0,"end":1.9,"duration":1.9,"description":"villa, pool, lawn, trees, mountains, sky, pathway, rocks, house, roof, windows, chairs"},{"order":2,"start":1.9,"end":6,"duration":4.1,"description":"house, pool, sun loungers, lawn, trees, mountains, sky"},{"order":3,"start":6,"end":9.5,"duration":3.5,"description":"pool, grass, sun loungers, house, trees, rocks, pathway"},{"order":4,"start":9.5,"end":11.7,"duration":2.2,"description":"house, roof, windows, grass, trees, mountains, sky"},{"order":5,"start":11.7,"end":14.2,"duration":2.5,"description":"house, pool, lawn, sun loungers, trees, rocks, mountains, sky"},{"order":6,"start":14.2,"end":17.2,"duration":3,"description":"lantern, beams, ceiling, kitchen, sink, countertop, stove, tiles, wall, window, table, chairs, candlestick, plant, towels, fireplace, bricks, door"},{"order":7,"start":17.2,"end":19.8,"duration":2.6,"description":"kitchen, dining table, chairs, sofa, chandelier, beams, clock, cabinet, plants, tiles, wall, window, door, countertop, utensils, candles"},{"order":8,"start":19.8,"end":21.9,"duration":2.1,"description":"wall, switch, mirror, dresser, lamp, plant, floor, ceiling, window, light, wood"},{"order":9,"start":21.9,"end":24.4,"duration":2.5,"description":"bed, window, curtain, wall, bench, rug"},{"order":10,"start":24.4,"end":27.6,"duration":3.1,"description":"mirror, bed, pillows, lamp, nightstand, books, picture frame, wall, ceiling, light fixture"},{"order":11,"start":27.6,"end":28.8,"duration":1.3,"description":"bedroom, bed, lamp, nightstand, mirror, dresser, books, window, blue door, wall, ceiling, light fixture, floor, rug, plant"},{"order":12,"start":28.8,"end":30.4,"duration":1.5,"description":"bed, pillows, bedside table, lamp, rug, floor, wall, ceiling, beams"},{"order":13,"start":30.4,"end":32.2,"duration":1.8,"description":"window, curtain, television, table, chest, rug, wall, ceiling, floor"},{"order":14,"start":32.2,"end":34.9,"duration":2.7,"description":"bathroom, sink, mirror, towels, basket, window, curtain, light fixtures, wall, floor, door, robe, wood beams"},{"order":15,"start":34.9,"end":37.4,"duration":2.6,"description":"sink, mirror, lights, wall, shelf, towels, plant, bottles, countertop, wood, basket, floor"},{"order":16,"start":37.4,"end":40.8,"duration":3.4,"description":"bathtub, window, towel, wall, light, floor, faucet, rack, tiles"},{"order":17,"start":40.8,"end":43.1,"duration":2.3,"description":"bottles, shampoo, lotion, soap, box, plant, table, mirror, wall, light"},{"order":18,"start":43.1,"end":45.8,"duration":2.7,"description":"stairs, railing, living room, sofa, table, chairs, kitchen, clock, window, curtains, ceiling, beams, floor tiles, wall, cabinet, television, plants"},{"order":19,"start":45.8,"end":48.5,"duration":2.7,"description":"window, grass, pool, stone, curtain, floor, wall, sky, landscape, furniture, sink"},{"order":20,"start":48.5,"end":51,"duration":2.5,"description":"bedroom, bed, pillows, bench, lamp, mirror, door, wall, ceiling, wood, tiles, floor"},{"order":21,"start":51,"end":53.5,"duration":2.6,"description":"sinks, mirrors, faucets, countertop, wall, lights, towels, shelf, bottles, plant, wood, door"},{"order":22,"start":53.5,"end":56,"duration":2.4,"description":"table, chairs, stone, lanterns, grill, plants, wall, floor, ceiling, window, lawn, trees"},{"order":23,"start":56,"end":58.6,"duration":2.7,"description":"lantern, ceiling, wood, wall, brick, grill, sink, countertop, chairs, table, cushions, floor, window, door, trash can"},{"order":24,"start":58.6,"end":61.5,"duration":2.9,"description":"pool, sun loungers, grass, rocks, trees, plants, wall"},{"order":25,"start":61.5,"end":67.3,"duration":5.8,"description":"villa, pool, lawn, trees, mountains, sky, pathway, rocks, house"}]',
+  25
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/CxGcXoJvHAi/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/269613713746284/',
+  131773,
+  293263,
+  2.2,
+  8576,
+  153,
+  55.2,
+  '[{"order":1,"start":0,"end":4.2,"duration":4.2,"description":"rocks, trees, plants, pathway, tables, chairs, canopy, railing, outdoor seating, steps"},{"order":2,"start":4.2,"end":6.2,"duration":2,"description":"deck, rocks, plants, tables, chairs, sofa, railing, pathway, roof, bar, people, trees"},{"order":3,"start":6.2,"end":10.3,"duration":4,"description":"rock, table, chairs, plants, hole, wood, landscape"},{"order":4,"start":10.3,"end":13.6,"duration":3.3,"description":"rocks, stairs, tables, chairs, plants, railing, wood, pathway, greenery"},{"order":5,"start":13.6,"end":16.5,"duration":2.9,"description":"table, glasses, plates, napkins, cutlery, greenery, rocks, sky, plants, landscape"},{"order":6,"start":16.5,"end":20,"duration":3.5,"description":"door, stone, candles, wall, floor, light, archway"},{"order":7,"start":20,"end":23.2,"duration":3.3,"description":"candles, holder, table, man, glass, light, stone, plants, background"},{"order":8,"start":23.2,"end":26.8,"duration":3.6,"description":"stone walls, candles, stairs, table, chairs, glassware, plant, cutlery, linen, wood, floor"},{"order":9,"start":26.8,"end":29.2,"duration":2.4,"description":"table, chairs, plates, glasses, candles, wine bottles, shelves, stone wall, wooden barrel, plants, napkins, cutlery, floor, light fixtures"},{"order":10,"start":29.2,"end":30.5,"duration":1.3,"description":"stairs, stones, candles, table, stools, wall, light"},{"order":11,"start":30.5,"end":35.1,"duration":4.7,"description":"cave, candles, table, chairs, wood, stone, wall, light, floor"},{"order":12,"start":35.1,"end":36.2,"duration":1.1,"description":"window, mirror, candles, table, chairs, plates, napkins, glass, plant, wall, ceiling, stone, wood"},{"order":13,"start":36.2,"end":39.4,"duration":3.2,"description":"table, plates, napkins, glasses, cutlery, chandelier, candles, stone wall, floor, ceiling, plants, person, cloth"},{"order":14,"start":39.4,"end":41.8,"duration":2.4,"description":"table, chairs, cushions, candles, wall, cabinet, towels, glasses, plants, stone, wood"},{"order":15,"start":41.8,"end":44.1,"duration":2.3,"description":"wine bottles, shelves, rocks, wall, light"},{"order":16,"start":44.1,"end":52.1,"duration":7.9,"description":"candle, table, glass, bottle, plant, shelf, wine, stone, light, person"},{"order":17,"start":52.1,"end":55.2,"duration":3.1,"description":"candles, candle holder, table, hand, stone, plant, light, shirt, watch"}]',
+  17
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/CuhiageI2Gp/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/217012537494808/',
+  131773,
+  388869,
+  3.0,
+  21013,
+  101,
+  78.5,
+  '[{"order":1,"start":0,"end":2.7,"duration":2.7,"description":"villa, pool, garden, trees, roof, patio, lawn, flowers, pathway, landscape, mountains, sky"},{"order":2,"start":2.7,"end":5.2,"duration":2.6,"description":"pathway, trees, grass, building, roof, door, sky"},{"order":3,"start":5.2,"end":7.9,"duration":2.6,"description":"villa, roof, windows, lawn, trees, rocks, patio, furniture, landscape, sky, mountain"},{"order":4,"start":7.9,"end":10.3,"duration":2.4,"description":"table, chairs, grass, stones, plants, trees, mountain, sky, pool, house"},{"order":5,"start":10.3,"end":12.9,"duration":2.6,"description":"sofa, cushions, coffee table, chess set, books, vase, chandelier, window, wall, floor, tiles, cabinet, armchair, decor"},{"order":6,"start":12.9,"end":15.8,"duration":2.8,"description":"chandelier, sofa, cushions, coffee table, books, dining table, chairs, kitchen, shelves, wall, window, floor, ceiling, staircase, railing, light fixtures"},{"order":7,"start":15.8,"end":17.8,"duration":2.1,"description":"chandelier, windows, mirror, wall, bookshelf, sofa, armchair, coffee table, chessboard, books, fireplace, tiles, floor, ceiling, plants"},{"order":8,"start":17.8,"end":19.9,"duration":2.1,"description":"chandelier, windows, walls, ceiling, fireplace, furniture, sofa, armchair, table, book, pages, chessboard, shelves, plants, landscape, light"},{"order":9,"start":19.9,"end":20.9,"duration":1,"description":"chandelier, windows, fireplace, sofa, armchair, coffee table, books, chessboard, cabinet, tiles, plants, wall, ceiling, light"},{"order":10,"start":20.9,"end":23.4,"duration":2.5,"description":"kitchen, island, pots, pans, shelves, plates, bowls, utensils, sink, window, light fixtures, wooden beams, cabinets, countertop, towels, baskets"},{"order":11,"start":23.4,"end":25.4,"duration":2,"description":"kitchen, bar, countertop, cabinets, pots, pans, plates, glasses, candles, stools, door, ceiling, beams, tiles, wall, floor"},{"order":12,"start":25.4,"end":27,"duration":1.6,"description":"kitchen, sink, faucet, countertop, brick, tiles, wall, shelves, bottles, glasses, artwork, light fixture, window, curtains, door"},{"order":13,"start":27,"end":28.7,"duration":1.6,"description":"sailboat, table, railing, sofa, window, ceiling, beams, floor, fireplace, wall"},{"order":14,"start":28.7,"end":31,"duration":2.4,"description":"sofa, chair, table, chest, rug, window, railing, ceiling, light fixture, telescope, book, wall, wood, beam, floor"},{"order":15,"start":31,"end":33.7,"duration":2.7,"description":"bedroom, bed, bench, rug, window, door, wall, ceiling, chandelier, artwork, radiator, curtain, floor, table, chairs"},{"order":16,"start":33.7,"end":36.5,"duration":2.8,"description":"bedroom, bed, pillows, blanket, nightstand, lamp, curtain, window, wall, ceiling, beams, glass door, robe, furniture, ottoman, floor"},{"order":17,"start":36.5,"end":39,"duration":2.5,"description":"bathtub, sink, mirror, window, curtain, wall, ceiling, light fixture, chair, table, towels, basket, floor"},{"order":18,"start":39,"end":40.4,"duration":1.4,"description":"bathtub, window, faucet, towel, chair, floor, plants, sky, mountains, landscape"},{"order":19,"start":40.4,"end":42.1,"duration":1.7,"description":"robe, shower, tiles, mirror, glass, door, wall, curtain, floor, faucet, hook"},{"order":20,"start":42.1,"end":44.2,"duration":2.1,"description":"hallway, ceiling, beams, light fixtures, mirror, wall, hooks, decorations, railing, stairs, floor, door, window, curtains, furniture, vase"},{"order":21,"start":44.2,"end":46.8,"duration":2.6,"description":"stairs, stone, arch, plants, pool, chairs, table, patio, deck, sky, landscape"},{"order":22,"start":46.8,"end":49.4,"duration":2.6,"description":"villa, pool, sun loungers, garden, trees, patio, roof, stone, pathway, plants, deck, chairs"},{"order":23,"start":49.4,"end":51.5,"duration":2.1,"description":"bed, pillows, blanket, lamp, ceiling, wood beams, wall, artwork, radiator, window, door, floor, rug"},{"order":24,"start":51.5,"end":53.8,"duration":2.3,"description":"shower, tiles, wall, window, curtain, soap, towel, floor, ceiling, light"},{"order":25,"start":53.8,"end":56,"duration":2.2,"description":"bedroom, bed, lamp, window, curtains, chair, table, mirror, floor, ceiling, tiles, light fixture, radiator"},{"order":26,"start":56,"end":58.3,"duration":2.3,"description":"bed, pillows, blanket, lamp, window, wall, ceiling, wood, furniture, table, chair, kitchenette, heater"},{"order":27,"start":58.3,"end":61,"duration":2.7,"description":"bed, pillow, blanket, lamp, nightstand, door, window, curtain, wall, ceiling, wood, floor, dresser, vase"},{"order":28,"start":61,"end":63.5,"duration":2.5,"description":"shelf, robes, bottles, window, countertop, brick, wood, floor"},{"order":29,"start":63.5,"end":66.2,"duration":2.7,"description":"window, wall, light fixture, mirror, shelf, towel, brick, countertop, basin, basket"},{"order":30,"start":66.2,"end":69.2,"duration":2.9,"description":"bed, bed frame, chair, table, mirror, wall, window, door, light fixture, radiator, artwork, tiles, floor"}]',
+  30
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'domainedemurtoli',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/Cz4J3UEoA63/',
+  'https://www.instagram.com/domainedemurtoli/',
+  'https://www.instagram.com/reels/audio/2021425631549732/',
+  131773,
+  241509,
+  1.8,
+  3722,
+  35,
+  45.6,
+  '[{"order":1,"start":0,"end":2.7,"duration":2.7,"description":"landscape, mountains, fields, trees, path, water, sand, sky, clouds"},{"order":2,"start":2.7,"end":4.3,"duration":1.6,"description":"sun, water, reflection, grass, trees, hills, sky, light, landscape"},{"order":3,"start":4.3,"end":6.1,"duration":1.8,"description":"rock, ocean, beach, boat, coastline, sky, land, trees, hills"},{"order":4,"start":6.1,"end":7.7,"duration":1.6,"description":"glasses, wine, men, berets, hands, background, wall, light fixture"},{"order":5,"start":7.7,"end":9.2,"duration":1.5,"description":"rock, plants, stones, path, sky, branches"},{"order":6,"start":9.2,"end":10.3,"duration":1,"description":"door, candles, table, bench, wall, stone, man, window, light, frame"},{"order":7,"start":10.3,"end":11.6,"duration":1.4,"description":"candelabra, candles, flame, wax, shelf, bottles, stone, wall, light"},{"order":8,"start":11.6,"end":13.4,"duration":1.8,"description":"candles, flame, holder, person, glasses, beret, fireplace, logs, smoke, shadows"},{"order":9,"start":13.4,"end":14.3,"duration":0.9,"description":"fire, flames, smoke, wood"},{"order":10,"start":14.3,"end":15,"duration":0.7,"description":"meat, herbs, plate, wood"},{"order":11,"start":15,"end":16.3,"duration":1.4,"description":"meat, slices, herbs, greens, plate, garnish"},{"order":12,"start":16.3,"end":17.2,"duration":0.9,"description":"candles, stone, wall, light, shadows"},{"order":13,"start":17.2,"end":18,"duration":0.8,"description":"stairs, stone, railing, rocks, plants, table, chairs, wood, pathway, lights"},{"order":14,"start":18,"end":20,"duration":2,"description":"slicer, ham, slices, wood, countertop, purple, machine"},{"order":15,"start":20,"end":21,"duration":1,"description":"bowl, food, plate, bread, knife, hand, table"},{"order":16,"start":21,"end":21.7,"duration":0.7,"description":"man, glasses, hat, hand, food, mouth, teeth, sky, background"},{"order":17,"start":21.7,"end":24.5,"duration":2.8,"description":"chef, gloves, food, tray, mushrooms, smoke, background, plants, apron, hands"},{"order":18,"start":24.5,"end":25.4,"duration":0.8,"description":"chefs, table, food, meat, vegetables, plate, bowl, wooden surface, rocks"},{"order":19,"start":25.4,"end":26.1,"duration":0.7,"description":"man, food, hand, shirt, beret, background, trees, sky"},{"order":20,"start":26.1,"end":26.8,"duration":0.7,"description":"grill, fire, meat, cauliflower, chef, man, smoke, outdoor, plate"},{"order":21,"start":26.8,"end":27.7,"duration":0.9,"description":"golf course, grass, trees, hills, sky, clouds, building, roof, pathway, landscape"},{"order":22,"start":27.7,"end":29.2,"duration":1.5,"description":"pergola, beams, windows, stone, sofa, cushions, plants, grass, sky, lamp"},{"order":23,"start":29.2,"end":30.5,"duration":1.2,"description":"I don''t see any property features in the image."},{"order":24,"start":30.5,"end":31.5,"duration":1,"description":"chandeliers, wood, windows, brick, table, vases, flowers, chairs, tablecloths, lighting, wall, plants"},{"order":25,"start":31.5,"end":32.1,"duration":0.6,"description":"glasses, hands, table, bar, bottles, people, light, background"},{"order":26,"start":32.1,"end":35.5,"duration":3.4,"description":"table, glasses, wine, plate, bread, menu, napkin, waiter, person, person, background, light, wall"},{"order":27,"start":35.5,"end":36.3,"duration":0.8,"description":"plate, meat, sauce, hand, seasoning, crumbs"},{"order":28,"start":36.3,"end":36.9,"duration":0.6,"description":"cake, chocolate, sauce, plate"},{"order":29,"start":36.9,"end":37.6,"duration":0.7,"description":"band, microphone, guitar, drums, mirror, wall, light, sofa, table, glass, people, audience, chair"},{"order":30,"start":37.6,"end":41.2,"duration":3.6,"description":"cigar, hand, hat, glasses, face, background, light"}]',
+  30
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'chateaustvictorlacoste',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/CrlP4GvLLb1/',
+  'https://www.instagram.com/chateaustvictorlacoste/',
+  'https://www.instagram.com/reels/audio/674701997753323/',
+  146555,
+  106202,
+  0.7,
+  4880,
+  43,
+  13.5,
+  '[{"order":1,"start":0,"end":2.6,"duration":2.6,"description":"stone wall, plants, flowers, patio, sun loungers, cushions, table, lantern, tiles"},{"order":2,"start":2.6,"end":4,"duration":1.3,"description":"planters, plants, stone wall, bench, gravel, trees, sunlight"},{"order":3,"start":4,"end":5.8,"duration":1.8,"description":"tree, plants, stone wall, steps, pot, sunlight, lawn, chair, pathway, garden"},{"order":4,"start":5.8,"end":12.4,"duration":6.6,"description":"pool, stairs, stone, plants, trees, flowers, table, chairs, vase, water, wall, column, garden, pot"},{"order":5,"start":12.4,"end":13.5,"duration":1.1,"description":"pool, sun loungers, table, chairs, stone wall, windows, trees, plants, water"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'chateaustvictorlacoste',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DQBP4_jiDTY/',
+  'https://www.instagram.com/chateaustvictorlacoste/',
+  'https://www.instagram.com/reels/audio/293110830242316/',
+  146555,
+  183051,
+  1.2,
+  8129,
+  181,
+  43.0,
+  '[{"order":1,"start":0,"end":4.2,"duration":4.2,"description":"chandelier, table, chairs, plates, glasses, napkins, candles, fruit, cabinet, door, wall, artwork, people"},{"order":2,"start":4.2,"end":13,"duration":8.7,"description":"garden, trees, stone wall, stairs, gate, plants, pots, gravel, pathway, fence, olive tree, shrubs, vines, roof tiles"},{"order":3,"start":13,"end":18.7,"duration":5.7,"description":"trees, plants, grass, wall, sky, sunlight, stone, ground"},{"order":4,"start":18.7,"end":30.9,"duration":12.3,"description":"garden, plants, trees, stone wall, gate, stairs, pot, globe, roof, gravel"},{"order":5,"start":30.9,"end":34.9,"duration":4,"description":"alley, stone walls, plants, potted plants, stairs, windows, door, sign, pavement, blue sky"},{"order":6,"start":34.9,"end":43,"duration":8,"description":"stone wall, patio, chairs, table, plants, pots, trees, lantern, tiles, steps"}]',
+  6
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'voyage_provocateur',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DLFCG8VtM5D/',
+  'https://www.instagram.com/voyage_provocateur/',
+  'https://www.instagram.com/reels/audio/1716372878966378/',
+  146555,
+  188178,
+  1.3,
+  14394,
+  842,
+  6.6,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"table, chairs, flowers, vase, pool, stairs, plants, trees, wall, stone, sunlight"},{"order":2,"start":0.9,"end":1.9,"duration":1,"description":"pool, flowers, plants, stone wall, stairs, lounge chair, table, statue, garden"},{"order":3,"start":1.9,"end":2.9,"duration":0.9,"description":"chandelier, clock, pots, fireplace, table, chairs, flowers, pineapple, bowl, lemon, pink wall, cabinet, tiles"},{"order":4,"start":2.9,"end":3.7,"duration":0.9,"description":"pool, table, chair, flowers, vase, stone wall, plants, trees, sunlight, woman, drink, plate, towel, steps"},{"order":5,"start":3.7,"end":4.7,"duration":0.9,"description":"pool, table, chairs, flowers, basket, sun loungers, plants, trees, stone wall"},{"order":6,"start":4.7,"end":5.6,"duration":1,"description":"pool, plants, flowers, chairs, table, sofa, steps, statues, wall, garden"},{"order":7,"start":5.6,"end":6.6,"duration":1,"description":"pool, flowers, vase, table, cups, plate, pastries, chair, plants, steps, towel, stone, water"}]',
+  7
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'chateaustvictorlacoste',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DHQqcp4O054/',
+  'https://www.instagram.com/chateaustvictorlacoste/',
+  'https://www.instagram.com/reels/audio/199130024102108/',
+  146555,
+  163868,
+  1.1,
+  9195,
+  119,
+  24.7,
+  '[{"order":1,"start":0,"end":8.4,"duration":8.4,"description":"pool, sun loungers, plants, trees, stone, sky, water"},{"order":2,"start":8.4,"end":11,"duration":2.6,"description":"pool, stone building, trees, plants, sky, clouds, garden, patio, columns, water"},{"order":3,"start":11,"end":14.2,"duration":3.2,"description":"flowers, pool, plants, trees, water"},{"order":4,"start":14.2,"end":15.3,"duration":1.1,"description":"pool, plants, flowers, trees, stone wall, patio, chairs, table, sky, water"},{"order":5,"start":15.3,"end":18,"duration":2.7,"description":"pool, chairs, table, flowers, vase, water, trees, stone wall, sky, plants"},{"order":6,"start":18,"end":19.6,"duration":1.6,"description":"pool, stone wall, windows, plants, sun loungers, pots, trees, sky"},{"order":7,"start":19.6,"end":22.4,"duration":2.7,"description":"pool, stone wall, trees, plants, chairs, water, sky"},{"order":8,"start":22.4,"end":24.7,"duration":2.3,"description":"door, window, stone wall, roof, pool, patio, plants, chairs, table, sky, clouds"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thetravelsquadfamily',
+  'Hotel',
+  'France',
+  'https://www.instagram.com/p/DHLyqe3O3kM/',
+  'https://www.instagram.com/thetravelsquadfamily/',
+  'https://www.instagram.com/reels/audio/540019081825635/',
+  146555,
+  2214384,
+  15.1,
+  67703,
+  305,
+  9.6,
+  '[{"order":1,"start":0,"end":5.5,"duration":5.5,"description":"pool, stone wall, plants, flowers, table, chairs, column, window, building, garden"},{"order":2,"start":5.5,"end":7.8,"duration":2.2,"description":"sky, clouds, landscape, hills, trees, plants, flowers, stone wall, pot, balcony"},{"order":3,"start":7.8,"end":9.6,"duration":1.8,"description":"pool, sun loungers, plants, flowers, stone wall, stairs, woman, trees, water, pots"}]',
+  3
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DPHWoXMDEC5/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/913579088826358/',
+  205620,
+  386111,
+  1.9,
+  6039,
+  94,
+  13.5,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"door, hallway, ceiling, light fixture, man, toy, floor, tiles, artwork, walls, windows"},{"order":2,"start":0.8,"end":1.5,"duration":0.7,"description":"bed, pillows, blanket, lamp, wall, artwork, frame, man, toy, furniture, gold, green"},{"order":3,"start":1.5,"end":3.4,"duration":1.8,"description":"bed, pillows, blanket, stuffed animal, plate, cupcakes, wall, headboard"},{"order":4,"start":3.4,"end":4.4,"duration":1.1,"description":"frog plush, slippers, towel, green fabric, embroidery, crown"},{"order":5,"start":4.4,"end":5.3,"duration":0.8,"description":"chandelier, sofa, armchair, table, crib, balloons, carpet, curtains, wall, painting, lamp, window"},{"order":6,"start":5.3,"end":6,"duration":0.8,"description":"crib, stuffed animals, frog, slippers, blanket, hand, mattress, pattern"},{"order":7,"start":6,"end":7.5,"duration":1.5,"description":"chandelier, table, chairs, man, artwork, mirror, wall, wood, floor, light"},{"order":8,"start":7.5,"end":9,"duration":1.5,"description":"table, glasses, juice, pitcher, dessert, strawberries, blackberries, mint, macarons, plate, sweets, wood"},{"order":9,"start":9,"end":9.7,"duration":0.6,"description":"fruit, platter, cake, glasses, cream, strawberries, macarons, teapot, table, lamp, window, balloons, juice, hand, glove"},{"order":10,"start":9.7,"end":10.4,"duration":0.7,"description":"table, chair, cup, teapot, dessert, macarons, cake pops, juice, glass, plate, napkin, spoon, window, curtain, hand, glove"},{"order":11,"start":10.4,"end":11.2,"duration":0.8,"description":"pool, water, steps, inflatable, chairs, windows, ceiling, lights, artwork, floor, columns, walls"},{"order":12,"start":11.2,"end":13.5,"duration":2.3,"description":"pool, inflatable swan, plush toys, man, lamp, window, chairs, floor, ceiling, artwork"}]',
+  12
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DAAped5uJqe/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/1440422849981270/',
+  205620,
+  2981406,
+  14.5,
+  127763,
+  1101,
+  13.5,
+  '[{"order":1,"start":0,"end":3.3,"duration":3.3,"description":"car, door, man, suit, hat, entrance, building, pavement, light fixture"},{"order":2,"start":3.3,"end":4.5,"duration":1.2,"description":"lobby, reception desk, artwork, chairs, people, flowers, marble, light fixtures, wall, floor"},{"order":3,"start":4.5,"end":5.6,"duration":1.1,"description":"reception desk, clock, wall, paneling, man, suit, tie, computer, brochure, light fixture, marble"},{"order":4,"start":5.6,"end":6.7,"duration":1.2,"description":"stairs, waiter, tray, chandelier, tables, chairs, floor, wall, artwork, lamps, menu, entrance"},{"order":5,"start":6.7,"end":7.8,"duration":1.1,"description":"stairs, railing, chandelier, balloons, woman, dress, floor, wall, light"},{"order":6,"start":7.8,"end":8.9,"duration":1.1,"description":"lobby, chandelier, curtains, windows, plants, chairs, tables, carpet, woman, phone, folder"},{"order":7,"start":8.9,"end":10.1,"duration":1.2,"description":"chandelier, door, hallway, floor, tiles, wall, light, furniture, window, room, stairs"},{"order":8,"start":10.1,"end":11.3,"duration":1.2,"description":"room, vase, flowers, woman, table, carpet, painting, bed, window, door, furniture, tray, food, juice"},{"order":9,"start":11.3,"end":13.5,"duration":2.2,"description":"table, umbrella, waiter, flowers, plates, glasses, orange juice, strawberries, pastries, chairs, patio, trees, sky, building"}]',
+  9
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DKm9qfVsIiF/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/1016816680641501/',
+  205620,
+  1033131,
+  5.0,
+  7112,
+  122,
+  12.9,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"hotel, building, windows, sign, plants, flowers, sky"},{"order":2,"start":0.8,"end":1.6,"duration":0.8,"description":"entrance, door, canopy, lanterns, pavement, bushes, man, uniform, building"},{"order":3,"start":1.6,"end":2.4,"duration":0.8,"description":"lobby, chandelier, flowers, reception desk, clock, marble floor, suitcases, people, furniture, lights"},{"order":4,"start":2.4,"end":3.3,"duration":0.8,"description":"bedroom, bed, table, tray, food, drink, lamp, curtain, window, wall, floor, sofa, artwork, light"},{"order":5,"start":3.3,"end":4,"duration":0.8,"description":"coffee, cup, saucer, teapot, flowers, vase, pastry, plate, knife, sunlight"},{"order":6,"start":4,"end":4.8,"duration":0.8,"description":"bed, table, chair, food, drink, window, curtain, mirror, flowers, plate, cup, napkin, person"},{"order":7,"start":4.8,"end":5.6,"duration":0.8,"description":"plate, dessert, raspberries, strawberries, sauce, fork, spoon, hand, glass, juice, newspaper, table, tablecloth"},{"order":8,"start":5.6,"end":6.5,"duration":0.8,"description":"breakfast, tray, table, fruit, flowers, coffee pot, juice, plates, magazine, bed, pillow, curtains, lamp, mirror, chair"},{"order":9,"start":6.5,"end":7.2,"duration":0.8,"description":"pool, ceiling, lights, walls, door, counter, sink, mirror, tiles, figure, windows, lamps, artwork, design"},{"order":10,"start":7.2,"end":8.1,"duration":0.9,"description":"pool, chair, table, window, light, floor, wall, towel, person"},{"order":11,"start":8.1,"end":9,"duration":0.9,"description":"bar, bartender, bottles, glasses, countertop, shaker, ice, light fixtures, mirrors, stools, wall, logo"},{"order":12,"start":9,"end":9.8,"duration":0.8,"description":"bar, bartender, drinks, bottles, glasses, countertop, marble, ice, shaker, cocktail, suit, tie, shirt, bowtie, light, chandelier"},{"order":13,"start":9.8,"end":10.6,"duration":0.8,"description":"bar, bartender, table, chairs, sofa, carpet, chandelier, windows, bottles, glasses, light fixtures, curtains, people"},{"order":14,"start":10.6,"end":12.9,"duration":2.3,"description":"cocktail, glass, ice, table, lamp, popcorn, bowl, olives, coaster, pattern"}]',
+  14
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DJcDw5Ns9n2/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/1651697772047067/',
+  205620,
+  297408,
+  1.4,
+  7339,
+  100,
+  16.8,
+  '[{"order":1,"start":0,"end":0.6,"duration":0.6,"description":"hotel, building, windows, sign, gate, plants, flags"},{"order":2,"start":0.6,"end":1.2,"duration":0.6,"description":"hand, ring, coat, lapel, pin, fabric"},{"order":3,"start":1.2,"end":1.9,"duration":0.7,"description":"clock, wall, shelves, bottles, counter, marble"},{"order":4,"start":1.9,"end":2.5,"duration":0.7,"description":"bottles, shelves, wood, wall"},{"order":5,"start":2.5,"end":3.1,"duration":0.6,"description":"chandelier, ceiling, marble, railing, artwork, light fixture"},{"order":6,"start":3.1,"end":3.8,"duration":0.6,"description":"chandelier, staircase, railing, wall, light, tiles, artwork, ceiling"},{"order":7,"start":3.8,"end":4.5,"duration":0.7,"description":"dining table, chairs, chandelier, artwork, wall, window, curtains, floor"},{"order":8,"start":4.5,"end":5.1,"duration":0.6,"description":"table, chairs, wood, wall, door, floor"},{"order":9,"start":5.1,"end":5.9,"duration":0.8,"description":"table, chairs, glassware, plates, cutlery, wall, artwork, curtain, floor, bottle, bar, light, decor"},{"order":10,"start":5.9,"end":6.5,"duration":0.6,"description":"table, chairs, glasses, plates, napkins, flowers, curtain, floor, light, wall, window"},{"order":11,"start":6.5,"end":7.1,"duration":0.6,"description":"hallway, chandelier, lights, doors, windows, floor, walls, artwork, display cases, ceiling"},{"order":12,"start":7.1,"end":7.8,"duration":0.7,"description":"chandelier, light bulbs, ceiling, wall, mirror, room"},{"order":13,"start":7.8,"end":8.4,"duration":0.6,"description":"chairs, tables, lamps, wall, artwork, floor, ceiling, partition, cushions"},{"order":14,"start":8.4,"end":9.1,"duration":0.6,"description":"chandelier, table, flowers, chairs, wall, artwork, light fixtures, window, sofa, vase, plants, floor"},{"order":15,"start":9.1,"end":9.7,"duration":0.7,"description":"bar, chairs, tables, chandelier, carpet, curtains, bottles, glasses, flowers, wall, ceiling, light"},{"order":16,"start":9.7,"end":10.4,"duration":0.6,"description":"chandelier, ceiling, fabric"},{"order":17,"start":10.4,"end":11,"duration":0.6,"description":"pool, water, ceiling, lamps, columns, walls, towels, entrance, floor, decorations, basin"},{"order":18,"start":11,"end":11.7,"duration":0.7,"description":"floor, water, mosaic, design, reflection"},{"order":19,"start":11.7,"end":12.3,"duration":0.6,"description":"stairs, railing, carpet, tiles, hallway"},{"order":20,"start":12.3,"end":13,"duration":0.7,"description":"lamp, wall, numbers, light, decoration, panel, wood"},{"order":21,"start":13,"end":13.6,"duration":0.6,"description":"sofa, armchair, coffee table, lamp, artwork, curtains, wall, carpet, window, light fixtures"},{"order":22,"start":13.6,"end":14.3,"duration":0.7,"description":"frames, sheet music, wall"},{"order":23,"start":14.3,"end":14.9,"duration":0.6,"description":"chairs, tables, carpet, ceiling, chandeliers, curtains, walls, windows, lights, patterns"},{"order":24,"start":14.9,"end":15.6,"duration":0.6,"description":"chandelier, ceiling, lights, vines, wall, pattern"},{"order":25,"start":15.6,"end":16.2,"duration":0.6,"description":"chair, painting, fireplace, orchids, wall, window, light, table, floor, wood, decor"},{"order":26,"start":16.2,"end":16.8,"duration":0.6,"description":"piano, keys, window, curtain, plant, flower, table, floor"}]',
+  26
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DBdVEAVMHDi/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/928888901599410/',
+  205620,
+  1277000,
+  6.2,
+  36842,
+  327,
+  12.8,
+  '[{"order":1,"start":0,"end":1.1,"duration":1.1,"description":"hallway, ceiling, lights, paintings, walls, windows, curtains, floor, tiles, man, coat"},{"order":2,"start":1.1,"end":2.1,"duration":1,"description":"door, hallway, suit, gloves, curtain, window, chair, carpet, wall, light fixture"},{"order":3,"start":2.1,"end":3.2,"duration":1,"description":"bed, pillows, blanket, headboard, curtains, wall, carpet, man, gloves, suit"},{"order":4,"start":3.2,"end":4.1,"duration":1,"description":"table, shoes, chair, carpet, hand, sock"},{"order":5,"start":4.1,"end":5.1,"duration":1,"description":"chandelier, man, suit, tray, bed, pillows, blanket, wall, lamp, carpet, curtain, furniture, window"},{"order":6,"start":5.1,"end":6.2,"duration":1,"description":"chair, table, tray, shoes, gloves, bottle, glass, coaster, carpet, wall, cushion, suit, hand"},{"order":7,"start":6.2,"end":7.2,"duration":1,"description":"shoes, tray, brushes, table, chair, window, carpet, hand, gloves, fabric"},{"order":8,"start":7.2,"end":8.1,"duration":0.9,"description":"shoe, hand, glove, chair, cushion, fabric, box, table"},{"order":9,"start":8.1,"end":9,"duration":0.9,"description":"suit, hanger, hand, glove, cushion, fabric, bed"},{"order":10,"start":9,"end":10,"duration":1,"description":"tie, tie, hand, glove, bed, pillow, curtain, wall, artwork, chair, table, lamp, cushion, fabric"},{"order":11,"start":10,"end":11,"duration":1,"description":"suit, tie, table, bed, pillow, hanger, hand, glove, fabric, wall, pattern"},{"order":12,"start":11,"end":12.8,"duration":1.8,"description":"closet, jacket, shoes, man, gloves, wood, hanger"}]',
+  12
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DIEh05bMWKL/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/24320875020882756/',
+  205620,
+  774885,
+  3.8,
+  10155,
+  126,
+  8.3,
+  '[{"order":1,"start":0,"end":1.3,"duration":1.3,"description":"hotel, building, windows, balconies, sign, trees, plants, sky, flags"},{"order":2,"start":1.3,"end":2.3,"duration":1.1,"description":"entrance, door, lantern, plants, pavement, man, suit, tie, smile"},{"order":3,"start":2.3,"end":3.4,"duration":1,"description":"chandelier, stairs, railing, wall, man, bag, light"},{"order":4,"start":3.4,"end":4.4,"duration":1,"description":"table, chairs, window, curtains, lamp, flowers, food, drinks, man, carpet, wall, greenery"},{"order":5,"start":4.4,"end":5.5,"duration":1.1,"description":"pancakes, syrup, strawberries, raspberries, blueberries, blackberries, plate, fork, knife, cup, saucer, coffee, cream, jar, table, hand, napkin, menu"},{"order":6,"start":5.5,"end":6.5,"duration":1.1,"description":"restaurant, tables, chairs, tablecloths, glasses, cutlery, chandelier, mirror, windows, staff, plants, floor, walls, light fixtures"},{"order":7,"start":6.5,"end":7.6,"duration":1.1,"description":"wine, glass, bottle, plate, food, garnish, napkin, table, utensils, water glass, crackers, decor"},{"order":8,"start":7.6,"end":8.3,"duration":0.7,"description":"building, windows, lights, skyline, tower, trees, sky, sunset"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DHglmXjsI-c/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/276863736527927/',
+  205620,
+  269524,
+  1.3,
+  6234,
+  71,
+  13.2,
+  '[{"order":1,"start":0,"end":13.2,"duration":13.2,"description":"elevator, man, suit, bags, wood, lights, floor, carpet, wall, door"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DJw48ytsxYA/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/655465723983511/',
+  205620,
+  843632,
+  4.1,
+  14301,
+  359,
+  19.3,
+  '[{"order":1,"start":0,"end":0.9,"duration":0.9,"description":"reception desk, clock, concierge sign, staff, flowers, counter, wall, cabinets, marble, yellow"},{"order":2,"start":0.9,"end":1.9,"duration":1,"description":"reception, concierge, clock, desk, flowers, vase, wall, shelves, keys, suit, tie, headphones"},{"order":3,"start":1.9,"end":2.9,"duration":1,"description":"reception desk, concierge, clock, flowers, lamp, wall, shelves, wood, suit, tie, headset, buttons"},{"order":4,"start":2.9,"end":3.4,"duration":0.5,"description":"lobby, reception desk, chandelier, clock, lamp, flowers, marble floor, wall, person"},{"order":5,"start":3.4,"end":4.3,"duration":0.9,"description":"hallway, chandelier, lights, walls, floor, marble, display cases, people"},{"order":6,"start":4.3,"end":4.9,"duration":0.5,"description":"chandelier, lobby, counter, flowers, vase, furniture, marble, ceiling, lights, wall, door, clock, staff, elevator"},{"order":7,"start":4.9,"end":5.8,"duration":0.9,"description":"elevator, man, suit, buttons, wall, light, floor, mirror, marble, door"},{"order":8,"start":5.8,"end":6.8,"duration":1,"description":"chandelier, clock, reception desk, wall, plants, floor, artwork, light"},{"order":9,"start":6.8,"end":9.1,"duration":2.3,"description":"elevator, lights, man, suit, headphones, buttons, wall, mirror"},{"order":10,"start":9.1,"end":11.1,"duration":2,"description":"elevator, man, suit, headphones, lights, buttons"},{"order":11,"start":11.1,"end":12.1,"duration":0.9,"description":"door, staircase, railing, wall, carpet, light, exit sign"},{"order":12,"start":12.1,"end":13.1,"duration":1,"description":"chandelier, stairs, railing, door, luggage, floor, wall, light, suit, man"},{"order":13,"start":13.1,"end":14,"duration":1,"description":"door, stairs, railing, floor, luggage, wall, light, artwork, coat rack, tiles"},{"order":14,"start":14,"end":15,"duration":0.9,"description":"chandelier, stairs, door, luggage cart, suitcases, floor tiles, wall, light, man, uniform"},{"order":15,"start":15,"end":16.9,"duration":1.9,"description":"headphones, suit, shirt, tie, hands, background, pattern"},{"order":16,"start":16.9,"end":18.3,"duration":1.4,"description":"elevator, stairs, chandelier, hallway, floor, wall, doors, man, suit, light fixtures"},{"order":17,"start":18.3,"end":19.3,"duration":0.9,"description":"reception desk, clock, staff, flowers, sign, wall, paneling, marble, floor"}]',
+  17
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DHL_O3bsYLs/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/229700301186330/',
+  205620,
+  313676,
+  1.5,
+  10895,
+  106,
+  13.5,
+  '[{"order":1,"start":0,"end":1.4,"duration":1.4,"description":"hotel, building, windows, balcony, sign, trees, sky"},{"order":2,"start":1.4,"end":3,"duration":1.6,"description":"entrance, door, chandelier, windows, man, coat, pavement, logo, plants, light"},{"order":3,"start":3,"end":4.2,"duration":1.2,"description":"curtains, chandelier, flowers, table, floor, windows, entrance, plants"},{"order":4,"start":4.2,"end":5.4,"duration":1.3,"description":"ceiling, glass, arches, walls, columns, floor, light, space"},{"order":5,"start":5.4,"end":6.6,"duration":1.1,"description":"building, windows, sign, street, clock, traffic sign, wires, wall"},{"order":6,"start":6.6,"end":7.6,"duration":1.1,"description":"mannequin, dress, dress, display, window, fabric, stand"},{"order":7,"start":7.6,"end":8.7,"duration":1.1,"description":"shelves, shoes, handbags, table, display, lighting, wall, floor"},{"order":8,"start":8.7,"end":9.9,"duration":1.2,"description":"tram, street, buildings, archway, people, motorcycle, tracks, wires, advertisements, pavement"},{"order":9,"start":9.9,"end":11.1,"duration":1.1,"description":"building, windows, balconies, plants, door, street, pavement, light, sign"},{"order":10,"start":11.1,"end":12.3,"duration":1.2,"description":"store, entrance, sign, clothing, hats, dresses, coats, frames, artwork, window, street, wall, light, plants"},{"order":11,"start":12.3,"end":13.5,"duration":1.2,"description":"chairs, table, buildings, skyline, trees, sky, balcony"}]',
+  11
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DGvqPwisncc/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/2006756813153218/',
+  205620,
+  347005,
+  1.7,
+  9664,
+  180,
+  20.9,
+  '[{"order":1,"start":0,"end":0.5,"duration":0.5,"description":"hotel, building, windows, balcony, sign, roof, antennas, skyline, city"},{"order":2,"start":0.5,"end":1.3,"duration":0.8,"description":"entrance, door, windows, chandelier, man, umbrella, pavement, plants, bushes, logo, building"},{"order":3,"start":1.3,"end":2.1,"duration":0.8,"description":"entrance, door, windows, chandelier, man, umbrella, pavement, plants, bushes"},{"order":4,"start":2.1,"end":2.8,"duration":0.8,"description":"umbrella, man, coat, tie, entrance, door, lobby, plants, pavement, light, windows"},{"order":5,"start":2.8,"end":3.6,"duration":0.8,"description":"reception desk, bell, hand, lamp, flowers, countertop, wall, keys"},{"order":6,"start":3.6,"end":4.4,"duration":0.8,"description":"concierge, bell, counter, flowers, umbrella, door, man, suit, lobby, wall, hooks"},{"order":7,"start":4.4,"end":5.1,"duration":0.7,"description":"I don''t know who they are."},{"order":8,"start":5.1,"end":5.8,"duration":0.8,"description":"suit, tie, shirt, window, door, hands, face"},{"order":9,"start":5.8,"end":6.4,"duration":0.6,"description":"chandelier, hallway, stairs, doors, men, bags, floor, walls, lights"},{"order":10,"start":6.4,"end":7.2,"duration":0.8,"description":"lobby, chandelier, stairs, elevator, marble floor, walls, men, briefcase, clock, furniture"},{"order":11,"start":7.2,"end":8,"duration":0.8,"description":"staircase, chandelier, door, wall, light fixture, floor, tiles, railing, wood, artwork"},{"order":12,"start":8,"end":8.8,"duration":0.8,"description":"staircase, railing, chandelier, door, wall, floor, tiles, man, suitcase, luggage cart, light fixtures, paneling"},{"order":13,"start":8.8,"end":10.2,"duration":1.4,"description":"stairs, carpet, doors, wood, chandelier, man, suit, bag, wall"},{"order":14,"start":10.2,"end":10.9,"duration":0.6,"description":"stairs, doors, chandelier, carpet, man, suit, bag"},{"order":15,"start":10.9,"end":11.8,"duration":0.9,"description":"stairs, doors, wood, carpet, man, suit, tie, bag"},{"order":16,"start":11.8,"end":12.6,"duration":0.8,"description":"bed, pillows, blanket, wall, paintings, men, furniture, lamp, curtain, dresser, floor"},{"order":17,"start":12.6,"end":13.4,"duration":0.8,"description":"wall, paintings, frames, men, bed, pillows, blanket, yellow, room"},{"order":18,"start":13.4,"end":14.5,"duration":1.1,"description":"bed, headboard, curtain, lamp, pillow, wall, hand, person"},{"order":19,"start":14.5,"end":15.2,"duration":0.7,"description":"elevator, buttons, hand, wall, sign, fire safety, panel"},{"order":20,"start":15.2,"end":16,"duration":0.8,"description":"elevator, door, wood, buttons, man, tray, drinks, wall, floor, carpet"},{"order":21,"start":16,"end":16.7,"duration":0.7,"description":"elevator, man, tray, food, drink, hallway, wall, light fixture, carpet, wood, sign"},{"order":22,"start":16.7,"end":17.8,"duration":1.2,"description":"plate, fruit, croissants, pastries, coffee, juice, fork, spoon, table, flower, magazine, hand"},{"order":23,"start":17.8,"end":18.7,"duration":0.8,"description":"window, balcony, railing, wall, door, man, suit, building, stone, architecture"},{"order":24,"start":18.7,"end":20.9,"duration":2.3,"description":"hotel, building, windows, balcony, sign, roof, sky"}]',
+  24
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DI6mT0KMGr2/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/1241773480623943/',
+  205620,
+  487670,
+  2.4,
+  6176,
+  130,
+  9.4,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"hotel, building, windows, balconies, trees, plants, entrance, flags, pavement, sign"},{"order":2,"start":0.8,"end":1.5,"duration":0.7,"description":"hotel, entrance, flags, tree, luggage cart, suitcases, pavement, plants, flowers, building"},{"order":3,"start":1.5,"end":2.2,"duration":0.7,"description":"reception, counter, staff, guest, blue folder, keys, wall, artwork, floor, marble, lighting, lobby, door, window, suit, uniform"},{"order":4,"start":2.2,"end":3,"duration":0.7,"description":"chandelier, stairs, door, table, cart, food, wall, window, floor, tiles, man"},{"order":5,"start":3,"end":3.7,"duration":0.7,"description":"table, umbrella, chairs, waiter, drinks, food, patio, trees, plants, sky"},{"order":6,"start":3.7,"end":4.4,"duration":0.7,"description":"table, pastries, fruit, coffee, orange juice, glass, plate, jar, berries, spoon, hand"},{"order":7,"start":4.4,"end":5.1,"duration":0.7,"description":"coffee, cup, saucer, spoon, pastry, croissant, cinnamon roll, danish, plate, orange juice, newspaper, hand"},{"order":8,"start":5.1,"end":5.9,"duration":0.7,"description":"stairs, chandelier, railing, carpet, wall, flowers, person, person"},{"order":9,"start":5.9,"end":6.5,"duration":0.7,"description":"restaurant, table, chairs, chandelier, waiter, mirror, light, floor, plates, glasses, napkins, flowers, wall, shelves"},{"order":10,"start":6.5,"end":7.3,"duration":0.7,"description":"sauce, plate, food, garnish, hand, glass, table"},{"order":11,"start":7.3,"end":7.9,"duration":0.7,"description":"bar, bartender, bottles, glasses, shaker, countertop, ice, cocktail, logo, light, wall, mirror"},{"order":12,"start":7.9,"end":8.6,"duration":0.7,"description":"bar, bartender, shaker, glass, bottles, countertop, ice, cocktail, light, shelves, drinks"},{"order":13,"start":8.6,"end":9.4,"duration":0.8,"description":"hotel, building, lights, entrance, car, trees, plants, sign, windows, doors"}]',
+  13
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'principesavoia',
+  'Hotel',
+  'Italy',
+  'https://www.instagram.com/p/DFrzdY3ulTf/',
+  'https://www.instagram.com/principesavoia/',
+  'https://www.instagram.com/reels/audio/198089564058762/',
+  205620,
+  536686,
+  2.6,
+  19102,
+  252,
+  10.7,
+  '[{"order":1,"start":0,"end":2.3,"duration":2.3,"description":"bed, pillows, blanket, table, tray, fruit, dessert, flowers, curtain, wall, chair, person, person"},{"order":2,"start":2.3,"end":4,"duration":1.7,"description":"table, fruit, croissants, coffee cup, bowl, berries, yogurt, glass, spoon, plate, bed, floor, mirror, cabinet, hand"},{"order":3,"start":4,"end":5.8,"duration":1.8,"description":"bedroom, bed, pillows, fruit, plate, glass, water, spoon, knife, fork, table, tablecloth, window, curtain, jar, strawberries, melon, grapes, tray, coffee cup, card"},{"order":4,"start":5.8,"end":7.2,"duration":1.4,"description":"coffee pot, coffee, cup, spoon, plate, fruit, berries, granola, dessert, table, card, mirror, napkin, fork, knife, glass"},{"order":5,"start":7.2,"end":10.7,"duration":3.5,"description":"bed, pillows, blanket, table, fruit, pastries, glass, plate, cutlery, flowers, menu, curtain, wall, chair"}]',
+  5
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/C-7-_fsSgbN/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/3613832018829121/',
+  135360,
+  1466832,
+  10.8,
+  78837,
+  501,
+  6.2,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"sofa, table, glass, flowers, window, city, buildings, skyline, man, food, plates, utensils, night"},{"order":2,"start":0.8,"end":1.7,"duration":0.9,"description":"table, chairs, plates, cutlery, glasses, food, flowers, city, buildings, lights, water, balcony"},{"order":3,"start":1.7,"end":2.6,"duration":0.9,"description":"table, chairs, wine, food, plate, glass, city, buildings, lights, water, balcony, man, suit"},{"order":4,"start":2.6,"end":3.5,"duration":0.9,"description":"plate, food, sauce, spoon, glass, wine, table, cutlery, napkin, bowl, bread, fruit, hand"},{"order":5,"start":3.5,"end":4.3,"duration":0.8,"description":"glasses, champagne, hands, table, flowers, city, buildings, lights, water, skyline"},{"order":6,"start":4.3,"end":6.2,"duration":2,"description":"skyscrapers, lights, bridge, water, reflection, night sky, buildings, tower"}]',
+  6
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/C9bulxMplAC/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/1202102977870890/',
+  135360,
+  755299,
+  5.6,
+  7773,
+  53,
+  11.6,
+  '[{"order":1,"start":0,"end":0.5,"duration":0.5,"description":"table, chairs, glasses, bottles, water, palm trees, buildings, skyline, river, sky, clouds"},{"order":2,"start":0.5,"end":1,"duration":0.5,"description":"pool, water, skyline, buildings, sky, person, hat"},{"order":3,"start":1,"end":3,"duration":2,"description":"rooftop, tables, chairs, umbrellas, plants, lights, buildings, people, cushions, sofas, glasses, drinks, cityscape, evening, floor"},{"order":4,"start":3,"end":3.5,"duration":0.5,"description":"pool, drinks, glasses, skyline, buildings, sky, water, hands, straw"},{"order":5,"start":3.5,"end":4,"duration":0.5,"description":"sofa, table, umbrella, plants, flowers, balcony, cityscape, sky, woman, chair, stone, tiles"},{"order":6,"start":4,"end":4.5,"duration":0.5,"description":"table, plate, eggs, sauce, croissants, coffee, glass, juice, green drink, bowl, fruit, spoon, fork, plant, cushion, marble, tray, napkin"},{"order":7,"start":4.5,"end":5,"duration":0.5,"description":"granola, raspberries, blueberries, fruit, croissant, coffee, green drink, orange juice, plate, spoon, fork, table, napkin, hand, ring, bracelet"},{"order":8,"start":5,"end":5.5,"duration":0.5,"description":"pool, umbrellas, sun loungers, buildings, sky"},{"order":9,"start":5.5,"end":6.1,"duration":0.5,"description":"rooftop, city, skyline, chairs, tables, plants, sofa, waiter, sunset, clouds, buildings"},{"order":10,"start":6.1,"end":6.6,"duration":0.5,"description":"palm trees, grass, pathway, buildings, sky, clouds, marina, boats, railing, terrace"},{"order":11,"start":6.6,"end":7.1,"duration":0.5,"description":"sofa, cushions, coffee table, flowers, shelves, sculptures, lamp, carpet, wall, window, light, furniture"},{"order":12,"start":7.1,"end":7.6,"duration":0.5,"description":"window, city, balcony, table, plate, strawberries, glass, water bottles, flower, vase, card"},{"order":13,"start":7.6,"end":8.1,"duration":0.5,"description":"pool, table, plate, food, lettuce, drinks, glass, skyline, buildings, sky, water"},{"order":14,"start":8.1,"end":8.6,"duration":0.5,"description":"plants, flowers, pot, table, chairs, umbrellas, buildings, sky, clouds, terrace, railing"},{"order":15,"start":8.6,"end":9.1,"duration":0.5,"description":"table, chairs, plates, napkins, glasses, bottle, plants, water, buildings, skyline, clouds, light, reflection, palm trees"},{"order":16,"start":9.1,"end":9.6,"duration":0.5,"description":"city, buildings, skyline, water, bridge, lights, sunset, glass railing"},{"order":17,"start":9.6,"end":10.1,"duration":0.5,"description":"pool, water, sun loungers, plants, terrace, building, skyline, sunset"},{"order":18,"start":10.1,"end":10.6,"duration":0.5,"description":"table, chairs, glasses, candle, water, buildings, skyline, river, plants, sky, person"},{"order":19,"start":10.6,"end":11.1,"duration":0.5,"description":"pool, water, building, terrace, plants, lights, city, sky, horizon"},{"order":20,"start":11.1,"end":11.6,"duration":0.5,"description":"pool, sun loungers, umbrella, city, buildings, skyline, water, towel, bag"}]',
+  20
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/C-M6Zvhpk8W/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/1587942095388453/',
+  135360,
+  561822,
+  4.2,
+  3931,
+  55,
+  15.1,
+  '[{"order":1,"start":0,"end":1.9,"duration":1.9,"description":"pool, water, city, skyline, glass, person, balcony, sky"},{"order":2,"start":1.9,"end":2.6,"duration":0.7,"description":"table, glasses, food, city, buildings, lights, hands, plate, cup, napkin"},{"order":3,"start":2.6,"end":6.4,"duration":3.8,"description":"window, balcony, city, buildings, lights, person, robe, sofa"},{"order":4,"start":6.4,"end":7.8,"duration":1.4,"description":"pool, sun loungers, water, city skyline, river, sky"},{"order":5,"start":7.8,"end":8.9,"duration":1.1,"description":"bed, pillows, lamp, window, city, skyline, curtain, sofa, table, chair, floor"},{"order":6,"start":8.9,"end":9.9,"duration":1.1,"description":"door, hallway, window, sofa, cityscape, buildings, floor, ceiling"},{"order":7,"start":9.9,"end":10.9,"duration":0.9,"description":"pool, sun loungers, table, glass, city, skyline, building, sky, water, person"},{"order":8,"start":10.9,"end":11.9,"duration":1,"description":"kitchen, chef, counter, food, cutting board, knife, apron, window, light"},{"order":9,"start":11.9,"end":13,"duration":1.1,"description":"table, chairs, window, skyline, buildings, man, balcony"},{"order":10,"start":13,"end":13.9,"duration":0.9,"description":"sofa, table, chair, window, city, buildings, lights, carpet, wall, door"},{"order":11,"start":13.9,"end":15.1,"duration":1.2,"description":"table, chair, teapot, cup, saucer, plate, sandwich, dessert, menu, flower, curtain, hand, tray, floor"}]',
+  11
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DN8PNc3kt5n/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/2235896570181081/',
+  135360,
+  257202,
+  1.9,
+  12804,
+  126,
+  5.6,
+  '[{"order":1,"start":0,"end":5.6,"duration":5.6,"description":"bathtub, towels, window, city, buildings, chair, table, bottles, wall, floor, light"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DNGHtgpyaJ2/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/1447768066559215/',
+  135360,
+  209640,
+  1.5,
+  7354,
+  75,
+  5.2,
+  '[{"order":1,"start":0,"end":5.2,"duration":5.2,"description":"window, city, skyscrapers, plant, pot, floor, mat, water bottle, towel, ball, treadmill, light, curtain"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DLaMFQVSJA-/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/1031316972315661/',
+  135360,
+  251114,
+  1.9,
+  19808,
+  150,
+  9.5,
+  '[{"order":1,"start":0,"end":1.2,"duration":1.2,"description":"table, chairs, glasses, water, skyline, buildings, sunset, pool, menu, light"},{"order":2,"start":1.2,"end":2.4,"duration":1.2,"description":"table, chairs, glass, bottle, candle, menu, plants, skyline, water, pool, sunset, buildings, lights"},{"order":3,"start":2.4,"end":3.2,"duration":0.8,"description":"city, buildings, skyline, lights, sunset, tower, road, cars, water, balcony"},{"order":4,"start":3.2,"end":4.3,"duration":1.1,"description":"pool, city, skyline, buildings, chairs, table, sunset, water, glass, balcony"},{"order":5,"start":4.3,"end":5.3,"duration":1,"description":"table, dessert, plate, fork, spoon, glass, bottle, skyline, buildings, lights, sky, sunset"},{"order":6,"start":5.3,"end":6.4,"duration":1.1,"description":"pool, city, buildings, lights, sky, horizon, people, furniture, tables, chairs, water"},{"order":7,"start":6.4,"end":7.6,"duration":1.2,"description":"table, plate, dessert, sauce, glass, water, lamp, skyline, buildings, tower, sunset, hand, fork, napkin"},{"order":8,"start":7.6,"end":9.5,"duration":1.9,"description":"buildings, lights, skyline, tower, night, city, windows, rooftops, streets"}]',
+  8
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'jarabymartinberasategui',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DIgyxxVJ2jD/',
+  'https://www.instagram.com/jarabymartinberasategui/',
+  'https://www.instagram.com/reels/audio/1900627670745359/',
+  135360,
+  103531,
+  0.8,
+  1022,
+  11,
+  32.6,
+  '[{"order":1,"start":0,"end":2.5,"duration":2.5,"description":"restaurant, staff, tables, chairs, menu, clock, floor, wall, light fixtures, decorations"},{"order":2,"start":2.5,"end":3.7,"duration":1.2,"description":"table, glasses, plates, napkins, cutlery, chairs, people, clock"},{"order":3,"start":3.7,"end":5,"duration":1.3,"description":"table, chairs, wine glass, paper, hands, clock, people, restaurant, plants, wall, light fixtures"},{"order":4,"start":5,"end":6.4,"duration":1.4,"description":"kitchen, chef, counter, stove, pots, pans, utensils, shelves, bottles, timer, apron, sink, light"},{"order":5,"start":6.4,"end":8.4,"duration":2,"description":"chef, refrigerator, fish, salt, plate, herbs, timer, kitchen"},{"order":6,"start":8.4,"end":9.3,"duration":0.9,"description":"table, chairs, glasses, lamp, window, city, buildings, skyline, curtain, clock"},{"order":7,"start":9.3,"end":10.4,"duration":1,"description":"restaurant, tables, chairs, glasses, candles, windows, cityscape, clock, floor, walls"},{"order":8,"start":10.4,"end":12,"duration":1.7,"description":"Burj Khalifa, buildings, skyline, sunset, people, table, chairs, clock, lights, cityscape"},{"order":9,"start":12,"end":13.4,"duration":1.3,"description":"table, chairs, glasses, candle, skyline, buildings, balcony, city, lights, tower"},{"order":10,"start":13.4,"end":14.4,"duration":1.1,"description":"city, buildings, lights, table, people, menu, notebook, clock, skyline"},{"order":11,"start":14.4,"end":17.9,"duration":3.5,"description":"chef, kitchen, apron, paper, counter, timer, equipment"},{"order":12,"start":17.9,"end":19.5,"duration":1.6,"description":"torch, flame, plate, hand, kitchen, countertop, food"},{"order":13,"start":19.5,"end":20.9,"duration":1.4,"description":"chef, kitchen, counter, pots, pans, utensils, apron, stove, food, ingredients, shelves, light"},{"order":14,"start":20.9,"end":21.8,"duration":0.9,"description":"copper pot, stove, hand, spoon, sauce, countertop"},{"order":15,"start":21.8,"end":22.5,"duration":0.7,"description":"notes, paper, pen, hand, writing, lines, numbers, desk"},{"order":16,"start":22.5,"end":23.4,"duration":1,"description":"pan, spoon, hand, stove, countertop, mixture"},{"order":17,"start":23.4,"end":24.4,"duration":1,"description":"chef, kitchen, pan, plate, sauce, countertop, utensils, containers, towel, stove, equipment"},{"order":18,"start":24.4,"end":26.8,"duration":2.4,"description":"chef, kitchen, tray, food, pastries, counter, utensils, stove, shelves, plates, glasses, light"},{"order":19,"start":26.8,"end":28.4,"duration":1.6,"description":"chefs, kitchen, counter, knives, vegetables, meat, plates, cooking utensils, lights, equipment"},{"order":20,"start":28.4,"end":29.7,"duration":1.3,"description":"window, city, buildings, lights, table, chairs, people, curtain"},{"order":21,"start":29.7,"end":32.6,"duration":2.9,"description":"reception, sign, wall, lighting, counter, decor"}]',
+  21
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'dorchestercollection',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DJ69IE4h9YQ/',
+  'https://www.instagram.com/dorchestercollection/',
+  'https://www.instagram.com/reels/audio/692173073459064/',
+  135360,
+  109363,
+  0.8,
+  6228,
+  161,
+  9.7,
+  '[{"order":1,"start":0,"end":9.7,"duration":9.7,"description":"table, chairs, men, city, skyline, buildings, lights, window"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'dorchestercollection',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DHTfFZkB58h/',
+  'https://www.instagram.com/dorchestercollection/',
+  'https://www.instagram.com/reels/audio/617898471055910/',
+  135360,
+  160201,
+  1.2,
+  7561,
+  151,
+  8.0,
+  '[{"order":1,"start":0,"end":8,"duration":8,"description":"pool, city, skyline, buildings, tower, table, food, drinks, lounge chair, towel, water"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DHoOP1GSN_y/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/986596243446262/',
+  135360,
+  119769,
+  0.9,
+  1341,
+  15,
+  7.7,
+  '[{"order":1,"start":0,"end":0.8,"duration":0.8,"description":"table, lamp, notebook, city, buildings, lights, water, skyline"},{"order":2,"start":0.8,"end":1.5,"duration":0.7,"description":"plate, food, herbs, pomegranate, table, glass, silverware"},{"order":3,"start":1.5,"end":2,"duration":0.5,"description":"plate, salad, lettuce, shrimp, vegetables, eggs, tuna, sauce, bowl, table, salt shaker, dressing, cup"},{"order":4,"start":2,"end":2.7,"duration":0.7,"description":"table, plates, food, fries, salad, glass, bottle, city, buildings, lights, night, balcony"},{"order":5,"start":2.7,"end":3.5,"duration":0.8,"description":"table, pizza, lamp, glass, skyline, buildings, man, plate, fries, sauce"},{"order":6,"start":3.5,"end":4.4,"duration":0.9,"description":"pool, lights, tables, chairs, umbrellas, plants, building, night sky"},{"order":7,"start":4.4,"end":5.3,"duration":0.9,"description":"pool, city, buildings, lights, skyline, tower, water, chair, balcony"},{"order":8,"start":5.3,"end":6.3,"duration":0.9,"description":"building, skyline, lights, silhouette, tower, sky"},{"order":9,"start":6.3,"end":7.7,"duration":1.4,"description":"city, skyline, buildings, lights, people, table, chairs, glass, night, tower"}]',
+  9
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'diorbeauty',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DHTeL6ctX_m/',
+  'https://www.instagram.com/diorbeauty/',
+  'https://www.instagram.com/reels/audio/546930438418643/',
+  135360,
+  510642,
+  3.8,
+  19105,
+  216,
+  103.8,
+  '[{"order":1,"start":0,"end":1.9,"duration":1.9,"description":"pool, skyline, buildings, water, sky, sunset, tower, cranes"},{"order":2,"start":1.9,"end":4.4,"duration":2.4,"description":"hotel, city skyline, building, pool, mat, person, water, stairs"},{"order":3,"start":4.4,"end":5.6,"duration":1.2,"description":"yoga mats, women, city skyline, buildings, balcony, sunlight, floor, tower"},{"order":4,"start":5.6,"end":6.6,"duration":1,"description":"I don''t know who they are."},{"order":5,"start":6.6,"end":8,"duration":1.4,"description":"I don''t see any property features in the image."},{"order":6,"start":8,"end":9.6,"duration":1.6,"description":"I don''t know who they are."},{"order":7,"start":9.6,"end":10.9,"duration":1.2,"description":"yoga mats, people, skyline, buildings, plants, terrace, sky, water bottle"},{"order":8,"start":10.9,"end":12.7,"duration":1.8,"description":"I don''t see any property features in the image."},{"order":9,"start":12.7,"end":14.9,"duration":2.2,"description":"strainer, green herbs, bowl, hand"},{"order":10,"start":14.9,"end":16,"duration":1.1,"description":"table, women, hands, bowl, spoon, plant, background"},{"order":11,"start":16,"end":17,"duration":0.9,"description":"I don''t know who they are."},{"order":12,"start":17,"end":17.7,"duration":0.7,"description":"bowl, hand, face, hair, table, people, background, outdoor, trees, umbrella"},{"order":13,"start":17.7,"end":18.5,"duration":0.8,"description":"I don''t know who they are."},{"order":14,"start":18.5,"end":19.4,"duration":0.9,"description":"I don''t know who they are."},{"order":15,"start":19.4,"end":20.6,"duration":1.2,"description":"table, cups, coffee pot, women, window, chairs, plates, utensils, plants, light fixtures"},{"order":16,"start":20.6,"end":21.5,"duration":0.9,"description":"bar, chairs, table, glasses, skyline, buildings, water, boats, harbor, sky"},{"order":17,"start":21.5,"end":22.3,"duration":0.8,"description":"women, hands, faces, headbands, table, bowls, jewelry, skin care products"},{"order":18,"start":22.3,"end":23.1,"duration":0.8,"description":"I don''t see any specific property features in the image."},{"order":19,"start":23.1,"end":24.2,"duration":1,"description":"jar, hand, label, countertop"},{"order":20,"start":24.2,"end":25,"duration":0.9,"description":"face, hand, skin, ring, towel, background"},{"order":21,"start":25,"end":26.1,"duration":1.1,"description":"robe, hair, skin, background, text"},{"order":22,"start":26.1,"end":27.5,"duration":1.4,"description":"city, buildings, skyline, windows, people, chairs, table, clothing, hair, light"},{"order":23,"start":27.5,"end":28.5,"duration":1,"description":"cream, jar, hand, spoon, table, mirror"},{"order":24,"start":28.5,"end":31.1,"duration":2.6,"description":"Dior, logo, wall, texture, design"},{"order":25,"start":31.1,"end":32.4,"duration":1.3,"description":"woman, hands, face, table, towel, room, wall, chair"},{"order":26,"start":32.4,"end":33.6,"duration":1.1,"description":"hands, face, towel, skin, hair"},{"order":27,"start":33.6,"end":34.8,"duration":1.2,"description":"I don''t see any property features in the image."},{"order":28,"start":34.8,"end":35.8,"duration":1,"description":"hands, face, hair, skin"},{"order":29,"start":35.8,"end":37.8,"duration":2,"description":"woman, hands, face, massage, robe, skin"},{"order":30,"start":37.8,"end":39,"duration":1.2,"description":"hand, face, skin, fingers"}]',
+  30
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'dorchestercollection',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DGI6v9RP6jM/',
+  'https://www.instagram.com/dorchestercollection/',
+  'https://www.instagram.com/reels/audio/736140325338668/',
+  135360,
+  139650,
+  1.0,
+  6367,
+  131,
+  11.3,
+  '[{"order":1,"start":0,"end":11.3,"duration":11.3,"description":"beds, window, city, skyline, chairs, cushions, table, women, towels, curtains, floor, light"}]',
+  1
+);
+
+INSERT INTO public.templates (
+  hotel_name, username, property_type, country, video_link, account_link, audio,
+  followers, views, ratio, likes, comments, duration, script, slots
+) VALUES (
+  '',
+  'thelanadubai',
+  'Hotel',
+  'Dubai',
+  'https://www.instagram.com/p/DFzbA6YSeC8/',
+  'https://www.instagram.com/thelanadubai/',
+  'https://www.instagram.com/reels/audio/1889152575226745/',
+  135360,
+  125285,
+  0.9,
+  1113,
+  24,
+  18.6,
+  '[{"order":1,"start":0,"end":15.7,"duration":15.7,"description":"elevator, woman, tray, food, mirror, wall, floor, light"},{"order":2,"start":15.7,"end":18.6,"duration":2.8,"description":"elevator, woman, wine glasses, bottle, towel, suit, floor, wall, light, hallway"}]',
+  2
+);
+
+
+COMMIT;
+
+-- Total: 161 templates importés
