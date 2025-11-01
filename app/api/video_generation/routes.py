@@ -456,27 +456,56 @@ async def generate_video_mediaconvert(
         logger.info(f"📊 Payload: property_id={request.property_id}, video_id={video_id}, job_id={job_id}")
         logger.info(f"📹 Segments: {len(request.segments)}, Text overlays: {len(request.text_overlays)}")
 
-        # Create video record in database
+        # Update or create video record in database
         try:
-            result = await db.execute(text("SELECT id FROM users LIMIT 1"))
-            first_user = result.fetchone()
-            user_id = first_user[0] if first_user else None
+            # Check if video already exists (from project save)
+            existing_video_result = await db.execute(
+                text("SELECT id, user_id FROM videos WHERE id = :video_id"),
+                {"video_id": video_id}
+            )
+            existing_video = existing_video_result.fetchone()
 
-            if user_id:
-                new_video = Video(
-                    id=video_id,
-                    title=f"Generated Video {video_id[:8]}",
-                    description=f"Optimized: MediaConvert + ECS job {job_id}",
-                    property_id=int(request.property_id) if request.property_id.isdigit() else None,
-                    user_id=user_id,
-                    status="processing",
-                    duration=request.total_duration
+            if existing_video:
+                # Update existing video record to "processing" status
+                await db.execute(
+                    text("""
+                        UPDATE videos
+                        SET status = :status,
+                            description = :description,
+                            duration = :duration,
+                            updated_at = NOW()
+                        WHERE id = :video_id
+                    """),
+                    {
+                        "status": "processing",
+                        "description": f"Optimized: MediaConvert + ECS job {job_id}",
+                        "duration": request.total_duration,
+                        "video_id": video_id
+                    }
                 )
-                db.add(new_video)
                 await db.commit()
-                logger.info(f"✅ Video record created: {video_id}")
+                logger.info(f"✅ Video record updated (draft → processing): {video_id}")
             else:
-                logger.warning("⚠️ No users found, skipping video record")
+                # Create new video record
+                result = await db.execute(text("SELECT id FROM users LIMIT 1"))
+                first_user = result.fetchone()
+                user_id = first_user[0] if first_user else None
+
+                if user_id:
+                    new_video = Video(
+                        id=video_id,
+                        title=f"Generated Video {video_id[:8]}",
+                        description=f"Optimized: MediaConvert + ECS job {job_id}",
+                        property_id=int(request.property_id) if request.property_id.isdigit() else None,
+                        user_id=user_id,
+                        status="processing",
+                        duration=request.total_duration
+                    )
+                    db.add(new_video)
+                    await db.commit()
+                    logger.info(f"✅ Video record created: {video_id}")
+                else:
+                    logger.warning("⚠️ No users found, skipping video record")
         except Exception as db_error:
             logger.error(f"❌ Database error: {str(db_error)}")
 
