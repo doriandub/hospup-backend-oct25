@@ -492,7 +492,6 @@ async def duplicate_video(
             template_id=original.template_id,
             source_type=original.source_type,
             generation_method=original.generation_method,
-            ai_description=original.ai_description,
             # Copy project data for composition projects
             project_data=original.project_data if original.project_data else None,
             # Reset video-specific fields
@@ -501,8 +500,7 @@ async def duplicate_video(
             file_url=None,  # Will be generated when user publishes
             thumbnail_url=None,  # Will be generated when user publishes
             aws_job_id=None,  # Will be assigned when published
-            completed_at=None,
-            last_saved_at=datetime.utcnow()
+            completed_at=None
         )
 
         db.add(duplicated)
@@ -526,11 +524,9 @@ async def duplicate_video(
             "source_type": duplicated.source_type,
             "generation_method": duplicated.generation_method,
             "aws_job_id": duplicated.aws_job_id,
-            "ai_description": duplicated.ai_description,
             "created_at": duplicated.created_at.isoformat() if duplicated.created_at else None,
             "updated_at": duplicated.updated_at.isoformat() if duplicated.updated_at else None,
             "completed_at": duplicated.completed_at.isoformat() if duplicated.completed_at else None,
-            "last_saved_at": duplicated.last_saved_at.isoformat() if duplicated.last_saved_at else None,
             "project_data": duplicated.project_data if duplicated.project_data else None,
             "contentVideos": duplicated.project_data.get("contentVideos", []) if duplicated.project_data else []
         }
@@ -582,11 +578,9 @@ async def list_user_videos(
                 "source_type": video.source_type,
                 "generation_method": video.generation_method,
                 "aws_job_id": video.aws_job_id,
-                "ai_description": video.ai_description,
                 "created_at": video.created_at.isoformat() if video.created_at else None,
                 "updated_at": video.updated_at.isoformat() if video.updated_at else None,
                 "completed_at": video.completed_at.isoformat() if video.completed_at else None,
-                "last_saved_at": video.last_saved_at.isoformat() if video.last_saved_at else None,
                 # Include full project_data for draft projects (contains textOverlays, contentVideos, etc.)
                 "project_data": video.project_data if video.project_data else None,
                 # Backward compatibility: also expose contentVideos separately

@@ -223,7 +223,7 @@ async def save_project(
         property_id=video.property_id,
         project_data=video.project_data or {},
         status=video.status,
-        last_saved_at=video.last_saved_at.isoformat() if video.last_saved_at else video.created_at.isoformat(),
+        updated_at=video.updated_at.isoformat(),
         created_at=video.created_at.isoformat()
     )
 
