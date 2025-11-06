@@ -18,20 +18,14 @@ class Video(Base):
 
     # Metadata
     duration = Column(Integer)  # Duration in seconds
-    file_size = Column(Integer)  # File size in bytes
 
     # Processing status
-    status = Column(String, nullable=False, default="queued")  # queued, processing, completed, failed
+    status = Column(String, nullable=False, default="queued")  # queued, processing, completed, failed, draft
 
-    # Project System - NEW
-    project_name = Column(String(255), nullable=True)  # Custom project name
-    template_id = Column(UUID(as_uuid=False), nullable=True)  # Template ID as UUID string (no FK constraint)
+    # Project System
+    project_name = Column(String(255), nullable=True)  # Custom project name for compositions
+    template_id = Column(UUID(as_uuid=False), ForeignKey("templates.id", ondelete="SET NULL"), nullable=True)
     project_data = Column(JSONB, default={})  # Stores: templateSlots, slotAssignments, textOverlays, customScript
-
-    # Video Generation Data
-    viral_video_id = Column(String(100), nullable=True)  # ID from viral template
-    ai_description = Column(Text, nullable=True)  # AI-generated Instagram caption
-    instagram_audio_url = Column(String(500), nullable=True)  # Audio URL from template
 
     # Source tracking
     source_type = Column(String(50), default="upload")  # upload, viral_template_composer, etc.
@@ -49,7 +43,6 @@ class Video(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     completed_at = Column(DateTime, nullable=True)  # When video generation completed
-    last_saved_at = Column(DateTime, default=datetime.utcnow)  # Auto-save tracking
 
     # Relationships
     property = relationship("Property", back_populates="videos")

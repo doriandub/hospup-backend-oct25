@@ -34,7 +34,7 @@ class ProjectResponse(BaseModel):
     property_id: int
     project_data: Dict[str, Any]
     status: str
-    last_saved_at: str
+    updated_at: str  # Replaced last_saved_at with updated_at
     created_at: str
 
 
@@ -89,7 +89,6 @@ async def save_project(
         video.project_name = request.project_name
         video.template_id = request.template_id
         video.project_data = request.project_data
-        video.last_saved_at = datetime.utcnow()
         video.updated_at = datetime.utcnow()
 
         # Calculate and update total duration from templateSlots (end_time of last slot)
@@ -199,9 +198,8 @@ async def save_project(
             project_data=request.project_data,
             thumbnail_url=thumbnail_url,
             source_type="viral_template_composer",
-            status="draft",  # New status for unsaved projects
-            duration=int(total_duration),  # Store calculated duration
-            last_saved_at=datetime.utcnow()
+            status="draft",  # New status for composition projects
+            duration=int(total_duration)  # Store calculated duration
         )
         db.add(video)
         logger.info("➕ Video object added to session", video_id=video_id)
@@ -266,7 +264,7 @@ async def get_project(
         property_id=video.property_id,
         project_data=video.project_data or {},
         status=video.status,
-        last_saved_at=video.last_saved_at.isoformat() if video.last_saved_at else video.created_at.isoformat(),
+        updated_at=video.updated_at.isoformat(),
         created_at=video.created_at.isoformat()
     )
 
@@ -284,7 +282,7 @@ async def list_projects(
             Video.property_id == property_id,
             Video.user_id == current_user.id,
             Video.source_type == "viral_template_composer"
-        ).order_by(Video.last_saved_at.desc())
+        ).order_by(Video.updated_at.desc())
     )
     videos = result.scalars().all()
 
@@ -296,7 +294,7 @@ async def list_projects(
             property_id=v.property_id,
             project_data=v.project_data or {},
             status=v.status,
-            last_saved_at=v.last_saved_at.isoformat() if v.last_saved_at else v.created_at.isoformat(),
+            updated_at=v.updated_at.isoformat(),
             created_at=v.created_at.isoformat()
         )
         for v in videos
